@@ -76,29 +76,72 @@ This will:
 
 ---
 
-## Running the Application
+## Local Startup & Shutdown
 
-### Backend
+### ▶ Start (Recommended — one command)
 
+From the **repo root**, run the unified launch script:
+
+```bash
+./voicecut/infrastructure/launch_local.sh
+```
+
+This starts **both** services concurrently:
+
+| Service | URL | Log file |
+|---------|-----|----------|
+| FastAPI Backend | http://localhost:8000 | `voicecut/voicecut_backend.log` |
+| API Docs (Swagger) | http://localhost:8000/docs | — |
+| React Frontend (Vite) | http://localhost:5173 | `voicecut/voicecut_frontend.log` |
+
+Press **Ctrl+C** to gracefully shut down both services together.
+
+---
+
+### ■ Stop (if running in background)
+
+If services are already running on their ports, kill them with:
+
+```bash
+./voicecut/infrastructure/stop_local.sh
+```
+
+This forcefully kills any process bound to ports `8000` and `5173`.
+
+---
+
+### ▶ Start Manually (two terminals)
+
+If you prefer to run services separately:
+
+**Terminal 1 — Backend:**
 ```bash
 cd voicecut
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-uvicorn voicecut.backend.api.main:app --reload
+uvicorn voicecut.backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Backend runs at: **http://localhost:8000**  
-API docs available at: **http://localhost:8000/docs**
-
-### Frontend
-
-In a separate terminal:
-
+**Terminal 2 — Frontend:**
 ```bash
 cd voicecut/web
 npm run dev
 ```
 
-Frontend runs at: **http://localhost:5173**
+---
+
+### 📋 Monitoring Logs
+
+Stream live logs in a separate terminal:
+
+```bash
+# Backend logs
+tail -f voicecut/voicecut_backend.log
+
+# Frontend logs
+tail -f voicecut/voicecut_frontend.log
+```
+
+> **First run note:** On the first analysis, the app will download AI model weights (Silero VAD, WhisperX) into `~/.cache/torch/hub/`. This may take a few minutes — ensure you have a stable internet connection.
 
 ---
 
