@@ -1,0 +1,478 @@
+# Scikit-learn Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for Scikit-learn ML projects
+# Usage: Copy and customize for each Scikit-learn project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  ml_framework: "scikit-learn"
+  sklearn_version: "${SKLEARN_VERSION}"  # e.g., 1.4.0
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  model_category: "${MODEL_CATEGORY}"  # classification | regression | clustering | dimensionality_reduction
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  ml_development:
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "Model selection and tuning"
+        - "Feature engineering"
+        - "Model evaluation"
+        
+    ml_engineer:
+      enabled: ${ML_ENGINEER_ENABLED}
+      role: "Machine Learning Engineer"
+      responsibilities:
+        - "Pipeline development"
+        - "Model deployment"
+        - "Performance optimization"
+        
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Data preprocessing"
+        - "Feature store management"
+        - "ETL pipelines"
+  
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    python_version: "${PYTHON_VERSION_DEV}"
+    sklearn_version: "${SKLEARN_VERSION_DEV}"
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    data_dir: "${DATA_DIR_DEV}"
+    model_dir: "${MODEL_DIR_DEV}"
+    cache_dir: "${CACHE_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    python_version: "${PYTHON_VERSION_STAGING}"
+    sklearn_version: "${SKLEARN_VERSION_STAGING}"
+    log_level: "${LOG_LEVEL_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    model_dir: "${MODEL_DIR_STAGING}"
+    cache_dir: "${CACHE_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    python_version: "${PYTHON_VERSION_PROD}"
+    sklearn_version: "${SKLEARN_VERSION_PROD}"
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    data_dir: "${DATA_DIR_PROD}"
+    model_dir: "${MODEL_DIR_PROD}"
+    cache_dir: "${CACHE_DIR_PROD}"
+
+# ============================================================================
+# GLOBAL SETTINGS
+# ============================================================================
+global_settings:
+  random_state: ${GLOBAL_RANDOM_STATE}  # For reproducibility
+  
+  verbosity:
+    level: ${VERBOSITY_LEVEL}  # 0 | 1 | 2 | 3
+    
+  working_memory:
+    memory_limit: ${WORKING_MEMORY_MB}  # Memory limit in MB
+    
+  array_api:
+    dispatch: ${ARRAY_API_DISPATCH}  # Enable array API dispatch
+    
+  threading:
+    assume_finite: ${ASSUME_FINITE}  # Skip finite checks for speed
+    enable_metadata_routing: ${ENABLE_METADATA_ROUTING}
+
+# ============================================================================
+# MODEL CONFIGURATION
+# ============================================================================
+model:
+  estimator:
+    type: "${ESTIMATOR_TYPE}"  # rf | xgb | svm | linear | neural | ensemble
+    
+  classification:
+    algorithm: "${CLASSIFICATION_ALGORITHM}"  # logistic | svm | rf | gbc | knn | nb | mlp
+    n_classes: ${NUM_CLASSES}
+    class_weight: "${CLASS_WEIGHT}"  # balanced | None | dict
+    
+  regression:
+    algorithm: "${REGRESSION_ALGORITHM}"  # linear | ridge | lasso | elasticnet | svr | rf | gbr
+    
+  clustering:
+    algorithm: "${CLUSTERING_ALGORITHM}"  # kmeans | dbscan | hierarchical | gmm
+    n_clusters: ${NUM_CLUSTERS}
+    
+  ensemble:
+    method: "${ENSEMBLE_METHOD}"  # voting | bagging | boosting | stacking
+    n_estimators: ${NUM_ESTIMATORS}
+    
+  hyperparameters:
+    max_depth: ${MAX_DEPTH}
+    min_samples_split: ${MIN_SAMPLES_SPLIT}
+    min_samples_leaf: ${MIN_SAMPLES_LEAF}
+    max_features: "${MAX_FEATURES}"  # auto | sqrt | log2 | None | int | float
+    learning_rate: ${LEARNING_RATE}
+    subsample: ${SUBSAMPLE}
+
+# ============================================================================
+# PREPROCESSING PIPELINE
+# ============================================================================
+preprocessing:
+  scaling:
+    method: "${SCALING_METHOD}"  # standard | minmax | robust | maxabs | normalizer | None
+    with_mean: ${SCALING_WITH_MEAN}
+    with_std: ${SCALING_WITH_STD}
+    
+  encoding:
+    categorical_method: "${CATEGORICAL_ENCODING}"  # onehot | ordinal | target | binary
+    handle_unknown: "${HANDLE_UNKNOWN}"  # error | ignore | infrequent_if_exist
+    
+  imputation:
+    strategy: "${IMPUTATION_STRATEGY}"  # mean | median | most_frequent | constant | knn
+    missing_values: "${MISSING_VALUES}"  # NaN | custom
+    fill_value: "${IMPUTATION_FILL_VALUE}"
+    
+  feature_selection:
+    enabled: ${FEATURE_SELECTION_ENABLED}
+    method: "${FEATURE_SELECTION_METHOD}"  # variance | univariate | rfe | from_model
+    n_features: ${NUM_FEATURES_TO_SELECT}
+    
+  dimensionality_reduction:
+    enabled: ${DIM_REDUCTION_ENABLED}
+    method: "${DIM_REDUCTION_METHOD}"  # pca | svd | tsne | umap | lda
+    n_components: ${NUM_COMPONENTS}
+    
+  feature_engineering:
+    polynomial_features: ${POLYNOMIAL_FEATURES_ENABLED}
+    polynomial_degree: ${POLYNOMIAL_DEGREE}
+    interaction_only: ${INTERACTION_ONLY}
+
+# ============================================================================
+# PIPELINE CONFIGURATION
+# ============================================================================
+pipeline:
+  enabled: ${PIPELINE_ENABLED}
+  
+  steps:
+    preprocessing_steps:
+      - "${PIPELINE_STEP_1}"
+      - "${PIPELINE_STEP_2}"
+      - "${PIPELINE_STEP_3}"
+    
+  caching:
+    cache_transformers: ${CACHE_TRANSFORMERS}
+    cache_dir: "${PIPELINE_CACHE_DIR}"
+    
+  memory:
+    use_memory: ${USE_PIPELINE_MEMORY}
+    
+  validation:
+    validate_steps: ${VALIDATE_PIPELINE_STEPS}
+
+# ============================================================================
+# CROSS-VALIDATION
+# ============================================================================
+cross_validation:
+  strategy: "${CV_STRATEGY}"  # kfold | stratified | group | timeseries | shuffle
+  n_splits: ${CV_N_SPLITS}
+  shuffle: ${CV_SHUFFLE}
+  random_state: ${CV_RANDOM_STATE}
+  
+  scoring:
+    primary_metric: "${PRIMARY_METRIC}"  # accuracy | f1 | roc_auc | precision | recall | r2 | mse
+    additional_metrics:
+      - "${CV_METRIC_1}"
+      - "${CV_METRIC_2}"
+      - "${CV_METRIC_3}"
+    
+  parallel:
+    n_jobs: ${CV_N_JOBS}  # -1 for all cores
+    
+  refit:
+    refit_strategy: ${CV_REFIT}  # True | False | callable
+
+# ============================================================================
+# HYPERPARAMETER TUNING
+# ============================================================================
+hyperparameter_tuning:
+  enabled: ${HYPERPARAM_TUNING_ENABLED}
+  
+  method: "${TUNING_METHOD}"  # grid | random | bayes | halving | optuna
+  
+  grid_search:
+    param_grid: "${GRID_SEARCH_PARAMS}"
+    
+  random_search:
+    n_iter: ${RANDOM_SEARCH_N_ITER}
+    param_distributions: "${RANDOM_SEARCH_PARAMS}"
+    
+  bayesian:
+    n_calls: ${BAYESIAN_N_CALLS}
+    n_initial_points: ${BAYESIAN_N_INITIAL_POINTS}
+    
+  halving:
+    factor: ${HALVING_FACTOR}
+    resource: "${HALVING_RESOURCE}"  # n_samples | n_features
+    
+  optimization:
+    cv: ${TUNING_CV_SPLITS}
+    scoring: "${TUNING_SCORING}"
+    n_jobs: ${TUNING_N_JOBS}
+    verbose: ${TUNING_VERBOSE}
+    
+  early_stopping:
+    enabled: ${TUNING_EARLY_STOPPING}
+    patience: ${TUNING_PATIENCE}
+
+# ============================================================================
+# MODEL EVALUATION
+# ============================================================================
+evaluation:
+  metrics:
+    classification:
+      - accuracy
+      - precision
+      - recall
+      - f1_score
+      - roc_auc
+      - confusion_matrix
+      - classification_report
+      
+    regression:
+      - r2_score
+      - mean_squared_error
+      - mean_absolute_error
+      - median_absolute_error
+      - explained_variance
+      
+    clustering:
+      - silhouette_score
+      - calinski_harabasz_score
+      - davies_bouldin_score
+      
+  validation:
+    test_size: ${TEST_SIZE}
+    validation_size: ${VALIDATION_SIZE}
+    stratify: ${STRATIFY_SPLIT}
+    
+  reporting:
+    generate_report: ${GENERATE_EVALUATION_REPORT}
+    report_path: "${EVALUATION_REPORT_PATH}"
+    
+  visualization:
+    confusion_matrix: ${VIZ_CONFUSION_MATRIX}
+    roc_curve: ${VIZ_ROC_CURVE}
+    precision_recall_curve: ${VIZ_PR_CURVE}
+    feature_importance: ${VIZ_FEATURE_IMPORTANCE}
+    learning_curve: ${VIZ_LEARNING_CURVE}
+
+# ============================================================================
+# MODEL PERSISTENCE
+# ============================================================================
+persistence:
+  format: "${MODEL_FORMAT}"  # pickle | joblib | onnx | pmml
+  
+  joblib:
+    compress: ${JOBLIB_COMPRESS}  # 0-9 compression level
+    protocol: ${JOBLIB_PROTOCOL}
+    
+  versioning:
+    enabled: ${MODEL_VERSIONING_ENABLED}
+    version: "${MODEL_VERSION}"
+    
+  metadata:
+    save_metadata: ${SAVE_MODEL_METADATA}
+    metadata_path: "${MODEL_METADATA_PATH}"
+
+# ============================================================================
+# PERFORMANCE OPTIMIZATION
+# ============================================================================
+performance:
+  parallelism:
+    n_jobs: ${DEFAULT_N_JOBS}  # -1 for all cores
+    backend: "${PARALLEL_BACKEND}"  # loky | threading | multiprocessing
+    
+  caching:
+    enable_caching: ${ENABLE_CACHING}
+    cache_size: ${CACHE_SIZE_MB}
+    
+  sparse_arrays:
+    use_sparse: ${USE_SPARSE_ARRAYS}
+    
+  gpu:
+    use_gpu: ${USE_GPU_ACCELERATION}  # Requires GPU-enabled estimators
+    
+  memory:
+    low_memory_mode: ${LOW_MEMORY_MODE}
+    chunk_size: ${PROCESSING_CHUNK_SIZE}
+
+# ============================================================================
+# FEATURE IMPORTANCE & INTERPRETABILITY
+# ============================================================================
+interpretability:
+  feature_importance:
+    method: "${FEATURE_IMPORTANCE_METHOD}"  # built_in | permutation | shap | lime
+    
+  permutation_importance:
+    n_repeats: ${PERMUTATION_N_REPEATS}
+    
+  shap:
+    enabled: ${SHAP_ENABLED}
+    explainer_type: "${SHAP_EXPLAINER}"  # tree | kernel | deep | linear
+    
+  lime:
+    enabled: ${LIME_ENABLED}
+    num_features: ${LIME_NUM_FEATURES}
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  serving:
+    platform: "${SERVING_PLATFORM}"  # flask | fastapi | sagemaker | custom
+    model_path: "${DEPLOYED_MODEL_PATH}"
+    
+  api:
+    batch_prediction: ${BATCH_PREDICTION_ENABLED}
+    max_batch_size: ${MAX_BATCH_SIZE}
+    
+  monitoring:
+    track_predictions: ${TRACK_PREDICTIONS}
+    track_performance: ${TRACK_PERFORMANCE}
+    alert_on_drift: ${ALERT_ON_DRIFT}
+    
+  optimization:
+    quantization: ${MODEL_QUANTIZATION}
+    pruning: ${MODEL_PRUNING}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  sklearn_logging:
+    log_estimators: ${LOG_ESTIMATORS}
+    log_pipelines: ${LOG_PIPELINES}
+    log_cv_results: ${LOG_CV_RESULTS}
+    
+  experiment_tracking:
+    backend: "${EXPERIMENT_TRACKER}"  # mlflow | wandb | neptune | tensorboard
+    
+  mlflow:
+    enabled: ${MLFLOW_ENABLED}
+    tracking_uri: "${MLFLOW_TRACKING_URI}"
+    experiment_name: "${MLFLOW_EXPERIMENT_NAME}"
+    log_models: ${MLFLOW_LOG_MODELS}
+    
+  wandb:
+    enabled: ${WANDB_ENABLED}
+    project: "${WANDB_PROJECT}"
+    entity: "${WANDB_ENTITY}"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    sklearn: "${LOG_LEVEL_SKLEARN}"
+    pipeline: "${LOG_LEVEL_PIPELINE}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+
+# ============================================================================
+# DATA VALIDATION
+# ============================================================================
+data_validation:
+  input_validation:
+    check_array: ${CHECK_ARRAY_INPUT}
+    force_all_finite: ${FORCE_ALL_FINITE}  # True | False | allow-nan
+    
+  output_validation:
+    check_predictions: ${CHECK_PREDICTIONS}
+    
+  schema:
+    validate_schema: ${VALIDATE_DATA_SCHEMA}
+    schema_path: "${DATA_SCHEMA_PATH}"
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  model_security:
+    sign_models: ${SIGN_MODELS}
+    encrypt_models: ${ENCRYPT_MODELS}
+    encryption_key: "${MODEL_ENCRYPTION_KEY}"
+    
+  data_privacy:
+    anonymization: ${DATA_ANONYMIZATION}
+    differential_privacy: ${DIFFERENTIAL_PRIVACY}
+    
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  cloud_storage:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  mlflow:
+    tracking_token: "${MLFLOW_TRACKING_TOKEN}"
+    
+  wandb:
+    api_key: "${WANDB_API_KEY}"
+    
+  model_registry:
+    registry_token: "${MODEL_REGISTRY_TOKEN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

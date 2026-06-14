@@ -1,0 +1,442 @@
+# NumPy Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for NumPy-based projects
+# Usage: Copy and customize for each NumPy project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  compute_framework: "numpy"
+  numpy_version: "${NUMPY_VERSION}"  # e.g., 1.26.3
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  computation_type: "${COMPUTATION_TYPE}"  # scientific | numerical | matrix | signal_processing
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  data_development:
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "Numerical algorithm development"
+        - "Scientific computing"
+        - "Performance optimization"
+        
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Array operations optimization"
+        - "Data transformation pipelines"
+        - "Memory management"
+        
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    python_version: "${PYTHON_VERSION_DEV}"
+    numpy_version: "${NUMPY_VERSION_DEV}"
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    data_dir: "${DATA_DIR_DEV}"
+    cache_dir: "${CACHE_DIR_DEV}"
+    output_dir: "${OUTPUT_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    python_version: "${PYTHON_VERSION_STAGING}"
+    numpy_version: "${NUMPY_VERSION_STAGING}"
+    log_level: "${LOG_LEVEL_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    cache_dir: "${CACHE_DIR_STAGING}"
+    output_dir: "${OUTPUT_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    python_version: "${PYTHON_VERSION_PROD}"
+    numpy_version: "${NUMPY_VERSION_PROD}"
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    data_dir: "${DATA_DIR_PROD}"
+    cache_dir: "${CACHE_DIR_PROD}"
+    output_dir: "${OUTPUT_DIR_PROD}"
+
+# ============================================================================
+# ARRAY SETTINGS
+# ============================================================================
+array:
+  dtype:
+    default_float: "${DEFAULT_FLOAT_DTYPE}"  # float16 | float32 | float64
+    default_int: "${DEFAULT_INT_DTYPE}"  # int8 | int16 | int32 | int64
+    default_complex: "${DEFAULT_COMPLEX_DTYPE}"  # complex64 | complex128
+    
+  memory:
+    array_order: "${ARRAY_ORDER}"  # C (row-major) | F (column-major)
+    copy_on_write: ${COPY_ON_WRITE}
+    
+  creation:
+    default_like_shape: "${DEFAULT_LIKE_SHAPE}"
+    empty_like_kwarg: "${EMPTY_LIKE_KWARG}"
+
+# ============================================================================
+# PERFORMANCE SETTINGS
+# ============================================================================
+performance:
+  linear_algebra:
+    blas_library: "${BLAS_LIBRARY}"  # openblas | mkl | atlas | blis
+    num_threads: ${BLAS_NUM_THREADS}
+    
+  threading:
+    mkl_num_threads: ${MKL_NUM_THREADS}
+    openblas_num_threads: ${OPENBLAS_NUM_THREADS}
+    blis_num_threads: ${BLIS_NUM_THREADS}
+    
+  simd:
+    enable_avx: ${ENABLE_AVX}
+    enable_avx2: ${ENABLE_AVX2}
+    enable_avx512: ${ENABLE_AVX512}
+    
+  memory:
+    buffer_size: ${BUFFER_SIZE}  # Buffer size for array operations
+    max_array_size: ${MAX_ARRAY_SIZE}  # Maximum array size in bytes
+    
+  optimization:
+    use_einsum_path: ${USE_EINSUM_PATH}  # Optimize einsum operations
+    einsum_optimize: "${EINSUM_OPTIMIZE}"  # greedy | optimal | False
+    
+  caching:
+    enable_cache: ${ENABLE_CACHE}
+    cache_size: ${CACHE_SIZE}  # Cache size in MB
+
+# ============================================================================
+# PRINT & DISPLAY OPTIONS
+# ============================================================================
+display:
+  print_options:
+    precision: ${PRINT_PRECISION}  # Decimal precision for float display
+    threshold: ${PRINT_THRESHOLD}  # Total items before summarizing
+    edgeitems: ${PRINT_EDGEITEMS}  # Items at beginning and end
+    linewidth: ${PRINT_LINEWIDTH}  # Characters per line
+    suppress: ${PRINT_SUPPRESS}  # Suppress small floats using scientific notation
+    nanstr: "${PRINT_NANSTR}"  # String representation of NaN
+    infstr: "${PRINT_INFSTR}"  # String representation of infinity
+    sign: "${PRINT_SIGN}"  # + | - | ' ' controls printing of sign
+    formatter: "${PRINT_FORMATTER}"  # Custom formatter dictionary
+    
+  formatting:
+    float_mode: "${FLOAT_MODE}"  # fixed | unique | maxprec | maxprec_equal
+    legacy: "${LEGACY_MODE}"  # 1.13 | 1.21 | 1.25 | False
+
+# ============================================================================
+# ERROR HANDLING
+# ============================================================================
+error_handling:
+  error_mode:
+    all: "${ERROR_MODE_ALL}"  # ignore | warn | raise | call | print | log
+    divide: "${ERROR_MODE_DIVIDE}"  # Action for divide by zero
+    over: "${ERROR_MODE_OVER}"  # Action for overflow
+    under: "${ERROR_MODE_UNDER}"  # Action for underflow
+    invalid: "${ERROR_MODE_INVALID}"  # Action for invalid value
+    
+  warnings:
+    complex_warning: ${COMPLEX_WARNING}
+    divide_warning: ${DIVIDE_WARNING}
+    overflow_warning: ${OVERFLOW_WARNING}
+    underflow_warning: ${UNDERFLOW_WARNING}
+    
+  validation:
+    check_finite: ${CHECK_FINITE}  # Check for inf/nan in operations
+    strict_mode: ${STRICT_MODE}
+
+# ============================================================================
+# RANDOM NUMBER GENERATION
+# ============================================================================
+random:
+  generator:
+    method: "${RNG_METHOD}"  # MT19937 | PCG64 | Philox | SFC64
+    seed: ${RNG_SEED}
+    
+  legacy:
+    use_legacy_random: ${USE_LEGACY_RANDOM}
+    legacy_seed: ${LEGACY_RNG_SEED}
+    
+  distributions:
+    default_size: "${DEFAULT_DISTRIBUTION_SIZE}"
+    
+  performance:
+    buffer_size: ${RNG_BUFFER_SIZE}
+
+# ============================================================================
+# LINEAR ALGEBRA
+# ============================================================================
+linear_algebra:
+  default_backend: "${LINALG_BACKEND}"  # numpy | scipy | mkl
+  
+  solvers:
+    default_solver: "${DEFAULT_SOLVER}"  # gesv | gelsd | gelsy | gelss
+    rcond: ${SOLVER_RCOND}  # Cut-off ratio for small singular values
+    
+  decomposition:
+    default_svd: "${DEFAULT_SVD}"  # lapack_full | lapack_lite | gesvd | gesdd
+    
+  eigenvalues:
+    hermitian: ${ASSUME_HERMITIAN}
+    
+  matrix_operations:
+    check_finite: ${LINALG_CHECK_FINITE}
+    assume_a: "${ASSUME_A}"  # pos | sym | her | gen
+
+# ============================================================================
+# FFT CONFIGURATION
+# ============================================================================
+fft:
+  backend: "${FFT_BACKEND}"  # numpy | scipy | mkl | pyfftw
+  
+  planning:
+    plan_rigor: "${FFT_PLAN_RIGOR}"  # estimate | measure | patient | exhaustive
+    
+  threads:
+    num_threads: ${FFT_NUM_THREADS}
+    
+  normalization:
+    norm: "${FFT_NORM}"  # backward | ortho | forward
+    
+  performance:
+    cache_plans: ${FFT_CACHE_PLANS}
+    use_wisdom: ${FFT_USE_WISDOM}
+
+# ============================================================================
+# I/O CONFIGURATION
+# ============================================================================
+io:
+  binary:
+    default_format: "${BINARY_FORMAT}"  # npy | npz
+    compression: ${NPZ_COMPRESSION}  # Compression for npz files
+    allow_pickle: ${ALLOW_PICKLE}
+    
+  text:
+    default_delimiter: "${TEXT_DELIMITER}"
+    default_encoding: "${TEXT_ENCODING}"
+    comments: "${TEXT_COMMENTS}"  # Character indicating start of comment
+    
+  memory_mapping:
+    enabled: ${MEMORY_MAPPING_ENABLED}
+    mode: "${MEMMAP_MODE}"  # r | r+ | w+ | c
+    
+  performance:
+    buffer_size: ${IO_BUFFER_SIZE}
+
+# ============================================================================
+# UFUNC CONFIGURATION
+# ============================================================================
+ufunc:
+  error_handling:
+    all: "${UFUNC_ERROR_ALL}"
+    divide: "${UFUNC_ERROR_DIVIDE}"
+    over: "${UFUNC_ERROR_OVER}"
+    under: "${UFUNC_ERROR_UNDER}"
+    invalid: "${UFUNC_ERROR_INVALID}"
+    
+  buffersize:
+    default: ${UFUNC_BUFFERSIZE}
+    
+  casting:
+    default_casting: "${DEFAULT_CASTING}"  # no | equiv | safe | same_kind | unsafe
+
+# ============================================================================
+# MEMORY MANAGEMENT
+# ============================================================================
+memory:
+  allocation:
+    allocator: "${MEMORY_ALLOCATOR}"  # default | jemalloc | tcmalloc
+    
+  garbage_collection:
+    gc_threshold: ${GC_THRESHOLD}
+    enable_gc: ${ENABLE_GC}
+    
+  pooling:
+    enable_pool: ${ENABLE_MEMORY_POOL}
+    pool_size: ${MEMORY_POOL_SIZE}
+    
+  monitoring:
+    track_allocation: ${TRACK_ALLOCATION}
+    warn_on_high_memory: ${WARN_HIGH_MEMORY}
+    memory_limit: ${MEMORY_LIMIT}  # In GB
+
+# ============================================================================
+# OPTIMIZATION SETTINGS
+# ============================================================================
+optimization:
+  vectorization:
+    enable_vectorization: ${ENABLE_VECTORIZATION}
+    vector_width: ${VECTOR_WIDTH}
+    
+  loop_fusion:
+    enable_fusion: ${ENABLE_LOOP_FUSION}
+    
+  inlining:
+    enable_inlining: ${ENABLE_INLINING}
+    inline_threshold: ${INLINE_THRESHOLD}
+    
+  array_api:
+    use_array_api: ${USE_ARRAY_API}  # NumPy 2.0+ Array API standard
+    
+  profiling:
+    enable_profiling: ${ENABLE_PROFILING}
+    profile_memory: ${PROFILE_MEMORY}
+    profile_time: ${PROFILE_TIME}
+
+# ============================================================================
+# DATA TYPES
+# ============================================================================
+dtypes:
+  custom_dtypes:
+    enabled: ${CUSTOM_DTYPES_ENABLED}
+    definitions: "${CUSTOM_DTYPE_DEFINITIONS}"
+    
+  structured_arrays:
+    enabled: ${STRUCTURED_ARRAYS_ENABLED}
+    alignment: ${DTYPE_ALIGNMENT}
+    
+  datetime:
+    datetime_unit: "${DATETIME_UNIT}"  # Y | M | W | D | h | m | s | ms | us | ns
+    
+  string:
+    string_dtype: "${STRING_DTYPE}"  # U | S | O
+
+# ============================================================================
+# TESTING & VALIDATION
+# ============================================================================
+testing:
+  numerical_stability:
+    check_stability: ${CHECK_NUMERICAL_STABILITY}
+    tolerance: ${NUMERICAL_TOLERANCE}
+    
+  assertions:
+    assert_allclose_rtol: ${ASSERT_ALLCLOSE_RTOL}
+    assert_allclose_atol: ${ASSERT_ALLCLOSE_ATOL}
+    
+  reproducibility:
+    ensure_reproducibility: ${ENSURE_REPRODUCIBILITY}
+    deterministic_mode: ${DETERMINISTIC_MODE}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  numpy_operations:
+    log_operations: ${LOG_NUMPY_OPERATIONS}
+    log_warnings: ${LOG_NUMPY_WARNINGS}
+    log_errors: ${LOG_NUMPY_ERRORS}
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    numpy: "${LOG_LEVEL_NUMPY}"
+    linalg: "${LOG_LEVEL_LINALG}"
+    fft: "${LOG_LEVEL_FFT}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+  performance:
+    log_performance: ${LOG_PERFORMANCE}
+    log_memory_usage: ${LOG_MEMORY_USAGE}
+
+# ============================================================================
+# INTEGRATION
+# ============================================================================
+integration:
+  scipy:
+    enabled: ${SCIPY_INTEGRATION}
+    version: "${SCIPY_VERSION}"
+    
+  numba:
+    enabled: ${NUMBA_INTEGRATION}
+    nopython_mode: ${NUMBA_NOPYTHON}
+    parallel: ${NUMBA_PARALLEL}
+    
+  cupy:
+    enabled: ${CUPY_INTEGRATION}
+    device_id: ${CUPY_DEVICE_ID}
+    
+  tensorflow:
+    enabled: ${TF_INTEGRATION}
+    convert_to_tensor: ${AUTO_CONVERT_TO_TENSOR}
+    
+  pytorch:
+    enabled: ${PYTORCH_INTEGRATION}
+    convert_to_torch: ${AUTO_CONVERT_TO_TORCH}
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  data_validation:
+    validate_inputs: ${VALIDATE_INPUTS}
+    sanitize_inputs: ${SANITIZE_INPUTS}
+    
+  safe_operations:
+    allow_pickle: ${ALLOW_PICKLE_LOAD}
+    allow_exec: ${ALLOW_EXEC}
+    
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  cloud_storage:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  compute_resources:
+    cluster_token: "${CLUSTER_TOKEN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

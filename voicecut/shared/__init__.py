@@ -1,0 +1,1 @@
+# VoiceCut — Shared package init

@@ -1,0 +1,549 @@
+# Go Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for Go projects
+# Usage: Copy and customize for each Go project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "go"
+  framework: "${GO_FRAMEWORK}"  # gin | echo | fiber | chi | standard-lib | none
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  module_path: "${GO_MODULE_PATH}"  # e.g., github.com/username/project
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "Go service development"
+        - "API implementation"
+        - "Microservices architecture"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  data:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_ARCHITECTURE}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_SERVICE_SPEC}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_DOCUMENTATION}"
+    agents_required:
+      - "Back-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_BENCHMARK_RESULTS}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    go_version: "${GO_VERSION_DEV}"  # e.g., 1.21 | 1.22
+    gopath: "${GOPATH_DEV}"
+    go_env: "${GO_ENV_DEV}"  # development
+    debug_mode: ${DEBUG_MODE_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # debug | info | warn | error
+    database_url: "${DATABASE_URL_DEV}"
+    redis_url: "${REDIS_URL_DEV}"
+    api_base_url: "${API_BASE_URL_DEV}"
+    cgoenabled: ${CGO_ENABLED_DEV}
+    race_detector: ${RACE_DETECTOR_DEV}
+    
+  staging:
+    name: "staging"
+    go_version: "${GO_VERSION_STAGING}"
+    gopath: "${GOPATH_STAGING}"
+    go_env: "${GO_ENV_STAGING}"
+    debug_mode: ${DEBUG_MODE_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    redis_url: "${REDIS_URL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    cgoenabled: ${CGO_ENABLED_STAGING}
+    race_detector: false
+    
+  production:
+    name: "prod"
+    go_version: "${GO_VERSION_PROD}"
+    gopath: "${GOPATH_PROD}"
+    go_env: "${GO_ENV_PROD}"
+    debug_mode: false
+    log_level: "${LOG_LEVEL_PROD}"  # Should be warn or error
+    database_url: "${DATABASE_URL_PROD}"
+    redis_url: "${REDIS_URL_PROD}"
+    api_base_url: "${API_BASE_URL_PROD}"
+    cgoenabled: ${CGO_ENABLED_PROD}
+    race_detector: false
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  module:
+    path: "${GO_MODULE_PATH}"
+    go_mod_file: "${GO_MOD_FILE}"  # go.mod
+    go_sum_file: "${GO_SUM_FILE}"  # go.sum
+    
+  dependencies:
+    vendor: ${VENDOR_ENABLED}
+    tidy_on_build: ${GO_MOD_TIDY_ON_BUILD}
+    download_command: "${GO_MOD_DOWNLOAD_CMD}"
+    update_command: "${GO_MOD_UPDATE_CMD}"
+    
+  compiler:
+    goos: "${TARGET_OS}"  # linux | darwin | windows
+    goarch: "${TARGET_ARCH}"  # amd64 | arm64 | 386
+    cgoenabled: ${CGO_ENABLED}
+    
+  build_flags:
+    ldflags: "${BUILD_LDFLAGS}"  # -s -w for smaller binaries
+    tags: "${BUILD_TAGS}"
+    trimpath: ${TRIM_PATH_ENABLED}
+    race: ${RACE_DETECTOR_ENABLED}
+    
+  output:
+    binary_name: "${OUTPUT_BINARY_NAME}"
+    output_dir: "${BUILD_OUTPUT_DIR}"  # bin | build
+    
+  cross_compilation:
+    enabled: ${CROSS_COMPILE_ENABLED}
+    targets:
+      - goos: "${CROSS_COMPILE_OS_1}"
+        goarch: "${CROSS_COMPILE_ARCH_1}"
+      - goos: "${CROSS_COMPILE_OS_2}"
+        goarch: "${CROSS_COMPILE_ARCH_2}"
+    
+  static_analysis:
+    golint:
+      enabled: ${GOLINT_ENABLED}
+      
+    staticcheck:
+      enabled: ${STATICCHECK_ENABLED}
+      
+    gosec:
+      enabled: ${GOSEC_ENABLED}  # Security-focused linter
+      severity: "${GOSEC_SEVERITY}"  # low | medium | high
+      
+    golangci_lint:
+      enabled: ${GOLANGCI_LINT_ENABLED}
+      config_file: "${GOLANGCI_CONFIG_PATH}"
+      
+  formatting:
+    gofmt:
+      enabled: ${GOFMT_ENABLED}
+      simplify: ${GOFMT_SIMPLIFY}
+      
+    goimports:
+      enabled: ${GOIMPORTS_ENABLED}
+      
+  pre_build_commands:
+    - "${PRE_BUILD_CMD_1}"
+    - "${PRE_BUILD_CMD_2}"
+    
+  post_build_commands:
+    - "${POST_BUILD_CMD_1}"
+    - "${POST_BUILD_CMD_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "go test"  # Native Go testing
+  
+  coverage:
+    tool: "go test -cover"
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # html | profile | func
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    mode: "${COVERAGE_MODE}"  # set | count | atomic
+    
+  unit_tests:
+    pattern: "${UNIT_TEST_PATTERN}"  # *_test.go
+    parallel: ${UNIT_TEST_PARALLEL}
+    short_mode: ${TEST_SHORT_MODE}
+    verbose: ${TEST_VERBOSE}
+    timeout: "${TEST_TIMEOUT}"
+    
+  integration_tests:
+    build_tags: "${INTEGRATION_TEST_TAGS}"  # integration
+    requires_database: ${INTEGRATION_TEST_DB_REQUIRED}
+    
+  benchmark_tests:
+    enabled: ${BENCHMARK_TEST_ENABLED}
+    run_pattern: "${BENCHMARK_RUN_PATTERN}"
+    benchtime: "${BENCHMARK_TIME}"
+    benchmem: ${BENCHMARK_MEM_STATS}
+    
+  race_detection:
+    enabled: ${RACE_DETECTION_ENABLED}
+    
+  fuzzing:
+    enabled: ${FUZZING_ENABLED}
+    fuzz_time: "${FUZZ_TIME}"
+    
+  mocking:
+    tool: "${MOCKING_TOOL}"  # gomock | testify/mock | mockery
+    
+  table_driven_tests:
+    enforced: ${TABLE_DRIVEN_TESTS_ENFORCED}
+    
+  test_helpers:
+    directory: "${TEST_HELPERS_DIR}"
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # kubernetes | docker | aws | gcp | azure
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    base_image: "${DOCKER_BASE_IMAGE}"  # golang:alpine | scratch | distroless
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    multi_stage_build: ${DOCKER_MULTI_STAGE}
+    scratch_build: ${DOCKER_SCRATCH_BUILD}  # Minimal image with only binary
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose | nomad
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    namespace: "${K8S_NAMESPACE}"
+    
+  binary:
+    static_linking: ${STATIC_LINKING}
+    strip_debug: ${STRIP_DEBUG_INFO}
+    compress: ${COMPRESS_BINARY}  # Using upx
+    
+  server:
+    host: "${SERVER_HOST}"
+    port: ${SERVER_PORT}
+    graceful_shutdown: ${GRACEFUL_SHUTDOWN_ENABLED}
+    shutdown_timeout: "${SHUTDOWN_TIMEOUT}"
+    read_timeout: "${READ_TIMEOUT}"
+    write_timeout: "${WRITE_TIMEOUT}"
+    idle_timeout: "${IDLE_TIMEOUT}"
+    max_header_bytes: ${MAX_HEADER_BYTES}
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"  # /health | /healthz
+    liveness_probe: "${LIVENESS_PROBE_PATH}"
+    readiness_probe: "${READINESS_PROBE_PATH}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+    
+  metrics:
+    enabled: ${METRICS_ENABLED}
+    prometheus_enabled: ${PROMETHEUS_ENABLED}
+    endpoint: "${METRICS_ENDPOINT}"  # /metrics
+    
+  profiling:
+    enabled: ${PPROF_ENABLED}
+    endpoint: "${PPROF_ENDPOINT}"  # /debug/pprof
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  library: "${LOGGING_LIBRARY}"  # zap | zerolog | logrus | slog
+  
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    http: "${LOG_LEVEL_HTTP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    grpc: "${LOG_LEVEL_GRPC}"
+    
+  outputs:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"  # json | text | console
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: ${LOG_FILE_ROTATION_ENABLED}
+      max_size_mb: ${LOG_FILE_MAX_SIZE_MB}
+      max_backups: ${LOG_FILE_MAX_BACKUPS}
+      max_age_days: ${LOG_FILE_MAX_AGE_DAYS}
+      compress: ${LOG_FILE_COMPRESS}
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "json"
+    
+  sampling:
+    enabled: ${LOG_SAMPLING_ENABLED}
+    initial: ${LOG_SAMPLING_INITIAL}
+    thereafter: ${LOG_SAMPLING_THEREAFTER}
+    
+  caller_info:
+    enabled: ${LOG_CALLER_ENABLED}
+    skip_frames: ${LOG_CALLER_SKIP}
+    
+  stacktrace:
+    enabled: ${LOG_STACKTRACE_ENABLED}
+    level: "${LOG_STACKTRACE_LEVEL}"  # error | panic
+    
+  context:
+    request_id: ${LOG_REQUEST_ID_ENABLED}
+    trace_id: ${LOG_TRACE_ID_ENABLED}
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # govulncheck | snyk | nancy
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    
+  static_application_security_testing:
+    tool: "${SAST_TOOL}"  # gosec | semgrep
+    config_path: "${SAST_CONFIG_PATH}"
+    
+  secrets_scanning:
+    enabled: ${SECRETS_SCANNING_ENABLED}
+    tool: "${SECRETS_SCAN_TOOL}"  # gitleaks | trufflehog
+    
+  tls:
+    enabled: ${TLS_ENABLED}
+    cert_file: "${TLS_CERT_FILE}"
+    key_file: "${TLS_KEY_FILE}"
+    min_version: "${TLS_MIN_VERSION}"  # TLS12 | TLS13
+    
+  cors:
+    enabled: ${CORS_ENABLED}
+    allowed_origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed_methods: "${CORS_ALLOWED_METHODS}"
+    allowed_headers: "${CORS_ALLOWED_HEADERS}"
+    max_age: ${CORS_MAX_AGE}
+    
+  rate_limiting:
+    enabled: ${RATE_LIMITING_ENABLED}
+    requests_per_second: ${RATE_LIMIT_RPS}
+    burst: ${RATE_LIMIT_BURST}
+    
+  authentication:
+    method: "${AUTH_METHOD}"  # jwt | oauth2 | api-key | mtls
+    jwt_secret: "${JWT_SECRET}"
+    jwt_expiry: "${JWT_EXPIRY}"
+    
+  input_validation:
+    library: "${INPUT_VALIDATION_LIBRARY}"  # validator | ozzo-validation
+    strict_mode: ${INPUT_VALIDATION_STRICT}
+    
+  memory_safety:
+    bounds_checking: ${BOUNDS_CHECKING_ENABLED}
+    race_detector: ${RACE_DETECTOR_ENABLED}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  linting:
+    enabled: ${LINTING_ENABLED}
+    tool: "golangci-lint"
+    config: "${LINT_CONFIG_PATH}"
+    
+  formatting:
+    tool: "gofmt"
+    enforce: ${ENFORCE_FORMATTING}
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}  # Cyclomatic complexity
+    max_func_lines: ${MAX_FUNC_LINES}
+    max_file_lines: ${MAX_FILE_LINES}
+    
+  naming_conventions:
+    enforce: ${ENFORCE_NAMING_CONVENTIONS}
+    
+  documentation:
+    godoc_required: ${GODOC_REQUIRED}
+    min_coverage: ${MIN_GODOC_COVERAGE}
+    exported_only: ${GODOC_EXPORTED_ONLY}
+    
+  error_handling:
+    check_errors: ${CHECK_ALL_ERRORS}
+    wrap_errors: ${WRAP_ERRORS_REQUIRED}
+    
+  imports:
+    organize: ${ORGANIZE_IMPORTS}
+    group_local: ${GROUP_LOCAL_IMPORTS}
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  godoc:
+    auto_generate: ${AUTO_GENERATE_GODOC}
+    serve_port: ${GODOC_PORT}
+    
+  openapi:
+    enabled: ${OPENAPI_ENABLED}
+    spec_path: "${OPENAPI_SPEC_PATH}"
+    tool: "${OPENAPI_TOOL}"  # swag | go-swagger
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  database:
+    dsn: "${DATABASE_DSN}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    host: "${DB_HOST}"
+    port: ${DB_PORT}
+    name: "${DB_NAME}"
+    
+  cache:
+    redis_url: "${REDIS_URL}"
+    redis_password: "${REDIS_PASSWORD}"
+    
+  api_keys:
+    service_1: "${API_KEY_SERVICE_1}"
+    service_2: "${API_KEY_SERVICE_2}"
+    
+  authentication:
+    jwt_secret: "${JWT_SECRET_KEY}"
+    jwt_signing_key: "${JWT_SIGNING_KEY}"
+    
+  cloud_provider:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    region: "${CLOUD_REGION}"
+    
+  encryption:
+    aes_key: "${AES_ENCRYPTION_KEY}"
+    
+  monitoring:
+    sentry_dsn: "${SENTRY_DSN}"
+    datadog_api_key: "${DATADOG_API_KEY}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

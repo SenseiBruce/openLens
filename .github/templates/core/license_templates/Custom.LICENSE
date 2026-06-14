@@ -1,0 +1,81 @@
+CUSTOM LICENSE
+
+Copyright (c) [YEAR] [COPYRIGHT_HOLDER]
+
+---
+INSTRUCTIONS FOR CUSTOM LICENSE:
+
+This is a placeholder template for custom licenses. To complete this license:
+
+1. REPLACE THIS ENTIRE FILE with your custom license text.
+
+2. If you need help creating a custom license:
+   - Consult with your legal department
+   - Consider using a standard license as a starting point
+   - Ensure the license addresses:
+     * Copyright and ownership
+     * Permitted uses
+     * Restrictions and prohibitions
+     * Warranty disclaimers
+     * Liability limitations
+     * Distribution terms
+     * Modification rights
+     * Termination conditions
+
+3. Common custom license scenarios:
+   - Internal company use only
+   - Client-specific licensing terms
+   - Dual licensing (commercial + open source)
+   - Academic or research licenses
+   - Evaluation or trial licenses
+
+4. Required elements to include:
+   - Copyright notice with year and holder
+   - Clear grant of rights (what users CAN do)
+   - Clear restrictions (what users CANNOT do)
+   - Warranty disclaimer
+   - Liability limitation
+   - Governing law and jurisdiction
+
+5. Recommended additions:
+   - Contact information for licensing inquiries
+   - License version number
+   - Effective date
+   - Acceptance mechanism
+
+---
+
+TEMPLATE EXAMPLE (CUSTOMIZE AS NEEDED):
+
+This software and associated documentation files (the "Software") are
+proprietary to [COPYRIGHT_HOLDER].
+
+LICENSE GRANT:
+[Describe what users are allowed to do]
+
+RESTRICTIONS:
+[Describe what users are NOT allowed to do]
+
+DISTRIBUTION:
+[Specify distribution terms]
+
+MODIFICATIONS:
+[Specify whether modifications are allowed]
+
+WARRANTY DISCLAIMER:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+LIMITATION OF LIABILITY:
+IN NO EVENT SHALL [COPYRIGHT_HOLDER] BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+CONTACT:
+For licensing inquiries: [CONTACT_EMAIL]
+
+---
+DELETE THESE INSTRUCTIONS and replace with your actual custom license text.
+---

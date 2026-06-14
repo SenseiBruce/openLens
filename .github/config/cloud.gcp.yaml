@@ -1,0 +1,998 @@
+# ============================================================================
+# GCP Cloud Infrastructure Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ============================================================================
+# This template provides comprehensive GCP infrastructure configuration
+# supporting multiple authentication methods, services, and deployment patterns.
+# ============================================================================
+
+# GCP Authentication Configuration
+# Multiple authentication methods are supported for different use cases
+authentication:
+  # Method 1: Service Account Key File (not recommended for production)
+  service_account_key:
+    enabled: false
+    key_file_path: "/path/to/service-account-key.json"
+    project_id: "my-project-id"
+    
+  # Method 2: Application Default Credentials (recommended)
+  application_default_credentials:
+    enabled: true
+    # Automatically uses credentials from:
+    # 1. GOOGLE_APPLICATION_CREDENTIALS environment variable
+    # 2. gcloud auth application-default login
+    # 3. Compute Engine/GKE metadata server
+    
+  # Method 3: gcloud CLI Profile
+  gcloud_profile:
+    enabled: false
+    profile_name: "default"
+    project_id: "my-project-id"
+    
+  # Method 4: Environment Variables
+  environment_variables:
+    enabled: true
+    # Uses GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_CLOUD_PROJECT
+    project_id: "${GOOGLE_CLOUD_PROJECT}"
+    
+  # Method 5: Workload Identity (for GKE)
+  workload_identity:
+    enabled: false
+    # Format: PROJECT_ID.svc.id.goog[NAMESPACE/SERVICE_ACCOUNT]
+    service_account: "my-project-id.svc.id.goog[default/my-ksa]"
+    namespace: "default"
+    kubernetes_service_account: "my-ksa"
+    
+  # Method 6: Compute Engine Service Account (automatic)
+  compute_engine_service_account:
+    enabled: true
+    # Automatically uses instance metadata service
+    scopes:
+      - "https://www.googleapis.com/auth/cloud-platform"
+      - "https://www.googleapis.com/auth/compute"
+      - "https://www.googleapis.com/auth/devstorage.read_write"
+
+# Project and Organization Configuration
+project:
+  id: "my-project-id"
+  name: "My Application Project"
+  organization_id: "123456789012"
+  billing_account_id: "012345-6789AB-CDEF01"
+  
+  # Regions and zones
+  regions:
+    primary:
+      name: "us-central1"
+      zones:
+        - "us-central1-a"
+        - "us-central1-b"
+        - "us-central1-c"
+    secondary:
+      name: "us-east1"
+      zones:
+        - "us-east1-b"
+        - "us-east1-c"
+        - "us-east1-d"
+    disaster_recovery:
+      name: "europe-west1"
+      zones:
+        - "europe-west1-b"
+        - "europe-west1-c"
+        - "europe-west1-d"
+        
+  # Enabled APIs
+  enabled_apis:
+    - "compute.googleapis.com"
+    - "container.googleapis.com"
+    - "cloudfunctions.googleapis.com"
+    - "run.googleapis.com"
+    - "sqladmin.googleapis.com"
+    - "storage-api.googleapis.com"
+    - "cloudkms.googleapis.com"
+    - "secretmanager.googleapis.com"
+    - "monitoring.googleapis.com"
+    - "logging.googleapis.com"
+    - "dns.googleapis.com"
+    - "cloudresourcemanager.googleapis.com"
+
+# VPC and Networking Configuration
+networking:
+  vpc:
+    name: "application-vpc"
+    auto_create_subnetworks: false
+    routing_mode: "REGIONAL"
+    description: "Main application VPC network"
+    
+  # Subnet Configuration
+  subnets:
+    public:
+      - name: "public-subnet-us-central1"
+        region: "us-central1"
+        ip_cidr_range: "10.0.1.0/24"
+        private_ip_google_access: true
+        secondary_ip_ranges:
+          - range_name: "pods"
+            ip_cidr_range: "10.1.0.0/16"
+          - range_name: "services"
+            ip_cidr_range: "10.2.0.0/16"
+            
+      - name: "public-subnet-us-east1"
+        region: "us-east1"
+        ip_cidr_range: "10.0.2.0/24"
+        private_ip_google_access: true
+        
+    private:
+      - name: "private-subnet-us-central1"
+        region: "us-central1"
+        ip_cidr_range: "10.0.11.0/24"
+        private_ip_google_access: true
+        
+      - name: "private-subnet-us-east1"
+        region: "us-east1"
+        ip_cidr_range: "10.0.12.0/24"
+        private_ip_google_access: true
+        
+  # Cloud NAT (for private instances to access internet)
+  cloud_nat:
+    - name: "nat-us-central1"
+      region: "us-central1"
+      router_name: "nat-router-us-central1"
+      nat_ip_allocate_option: "AUTO_ONLY"
+      source_subnetwork_ip_ranges_to_nat: "ALL_SUBNETWORKS_ALL_IP_RANGES"
+      log_config:
+        enable: true
+        filter: "ERRORS_ONLY"
+        
+    - name: "nat-us-east1"
+      region: "us-east1"
+      router_name: "nat-router-us-east1"
+      nat_ip_allocate_option: "MANUAL_ONLY"
+      nat_ips:
+        - "nat-ip-1"
+        - "nat-ip-2"
+        
+  # Cloud Router (required for Cloud NAT and VPN)
+  cloud_routers:
+    - name: "nat-router-us-central1"
+      region: "us-central1"
+      network: "application-vpc"
+      bgp:
+        asn: 64514
+        
+  # VPC Peering
+  vpc_peering:
+    enabled: false
+    peer_network: "projects/other-project/global/networks/other-vpc"
+    export_custom_routes: false
+    import_custom_routes: false
+    
+  # Private Service Connection (for Cloud SQL)
+  private_service_connection:
+    enabled: true
+    reserved_peering_ranges:
+      - name: "google-managed-services-range"
+        address: "10.100.0.0"
+        prefix_length: 16
+        purpose: "VPC_PEERING"
+
+# Firewall Rules
+firewall_rules:
+  allow_http:
+    name: "allow-http"
+    network: "application-vpc"
+    priority: 1000
+    direction: "INGRESS"
+    source_ranges:
+      - "0.0.0.0/0"
+    target_tags:
+      - "http-server"
+    allow:
+      - protocol: "tcp"
+        ports:
+          - "80"
+          
+  allow_https:
+    name: "allow-https"
+    network: "application-vpc"
+    priority: 1000
+    direction: "INGRESS"
+    source_ranges:
+      - "0.0.0.0/0"
+    target_tags:
+      - "https-server"
+    allow:
+      - protocol: "tcp"
+        ports:
+          - "443"
+          
+  allow_internal:
+    name: "allow-internal"
+    network: "application-vpc"
+    priority: 65534
+    direction: "INGRESS"
+    source_ranges:
+      - "10.0.0.0/8"
+    allow:
+      - protocol: "tcp"
+        ports:
+          - "0-65535"
+      - protocol: "udp"
+        ports:
+          - "0-65535"
+      - protocol: "icmp"
+      
+  allow_ssh:
+    name: "allow-ssh"
+    network: "application-vpc"
+    priority: 1000
+    direction: "INGRESS"
+    source_ranges:
+      - "35.235.240.0/20"  # IAP IP range
+    target_tags:
+      - "ssh-enabled"
+    allow:
+      - protocol: "tcp"
+        ports:
+          - "22"
+          
+  deny_all_ingress:
+    name: "deny-all-ingress"
+    network: "application-vpc"
+    priority: 65535
+    direction: "INGRESS"
+    source_ranges:
+      - "0.0.0.0/0"
+    deny:
+      - protocol: "all"
+
+# Compute Engine Configuration
+compute_engine:
+  instance_templates:
+    web_server:
+      name: "web-server-template"
+      machine_type: "n2-standard-2"
+      region: "us-central1"
+      
+      # Boot disk
+      disk:
+        source_image: "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts"
+        disk_size_gb: 30
+        disk_type: "pd-balanced"
+        auto_delete: true
+        boot: true
+        
+      # Network interface
+      network_interface:
+        network: "application-vpc"
+        subnetwork: "private-subnet-us-central1"
+        access_config: []  # No external IP
+        
+      # Metadata
+      metadata:
+        startup-script: |
+          #!/bin/bash
+          apt-get update
+          apt-get install -y docker.io
+          systemctl start docker
+          systemctl enable docker
+          
+      # Service account
+      service_account:
+        email: "compute@my-project-id.iam.gserviceaccount.com"
+        scopes:
+          - "https://www.googleapis.com/auth/cloud-platform"
+          
+      # Tags
+      tags:
+        - "web-server"
+        - "http-server"
+        - "https-server"
+        
+      # Labels
+      labels:
+        environment: "production"
+        role: "web"
+        
+  instances:
+    bastion:
+      name: "bastion-host"
+      zone: "us-central1-a"
+      machine_type: "e2-micro"
+      
+      boot_disk:
+        initialize_params:
+          image: "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts"
+          size: 10
+          type: "pd-standard"
+          
+      network_interfaces:
+        - network: "application-vpc"
+          subnetwork: "public-subnet-us-central1"
+          access_configs:
+            - nat_ip: ""  # Ephemeral external IP
+              network_tier: "PREMIUM"
+              
+      tags:
+        - "ssh-enabled"
+        - "bastion"
+
+# Managed Instance Groups
+managed_instance_groups:
+  web_mig:
+    name: "web-server-mig"
+    base_instance_name: "web"
+    zone: "us-central1-a"
+    instance_template: "web-server-template"
+    
+    # Target size
+    target_size: 3
+    
+    # Auto-healing
+    auto_healing_policies:
+      health_check: "web-health-check"
+      initial_delay_sec: 300
+      
+    # Update policy
+    update_policy:
+      type: "PROACTIVE"
+      minimal_action: "REPLACE"
+      max_surge_fixed: 3
+      max_unavailable_fixed: 0
+      
+  regional_web_mig:
+    name: "web-server-regional-mig"
+    region: "us-central1"
+    base_instance_name: "web-regional"
+    instance_template: "web-server-template"
+    
+    # Distribution policy (multi-zone)
+    distribution_policy_zones:
+      - "us-central1-a"
+      - "us-central1-b"
+      - "us-central1-c"
+      
+    # Auto-scaling
+    autoscaler:
+      name: "web-autoscaler"
+      max_replicas: 10
+      min_replicas: 3
+      cooldown_period: 60
+      
+      # CPU utilization
+      cpu_utilization:
+        target: 0.7
+        
+      # Load balancing utilization
+      load_balancing_utilization:
+        target: 0.8
+        
+      # Custom metrics
+      metric:
+        name: "custom.googleapis.com/requests_per_second"
+        target: 100
+        type: "GAUGE"
+
+# Google Kubernetes Engine (GKE)
+gke:
+  clusters:
+    primary:
+      name: "primary-cluster"
+      location: "us-central1"  # Regional cluster
+      
+      # Network configuration
+      network: "application-vpc"
+      subnetwork: "public-subnet-us-central1"
+      
+      # IP allocation for pods and services
+      ip_allocation_policy:
+        cluster_secondary_range_name: "pods"
+        services_secondary_range_name: "services"
+        
+      # Master configuration
+      master_auth:
+        client_certificate_config:
+          issue_client_certificate: false
+          
+      # Remove default node pool
+      remove_default_node_pool: true
+      initial_node_count: 1
+      
+      # Workload Identity
+      workload_identity_config:
+        workload_pool: "my-project-id.svc.id.goog"
+        
+      # Network policy
+      network_policy:
+        enabled: true
+        provider: "PROVIDER_UNSPECIFIED"
+        
+      # Private cluster config
+      private_cluster_config:
+        enable_private_nodes: true
+        enable_private_endpoint: false
+        master_ipv4_cidr_block: "172.16.0.0/28"
+        
+      # Master authorized networks
+      master_authorized_networks_config:
+        cidr_blocks:
+          - cidr_block: "10.0.0.0/8"
+            display_name: "Internal VPC"
+            
+  node_pools:
+    primary_pool:
+      name: "primary-pool"
+      cluster: "primary-cluster"
+      location: "us-central1"
+      
+      # Node configuration
+      node_config:
+        machine_type: "n2-standard-4"
+        disk_size_gb: 100
+        disk_type: "pd-balanced"
+        preemptible: false
+        
+        # OAuth scopes
+        oauth_scopes:
+          - "https://www.googleapis.com/auth/cloud-platform"
+          
+        # Service account
+        service_account: "gke-nodes@my-project-id.iam.gserviceaccount.com"
+        
+        # Metadata
+        metadata:
+          disable-legacy-endpoints: "true"
+          
+        # Workload Identity
+        workload_metadata_config:
+          mode: "GKE_METADATA"
+          
+        # Tags
+        tags:
+          - "gke-node"
+          
+      # Auto-scaling
+      autoscaling:
+        min_node_count: 3
+        max_node_count: 10
+        
+      # Management
+      management:
+        auto_repair: true
+        auto_upgrade: true
+        
+    spot_pool:
+      name: "spot-pool"
+      cluster: "primary-cluster"
+      location: "us-central1"
+      
+      node_config:
+        machine_type: "n2-standard-4"
+        spot: true
+        
+      autoscaling:
+        min_node_count: 0
+        max_node_count: 5
+
+# Cloud Run
+cloud_run:
+  services:
+    api:
+      name: "api-service"
+      location: "us-central1"
+      
+      # Template
+      template:
+        # Container specification
+        containers:
+          - image: "gcr.io/my-project-id/api:latest"
+            ports:
+              - container_port: 8080
+            env:
+              - name: "ENV"
+                value: "production"
+              - name: "DB_HOST"
+                value_from:
+                  secret_key_ref:
+                    name: "database-host"
+                    key: "latest"
+            resources:
+              limits:
+                cpu: "2"
+                memory: "2Gi"
+                
+        # Scaling
+        scaling:
+          min_instance_count: 1
+          max_instance_count: 100
+          
+        # VPC connector
+        vpc_access:
+          connector: "projects/my-project-id/locations/us-central1/connectors/serverless-connector"
+          egress: "PRIVATE_RANGES_ONLY"
+          
+        # Service account
+        service_account: "cloud-run@my-project-id.iam.gserviceaccount.com"
+        
+      # Traffic
+      traffic:
+        - percent: 100
+          latest_revision: true
+          
+      # IAM policy (public access)
+      iam_policy:
+        bindings:
+          - role: "roles/run.invoker"
+            members:
+              - "allUsers"
+
+# Cloud Functions
+cloud_functions:
+  functions:
+    data_processor:
+      name: "data-processor"
+      region: "us-central1"
+      runtime: "python311"
+      entry_point: "process_data"
+      
+      # Source code
+      source_archive_bucket: "my-functions-source"
+      source_archive_object: "data-processor.zip"
+      
+      # Resources
+      available_memory_mb: 512
+      timeout: 60
+      max_instances: 100
+      min_instances: 1
+      
+      # Environment variables
+      environment_variables:
+        ENV: "production"
+        
+      # Secret environment variables
+      secret_environment_variables:
+        - key: "API_KEY"
+          project_id: "my-project-id"
+          secret: "api-key"
+          version: "latest"
+          
+      # VPC connector
+      vpc_connector: "projects/my-project-id/locations/us-central1/connectors/serverless-connector"
+      vpc_connector_egress_settings: "PRIVATE_RANGES_ONLY"
+      
+      # Service account
+      service_account_email: "cloud-functions@my-project-id.iam.gserviceaccount.com"
+      
+      # Trigger
+      event_trigger:
+        event_type: "google.storage.object.finalize"
+        resource: "projects/my-project-id/buckets/input-bucket"
+
+# Cloud SQL
+cloud_sql:
+  instances:
+    primary:
+      name: "production-db"
+      database_version: "POSTGRES_15"
+      region: "us-central1"
+      
+      # Tier
+      settings:
+        tier: "db-custom-4-16384"  # 4 vCPU, 16 GB RAM
+        
+        # Availability
+        availability_type: "REGIONAL"  # High availability
+        
+        # Backup configuration
+        backup_configuration:
+          enabled: true
+          start_time: "03:00"
+          point_in_time_recovery_enabled: true
+          transaction_log_retention_days: 7
+          backup_retention_settings:
+            retained_backups: 7
+            retention_unit: "COUNT"
+            
+        # Maintenance window
+        maintenance_window:
+          day: 7  # Sunday
+          hour: 4
+          update_track: "stable"
+          
+        # IP configuration
+        ip_configuration:
+          ipv4_enabled: false
+          private_network: "projects/my-project-id/global/networks/application-vpc"
+          require_ssl: true
+          
+        # Database flags
+        database_flags:
+          - name: "max_connections"
+            value: "100"
+          - name: "shared_buffers"
+            value: "4194304"  # 4 GB in 8KB pages
+            
+        # Disk configuration
+        disk_size: 100
+        disk_type: "PD_SSD"
+        disk_autoresize: true
+        disk_autoresize_limit: 500
+        
+        # Insights
+        insights_config:
+          query_insights_enabled: true
+          query_string_length: 1024
+          record_application_tags: true
+          record_client_address: true
+          
+      # Read replicas
+      replica_configuration:
+        - name: "production-db-replica-1"
+          region: "us-east1"
+          tier: "db-custom-2-8192"
+        - name: "production-db-replica-2"
+          region: "us-central1"
+          tier: "db-custom-2-8192"
+
+# Cloud Storage
+storage:
+  buckets:
+    application_data:
+      name: "my-application-data-${PROJECT_ID}"
+      location: "US"  # Multi-region
+      storage_class: "STANDARD"
+      
+      # Versioning
+      versioning:
+        enabled: true
+        
+      # Lifecycle rules
+      lifecycle_rules:
+        - action:
+            type: "SetStorageClass"
+            storage_class: "NEARLINE"
+          condition:
+            age: 90
+        - action:
+            type: "SetStorageClass"
+            storage_class: "COLDLINE"
+          condition:
+            age: 180
+        - action:
+            type: "Delete"
+          condition:
+            age: 365
+            
+      # Encryption
+      encryption:
+        default_kms_key_name: "projects/my-project-id/locations/us/keyRings/storage/cryptoKeys/bucket-key"
+        
+      # CORS
+      cors:
+        - origin: ["https://example.com"]
+          method: ["GET", "PUT", "POST"]
+          response_header: ["Content-Type"]
+          max_age_seconds: 3600
+          
+      # Uniform bucket-level access
+      uniform_bucket_level_access:
+        enabled: true
+        
+    static_assets:
+      name: "my-static-assets-${PROJECT_ID}"
+      location: "US"
+      storage_class: "STANDARD"
+      
+      # Website configuration
+      website:
+        main_page_suffix: "index.html"
+        not_found_page: "404.html"
+        
+      # Public access
+      iam_members:
+        - role: "roles/storage.objectViewer"
+          member: "allUsers"
+
+# Cloud CDN
+cloud_cdn:
+  backend_buckets:
+    static:
+      name: "static-backend"
+      bucket_name: "my-static-assets-${PROJECT_ID}"
+      enable_cdn: true
+      
+      # Cache settings
+      cdn_policy:
+        cache_mode: "CACHE_ALL_STATIC"
+        default_ttl: 3600
+        max_ttl: 86400
+        client_ttl: 7200
+        negative_caching: true
+        negative_caching_policy:
+          - code: 404
+            ttl: 120
+          - code: 410
+            ttl: 120
+
+# Cloud Load Balancing
+load_balancing:
+  global_forwarding_rule:
+    name: "main-forwarding-rule"
+    ip_protocol: "TCP"
+    port_range: "443"
+    target: "main-https-proxy"
+    
+  target_https_proxy:
+    name: "main-https-proxy"
+    url_map: "main-url-map"
+    ssl_certificates:
+      - "main-ssl-cert"
+    ssl_policy: "modern-ssl-policy"
+    
+  url_map:
+    name: "main-url-map"
+    default_service: "web-backend-service"
+    
+    host_rules:
+      - hosts: ["example.com", "www.example.com"]
+        path_matcher: "main-paths"
+        
+    path_matchers:
+      - name: "main-paths"
+        default_service: "web-backend-service"
+        path_rules:
+          - paths: ["/api/*"]
+            service: "api-backend-service"
+          - paths: ["/static/*"]
+            service: "static-backend-bucket"
+            
+  backend_services:
+    web:
+      name: "web-backend-service"
+      protocol: "HTTP"
+      port_name: "http"
+      timeout_sec: 30
+      
+      # Backend
+      backends:
+        - group: "projects/my-project-id/zones/us-central1-a/instanceGroups/web-server-mig"
+          balancing_mode: "UTILIZATION"
+          capacity_scaler: 1.0
+          max_utilization: 0.8
+          
+      # Health check
+      health_checks:
+        - "web-health-check"
+        
+      # Session affinity
+      session_affinity: "CLIENT_IP"
+      
+      # CDN
+      enable_cdn: true
+      cdn_policy:
+        cache_mode: "USE_ORIGIN_HEADERS"
+        
+  health_checks:
+    web:
+      name: "web-health-check"
+      check_interval_sec: 10
+      timeout_sec: 5
+      healthy_threshold: 2
+      unhealthy_threshold: 3
+      
+      http_health_check:
+        port: 8080
+        request_path: "/health"
+
+# Cloud DNS
+cloud_dns:
+  managed_zones:
+    main:
+      name: "example-com-zone"
+      dns_name: "example.com."
+      description: "Main application domain"
+      
+      # DNSSEC
+      dnssec_config:
+        state: "on"
+        
+      # Record sets
+      record_sets:
+        - name: "example.com."
+          type: "A"
+          ttl: 300
+          rrdatas:
+            - "34.120.123.456"  # Load balancer IP
+            
+        - name: "www.example.com."
+          type: "A"
+          ttl: 300
+          rrdatas:
+            - "34.120.123.456"
+            
+        - name: "api.example.com."
+          type: "A"
+          ttl: 300
+          rrdatas:
+            - "34.120.123.456"
+
+# IAM Configuration
+iam:
+  service_accounts:
+    compute:
+      account_id: "compute"
+      display_name: "Compute Engine Service Account"
+      description: "Service account for Compute Engine instances"
+      
+    gke_nodes:
+      account_id: "gke-nodes"
+      display_name: "GKE Nodes Service Account"
+      
+    cloud_run:
+      account_id: "cloud-run"
+      display_name: "Cloud Run Service Account"
+      
+  custom_roles:
+    app_role:
+      role_id: "appRole"
+      title: "Application Role"
+      description: "Custom role for application services"
+      permissions:
+        - "storage.objects.get"
+        - "storage.objects.list"
+        - "secretmanager.versions.access"
+        - "cloudkms.cryptoKeyVersions.useToDecrypt"
+        
+  bindings:
+    - members:
+        - "serviceAccount:compute@my-project-id.iam.gserviceaccount.com"
+      role: "roles/storage.objectViewer"
+      
+    - members:
+        - "serviceAccount:gke-nodes@my-project-id.iam.gserviceaccount.com"
+      role: "roles/logging.logWriter"
+      
+    - members:
+        - "serviceAccount:gke-nodes@my-project-id.iam.gserviceaccount.com"
+      role: "roles/monitoring.metricWriter"
+
+# Secret Manager
+secret_manager:
+  secrets:
+    database_password:
+      secret_id: "database-password"
+      replication:
+        automatic: true
+        
+      # Rotation
+      rotation:
+        rotation_period: "2592000s"  # 30 days
+        next_rotation_time: "2026-03-01T00:00:00Z"
+        
+    api_keys:
+      secret_id: "api-keys"
+      replication:
+        user_managed:
+          replicas:
+            - location: "us-central1"
+            - location: "us-east1"
+
+# Cloud Monitoring
+monitoring:
+  alert_policies:
+    high_cpu:
+      display_name: "High CPU Utilization"
+      conditions:
+        - display_name: "CPU > 80%"
+          condition_threshold:
+            filter: 'resource.type="gce_instance" AND metric.type="compute.googleapis.com/instance/cpu/utilization"'
+            comparison: "COMPARISON_GT"
+            threshold_value: 0.8
+            duration: "300s"
+            aggregations:
+              - alignment_period: "60s"
+                per_series_aligner: "ALIGN_MEAN"
+                
+      notification_channels:
+        - "projects/my-project-id/notificationChannels/1234567890"
+        
+      alert_strategy:
+        auto_close: "604800s"  # 7 days
+        
+  dashboards:
+    main:
+      display_name: "Application Dashboard"
+      
+  uptime_checks:
+    website:
+      display_name: "Website Uptime"
+      monitored_resource:
+        type: "uptime_url"
+        labels:
+          host: "example.com"
+          
+      http_check:
+        path: "/"
+        port: 443
+        use_ssl: true
+        
+      period: "60s"
+      timeout: "10s"
+
+# Cost Optimization
+cost_optimization:
+  # Committed Use Discounts
+  committed_use_discounts:
+    compute:
+      - name: "1-year-commitment"
+        region: "us-central1"
+        resources:
+          - type: "n2-standard-4"
+            amount: 10
+        plan: "TWELVE_MONTH"
+        
+  # Sustained Use Discounts (automatic)
+  sustained_use_discounts:
+    enabled: true
+    
+  # Preemptible/Spot VMs
+  preemptible_instances:
+    enabled: true
+    percentage: 30
+    
+  # Budget alerts
+  budgets:
+    monthly:
+      display_name: "Monthly Budget"
+      budget_amount:
+        specified_amount:
+          currency_code: "USD"
+          units: "5000"
+      threshold_rules:
+        - threshold_percent: 0.5
+        - threshold_percent: 0.8
+        - threshold_percent: 1.0
+      all_updates_rule:
+        monitoring_notification_channels:
+          - "projects/my-project-id/notificationChannels/1234567890"
+
+# Disaster Recovery
+disaster_recovery:
+  # Cross-region replication
+  backup_region: "europe-west1"
+  
+  # Cloud SQL backups
+  database_backups:
+    automated: true
+    retention_days: 7
+    cross_region_backup_region: "europe-west1"
+    
+  # Storage replication
+  storage_replication:
+    enabled: true
+    destination_bucket: "my-application-data-dr-${PROJECT_ID}"
+    destination_location: "EU"
+    
+  # Compute snapshots
+  compute_snapshots:
+    schedule_name: "daily-snapshots"
+    schedule:
+      daily_schedule:
+        days_in_cycle: 1
+        start_time: "03:00"
+    retention_policy:
+      max_retention_days: 14
+      
+  # Recovery objectives
+  objectives:
+    rto_hours: 4
+    rpo_hours: 1
+
+# Labels (applied to all resources)
+global_labels:
+  project: "my-application"
+  environment: "production"
+  managed_by: "terraform"
+  cost_center: "engineering"
+  owner: "devops-team"
+  compliance: "pci-dss"

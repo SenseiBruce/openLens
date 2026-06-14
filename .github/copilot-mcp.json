@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "TokenSlayer": {
+      "type": "http",
+      "url": "http://localhost:50964/mcp",
+      "description": "TokenSlayer: AST skeleton provider. Reduces AI token usage by 40-95%."
+    }
+  }
+}

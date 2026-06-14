@@ -1,0 +1,384 @@
+# TensorFlow Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for TensorFlow ML projects
+# Usage: Copy and customize for each TensorFlow project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  ml_framework: "tensorflow"
+  tf_version: "${TENSORFLOW_VERSION}"  # e.g., 2.15.0
+  keras_version: "${KERAS_VERSION}"  # e.g., 3.0.0
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  model_type: "${MODEL_TYPE}"  # classification | regression | detection | segmentation | nlp | timeseries
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  ml_development:
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "Model architecture design"
+        - "Feature engineering"
+        - "Model training and evaluation"
+        
+    ml_engineer:
+      enabled: ${ML_ENGINEER_ENABLED}
+      role: "Machine Learning Engineer"
+      responsibilities:
+        - "Model optimization"
+        - "Production deployment"
+        - "Model serving infrastructure"
+        
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Data pipeline development"
+        - "Data preprocessing"
+        - "Feature store management"
+  
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    python_version: "${PYTHON_VERSION_DEV}"
+    tf_version: "${TF_VERSION_DEV}"
+    gpu_enabled: ${GPU_ENABLED_DEV}
+    mixed_precision: ${MIXED_PRECISION_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    tensorboard_enabled: ${TENSORBOARD_ENABLED_DEV}
+    checkpoint_dir: "${CHECKPOINT_DIR_DEV}"
+    data_dir: "${DATA_DIR_DEV}"
+    model_dir: "${MODEL_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    python_version: "${PYTHON_VERSION_STAGING}"
+    tf_version: "${TF_VERSION_STAGING}"
+    gpu_enabled: ${GPU_ENABLED_STAGING}
+    mixed_precision: ${MIXED_PRECISION_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    tensorboard_enabled: ${TENSORBOARD_ENABLED_STAGING}
+    checkpoint_dir: "${CHECKPOINT_DIR_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    model_dir: "${MODEL_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    python_version: "${PYTHON_VERSION_PROD}"
+    tf_version: "${TF_VERSION_PROD}"
+    gpu_enabled: ${GPU_ENABLED_PROD}
+    mixed_precision: ${MIXED_PRECISION_PROD}
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    tensorboard_enabled: false
+    checkpoint_dir: "${CHECKPOINT_DIR_PROD}"
+    data_dir: "${DATA_DIR_PROD}"
+    model_dir: "${MODEL_DIR_PROD}"
+
+# ============================================================================
+# MODEL CONFIGURATION
+# ============================================================================
+model:
+  architecture:
+    name: "${MODEL_ARCHITECTURE_NAME}"  # resnet50 | mobilenet | efficientnet | custom
+    input_shape: "${MODEL_INPUT_SHAPE}"  # e.g., [224, 224, 3]
+    num_classes: ${MODEL_NUM_CLASSES}
+    pretrained: ${MODEL_PRETRAINED}
+    weights: "${MODEL_PRETRAINED_WEIGHTS}"  # imagenet | coco | custom | none
+    
+  layers:
+    custom_layers_enabled: ${CUSTOM_LAYERS_ENABLED}
+    dropout_rate: ${MODEL_DROPOUT_RATE}
+    batch_normalization: ${MODEL_BATCH_NORM}
+    
+  optimizer:
+    type: "${OPTIMIZER_TYPE}"  # adam | sgd | rmsprop | adagrad | adamw
+    learning_rate: ${LEARNING_RATE}
+    learning_rate_schedule: "${LR_SCHEDULE}"  # constant | exponential | cosine | polynomial
+    beta_1: ${OPTIMIZER_BETA_1}  # For Adam-based optimizers
+    beta_2: ${OPTIMIZER_BETA_2}
+    epsilon: ${OPTIMIZER_EPSILON}
+    momentum: ${OPTIMIZER_MOMENTUM}  # For SGD
+    weight_decay: ${WEIGHT_DECAY}
+    
+  loss_function:
+    type: "${LOSS_FUNCTION}"  # categorical_crossentropy | binary_crossentropy | mse | mae | custom
+    custom_loss_path: "${CUSTOM_LOSS_PATH}"
+    
+  metrics:
+    primary_metric: "${PRIMARY_METRIC}"  # accuracy | precision | recall | f1 | auc
+    additional_metrics:
+      - "${METRIC_1}"
+      - "${METRIC_2}"
+      - "${METRIC_3}"
+
+# ============================================================================
+# TRAINING CONFIGURATION
+# ============================================================================
+training:
+  batch_size: ${BATCH_SIZE}
+  epochs: ${EPOCHS}
+  validation_split: ${VALIDATION_SPLIT}
+  shuffle: ${SHUFFLE_DATA}
+  seed: ${RANDOM_SEED}
+  
+  data_augmentation:
+    enabled: ${DATA_AUGMENTATION_ENABLED}
+    rotation_range: ${AUGMENTATION_ROTATION}
+    width_shift_range: ${AUGMENTATION_WIDTH_SHIFT}
+    height_shift_range: ${AUGMENTATION_HEIGHT_SHIFT}
+    horizontal_flip: ${AUGMENTATION_HORIZONTAL_FLIP}
+    vertical_flip: ${AUGMENTATION_VERTICAL_FLIP}
+    zoom_range: ${AUGMENTATION_ZOOM}
+    
+  callbacks:
+    early_stopping:
+      enabled: ${EARLY_STOPPING_ENABLED}
+      monitor: "${EARLY_STOPPING_MONITOR}"  # val_loss | val_accuracy
+      patience: ${EARLY_STOPPING_PATIENCE}
+      min_delta: ${EARLY_STOPPING_MIN_DELTA}
+      
+    model_checkpoint:
+      enabled: ${MODEL_CHECKPOINT_ENABLED}
+      filepath: "${CHECKPOINT_FILEPATH}"
+      monitor: "${CHECKPOINT_MONITOR}"
+      save_best_only: ${CHECKPOINT_SAVE_BEST_ONLY}
+      save_weights_only: ${CHECKPOINT_SAVE_WEIGHTS_ONLY}
+      
+    tensorboard:
+      enabled: ${TENSORBOARD_ENABLED}
+      log_dir: "${TENSORBOARD_LOG_DIR}"
+      histogram_freq: ${TENSORBOARD_HISTOGRAM_FREQ}
+      write_graph: ${TENSORBOARD_WRITE_GRAPH}
+      update_freq: "${TENSORBOARD_UPDATE_FREQ}"  # epoch | batch
+      
+    reduce_lr_on_plateau:
+      enabled: ${REDUCE_LR_ENABLED}
+      monitor: "${REDUCE_LR_MONITOR}"
+      factor: ${REDUCE_LR_FACTOR}
+      patience: ${REDUCE_LR_PATIENCE}
+      min_lr: ${REDUCE_LR_MIN_LR}
+      
+    csv_logger:
+      enabled: ${CSV_LOGGER_ENABLED}
+      filename: "${CSV_LOGGER_FILENAME}"
+      
+  distributed_training:
+    enabled: ${DISTRIBUTED_TRAINING_ENABLED}
+    strategy: "${DISTRIBUTION_STRATEGY}"  # mirrored | multi_worker_mirrored | tpu | parameter_server
+    num_workers: ${NUM_WORKERS}
+
+# ============================================================================
+# DATA PIPELINE CONFIGURATION
+# ============================================================================
+data:
+  input_pipeline:
+    use_tf_data: ${USE_TF_DATA}
+    prefetch_buffer_size: ${PREFETCH_BUFFER_SIZE}
+    num_parallel_calls: ${NUM_PARALLEL_CALLS}
+    cache_dataset: ${CACHE_DATASET}
+    
+  preprocessing:
+    normalization: "${NORMALIZATION_METHOD}"  # standardize | minmax | custom
+    resize_method: "${RESIZE_METHOD}"  # bilinear | nearest | bicubic
+    
+  format:
+    input_format: "${INPUT_DATA_FORMAT}"  # tfrecord | csv | parquet | image_directory
+    compression: "${DATA_COMPRESSION}"  # gzip | none
+    
+  storage:
+    local_cache_dir: "${LOCAL_CACHE_DIR}"
+    remote_storage_url: "${REMOTE_STORAGE_URL}"
+    use_cloud_storage: ${USE_CLOUD_STORAGE}
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+performance:
+  gpu:
+    memory_growth: ${GPU_MEMORY_GROWTH}  # Allow dynamic GPU memory allocation
+    per_process_gpu_memory_fraction: ${GPU_MEMORY_FRACTION}
+    visible_devices: "${GPU_VISIBLE_DEVICES}"  # e.g., "0,1" or "-1" for CPU
+    
+  mixed_precision:
+    enabled: ${MIXED_PRECISION_ENABLED}
+    policy: "${MIXED_PRECISION_POLICY}"  # mixed_float16 | mixed_bfloat16
+    
+  xla:
+    enabled: ${XLA_ENABLED}  # Accelerated Linear Algebra
+    auto_jit: ${XLA_AUTO_JIT}
+    
+  threading:
+    inter_op_parallelism_threads: ${INTER_OP_THREADS}
+    intra_op_parallelism_threads: ${INTRA_OP_THREADS}
+    
+  optimization:
+    auto_mixed_precision: ${AUTO_MIXED_PRECISION}
+    graph_optimization_level: ${GRAPH_OPTIMIZATION_LEVEL}  # 0 | 1 | 2
+
+# ============================================================================
+# MODEL DEPLOYMENT
+# ============================================================================
+deployment:
+  serving:
+    platform: "${SERVING_PLATFORM}"  # tfserving | torchserve | sagemaker | vertex_ai | custom
+    model_format: "${MODEL_FORMAT}"  # saved_model | h5 | checkpoint | tflite
+    export_path: "${MODEL_EXPORT_PATH}"
+    
+  optimization:
+    quantization:
+      enabled: ${QUANTIZATION_ENABLED}
+      method: "${QUANTIZATION_METHOD}"  # dynamic | static | qat
+      
+    pruning:
+      enabled: ${PRUNING_ENABLED}
+      target_sparsity: ${TARGET_SPARSITY}
+      
+    tflite_conversion:
+      enabled: ${TFLITE_ENABLED}
+      optimizations: "${TFLITE_OPTIMIZATIONS}"  # DEFAULT | OPTIMIZE_FOR_SIZE | OPTIMIZE_FOR_LATENCY
+      
+  serving_config:
+    batch_size: ${SERVING_BATCH_SIZE}
+    max_batch_delay: ${MAX_BATCH_DELAY}
+    timeout: ${SERVING_TIMEOUT}
+    
+  monitoring:
+    model_version: "${MODEL_VERSION}"
+    track_predictions: ${TRACK_PREDICTIONS}
+    track_latency: ${TRACK_LATENCY}
+    alert_on_drift: ${ALERT_ON_DRIFT}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  training_logs:
+    enabled: true
+    path: "${TRAINING_LOG_PATH}"
+    log_frequency: "${LOG_FREQUENCY}"  # epoch | batch | step
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    tensorflow: "${LOG_LEVEL_TENSORFLOW}"
+    model: "${LOG_LEVEL_MODEL}"
+    data_pipeline: "${LOG_LEVEL_DATA_PIPELINE}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+  mlflow:
+    enabled: ${MLFLOW_ENABLED}
+    tracking_uri: "${MLFLOW_TRACKING_URI}"
+    experiment_name: "${MLFLOW_EXPERIMENT_NAME}"
+    
+  wandb:
+    enabled: ${WANDB_ENABLED}
+    project: "${WANDB_PROJECT}"
+    entity: "${WANDB_ENTITY}"
+
+# ============================================================================
+# EVALUATION CONFIGURATION
+# ============================================================================
+evaluation:
+  metrics_to_track:
+    - "${EVAL_METRIC_1}"
+    - "${EVAL_METRIC_2}"
+    - "${EVAL_METRIC_3}"
+    
+  test_dataset:
+    path: "${TEST_DATASET_PATH}"
+    batch_size: ${TEST_BATCH_SIZE}
+    
+  thresholds:
+    min_accuracy: ${MIN_ACCURACY_THRESHOLD}
+    max_val_loss: ${MAX_VAL_LOSS_THRESHOLD}
+    
+  visualization:
+    confusion_matrix: ${GENERATE_CONFUSION_MATRIX}
+    roc_curve: ${GENERATE_ROC_CURVE}
+    precision_recall_curve: ${GENERATE_PR_CURVE}
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  model_encryption:
+    enabled: ${MODEL_ENCRYPTION_ENABLED}
+    encryption_key: "${MODEL_ENCRYPTION_KEY}"
+    
+  data_privacy:
+    anonymization_enabled: ${DATA_ANONYMIZATION_ENABLED}
+    differential_privacy: ${DIFFERENTIAL_PRIVACY_ENABLED}
+    
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  cloud_storage:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  mlflow:
+    tracking_token: "${MLFLOW_TRACKING_TOKEN}"
+    
+  wandb:
+    api_key: "${WANDB_API_KEY}"
+    
+  model_registry:
+    registry_token: "${MODEL_REGISTRY_TOKEN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

@@ -1,0 +1,568 @@
+# TypeScript Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for TypeScript projects
+# Usage: Copy and customize for each TypeScript project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "typescript"
+  framework: "${TS_FRAMEWORK}"  # react | vue | angular | express | nest | next | none
+  runtime: "${TS_RUNTIME}"  # node | browser | both | deno | bun
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    frontend_developer:
+      enabled: ${FRONTEND_AGENT_ENABLED}
+      role: "Front-End Developer"
+      responsibilities:
+        - "TypeScript UI development"
+        - "Type-safe component creation"
+        - "State management"
+        
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "Type-safe API development"
+        - "Server-side TypeScript logic"
+        - "Database integration with types"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  design:
+    ux_ui_designer:
+      enabled: ${UX_UI_AGENT_ENABLED}
+      role: "UX-UI Designer"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_TYPE_DEFINITIONS}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      - "${PHASE_1_AGENT_2}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_TYPE_ARCHITECTURE}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_TYPE_DECLARATIONS}"
+    agents_required:
+      - "Front-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      - "${PHASE_3_AGENT_2}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_TYPE_COVERAGE}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    node_version: "${NODE_VERSION_DEV}"  # e.g., 18.x | 20.x
+    typescript_version: "${TS_VERSION_DEV}"
+    npm_registry: "${NPM_REGISTRY_DEV}"
+    debug_mode: ${DEBUG_MODE_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # debug | info | warn | error
+    api_base_url: "${API_BASE_URL_DEV}"
+    database_url: "${DATABASE_URL_DEV}"
+    redis_url: "${REDIS_URL_DEV}"
+    hot_reload: ${HOT_RELOAD_DEV}
+    source_maps: ${SOURCE_MAPS_DEV}
+    strict_null_checks: ${STRICT_NULL_CHECKS_DEV}
+    
+  staging:
+    name: "staging"
+    node_version: "${NODE_VERSION_STAGING}"
+    typescript_version: "${TS_VERSION_STAGING}"
+    npm_registry: "${NPM_REGISTRY_STAGING}"
+    debug_mode: ${DEBUG_MODE_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    redis_url: "${REDIS_URL_STAGING}"
+    hot_reload: false
+    source_maps: ${SOURCE_MAPS_STAGING}
+    strict_null_checks: true
+    
+  production:
+    name: "prod"
+    node_version: "${NODE_VERSION_PROD}"
+    typescript_version: "${TS_VERSION_PROD}"
+    npm_registry: "${NPM_REGISTRY_PROD}"
+    debug_mode: false
+    log_level: "${LOG_LEVEL_PROD}"  # Should be warn or error
+    api_base_url: "${API_BASE_URL_PROD}"
+    database_url: "${DATABASE_URL_PROD}"
+    redis_url: "${REDIS_URL_PROD}"
+    hot_reload: false
+    source_maps: false
+    strict_null_checks: true
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  package_manager: "${PACKAGE_MANAGER}"  # npm | yarn | pnpm
+  lock_file: "${LOCK_FILE_PATH}"
+  
+  typescript:
+    config_file: "${TSCONFIG_PATH}"  # tsconfig.json
+    target: "${TS_TARGET}"  # ES5 | ES6 | ES2020 | ESNext
+    module: "${TS_MODULE}"  # commonjs | esnext | es2020
+    lib: "${TS_LIB}"  # ES2020 | DOM | ES2021
+    strict: ${TS_STRICT_MODE}
+    strict_null_checks: ${TS_STRICT_NULL_CHECKS}
+    no_implicit_any: ${TS_NO_IMPLICIT_ANY}
+    no_unused_locals: ${TS_NO_UNUSED_LOCALS}
+    no_unused_parameters: ${TS_NO_UNUSED_PARAMETERS}
+    declaration: ${TS_DECLARATION}
+    declaration_map: ${TS_DECLARATION_MAP}
+    source_map: ${TS_SOURCE_MAP}
+    out_dir: "${TS_OUT_DIR}"
+    root_dir: "${TS_ROOT_DIR}"
+    module_resolution: "${TS_MODULE_RESOLUTION}"  # node | classic
+    es_module_interop: ${TS_ES_MODULE_INTEROP}
+    allow_synthetic_default_imports: ${TS_ALLOW_SYNTHETIC_DEFAULTS}
+    resolve_json_module: ${TS_RESOLVE_JSON_MODULE}
+    
+  dependencies:
+    install_command: "${INSTALL_COMMAND}"
+    update_command: "${UPDATE_COMMAND}"
+    audit_command: "${AUDIT_COMMAND}"
+    type_definitions: "${TYPE_DEFINITIONS_SOURCE}"  # @types/* | DefinitelyTyped
+    
+  bundler:
+    tool: "${BUNDLER_TOOL}"  # webpack | vite | rollup | esbuild | parcel | tsup
+    config_file: "${BUNDLER_CONFIG_PATH}"
+    mode: "${BUILD_MODE}"  # development | production
+    
+  transpilation:
+    tool: "${TRANSPILER_TOOL}"  # tsc | swc | esbuild
+    incremental: ${TS_INCREMENTAL_BUILD}
+    
+  optimization:
+    minify: ${MINIFY_ENABLED}
+    tree_shake: ${TREE_SHAKE_ENABLED}
+    code_split: ${CODE_SPLIT_ENABLED}
+    compress: ${COMPRESS_ENABLED}
+    
+  output:
+    directory: "${BUILD_OUTPUT_DIR}"
+    public_path: "${PUBLIC_PATH}"
+    filename_pattern: "${OUTPUT_FILENAME_PATTERN}"
+    
+  linting:
+    eslint:
+      enabled: ${ESLINT_ENABLED}
+      config_file: "${ESLINT_CONFIG_PATH}"
+      parser: "@typescript-eslint/parser"
+      plugins:
+        - "@typescript-eslint"
+        - "${ESLINT_PLUGIN_1}"
+      
+  formatting:
+    prettier:
+      enabled: ${PRETTIER_ENABLED}
+      config_file: "${PRETTIER_CONFIG_PATH}"
+      
+  pre_build_scripts:
+    - "${PRE_BUILD_SCRIPT_1}"
+    - "${PRE_BUILD_SCRIPT_2}"
+    
+  post_build_scripts:
+    - "${POST_BUILD_SCRIPT_1}"
+    - "${POST_BUILD_SCRIPT_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "${TEST_FRAMEWORK}"  # jest | vitest | mocha | ava
+  
+  typescript_support:
+    ts_node: ${TS_NODE_ENABLED}
+    ts_jest: ${TS_JEST_ENABLED}
+    transform: "${TS_TRANSFORM_TOOL}"  # ts-jest | @swc/jest | esbuild-jest
+    
+  coverage:
+    tool: "${COVERAGE_TOOL}"  # jest | c8 | nyc
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # html | lcov | json | text
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    thresholds:
+      statements: ${COVERAGE_THRESHOLD_STATEMENTS}
+      branches: ${COVERAGE_THRESHOLD_BRANCHES}
+      functions: ${COVERAGE_THRESHOLD_FUNCTIONS}
+      lines: ${COVERAGE_THRESHOLD_LINES}
+    
+  unit_tests:
+    directory: "${UNIT_TEST_DIR}"
+    pattern: "${UNIT_TEST_PATTERN}"  # **/*.test.ts | **/*.spec.ts
+    watch_mode: ${UNIT_TEST_WATCH_MODE}
+    parallel: ${UNIT_TEST_PARALLEL}
+    
+  integration_tests:
+    directory: "${INTEGRATION_TEST_DIR}"
+    pattern: "${INTEGRATION_TEST_PATTERN}"
+    requires_server: ${INTEGRATION_TEST_SERVER_REQUIRED}
+    
+  e2e_tests:
+    enabled: ${E2E_TEST_ENABLED}
+    framework: "${E2E_FRAMEWORK}"  # playwright | cypress
+    directory: "${E2E_TEST_DIR}"
+    base_url: "${E2E_BASE_URL}"
+    headless: ${E2E_HEADLESS_MODE}
+    typescript_config: "${E2E_TSCONFIG_PATH}"
+    
+  type_coverage:
+    enabled: ${TYPE_COVERAGE_ENABLED}
+    tool: "${TYPE_COVERAGE_TOOL}"  # type-coverage | typescript-coverage-report
+    min_coverage: ${TYPE_COVERAGE_MIN}
+    strict: ${TYPE_COVERAGE_STRICT}
+    
+  mocking:
+    library: "${MOCKING_LIBRARY}"  # jest | sinon | msw
+    
+  snapshot_testing:
+    enabled: ${SNAPSHOT_TEST_ENABLED}
+    update_snapshots: ${UPDATE_SNAPSHOTS}
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # vercel | netlify | aws | gcp | azure | heroku
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    multi_stage_build: ${DOCKER_MULTI_STAGE}
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose | ecs
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    
+  server:
+    type: "${SERVER_TYPE}"  # express | fastify | koa | nest
+    host: "${SERVER_HOST}"
+    port: ${SERVER_PORT}
+    cluster_mode: ${CLUSTER_MODE_ENABLED}
+    workers: ${SERVER_WORKERS}
+    
+  build_artifacts:
+    include_source_maps: ${INCLUDE_SOURCE_MAPS_DEPLOY}
+    include_declarations: ${INCLUDE_DECLARATIONS_DEPLOY}
+    strip_comments: ${STRIP_COMMENTS_DEPLOY}
+    
+  static_hosting:
+    enabled: ${STATIC_HOSTING_ENABLED}
+    directory: "${STATIC_FILES_DIR}"
+    cdn_url: "${CDN_URL}"
+    
+  environment_injection:
+    method: "${ENV_INJECTION_METHOD}"  # build-time | runtime
+    prefix: "${ENV_VAR_PREFIX}"
+    type_safe: ${TYPE_SAFE_ENV_VARS}
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+    
+  ssl:
+    enabled: ${SSL_ENABLED}
+    certificate_path: "${SSL_CERT_PATH}"
+    key_path: "${SSL_KEY_PATH}"
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    http: "${LOG_LEVEL_HTTP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    external_apis: "${LOG_LEVEL_EXTERNAL_APIS}"
+    
+  library: "${LOGGING_LIBRARY}"  # winston | pino | tslog
+  type_safe: ${TYPE_SAFE_LOGGING}
+  
+  transports:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      max_files: ${LOG_FILE_MAX_FILES}
+      
+    http:
+      enabled: ${LOG_HTTP_ENABLED}
+      endpoint: "${LOG_HTTP_ENDPOINT}"
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "json"
+    type_definitions: "${LOG_TYPE_DEFINITIONS_PATH}"
+    
+  request_logging:
+    enabled: ${REQUEST_LOGGING_ENABLED}
+    include_headers: ${LOG_INCLUDE_HEADERS}
+    include_body: ${LOG_INCLUDE_BODY}
+    sanitize_tokens: ${LOG_SANITIZE_TOKENS}
+    
+  correlation_id:
+    enabled: ${CORRELATION_ID_ENABLED}
+    header_name: "${CORRELATION_ID_HEADER}"
+    type_definition: "${CORRELATION_ID_TYPE}"
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # npm audit | snyk | dependabot
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    severity_threshold: "${VULNERABILITY_SEVERITY_THRESHOLD}"
+    
+  static_analysis:
+    tool: "${SAST_TOOL}"  # eslint-plugin-security | semgrep
+    config_path: "${SAST_CONFIG_PATH}"
+    
+  type_safety_as_security:
+    strict_mode: ${TS_STRICT_FOR_SECURITY}
+    no_any: ${ENFORCE_NO_ANY}
+    no_explicit_any: ${ENFORCE_NO_EXPLICIT_ANY}
+    
+  secrets_scanning:
+    enabled: ${SECRETS_SCANNING_ENABLED}
+    tool: "${SECRETS_SCAN_TOOL}"
+    
+  cors:
+    enabled: ${CORS_ENABLED}
+    allowed_origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed_methods: "${CORS_ALLOWED_METHODS}"
+    type_safe_config: ${CORS_TYPE_SAFE}
+    
+  helmet:
+    enabled: ${HELMET_ENABLED}
+    config_path: "${HELMET_CONFIG_PATH}"
+    
+  rate_limiting:
+    enabled: ${RATE_LIMITING_ENABLED}
+    window_ms: ${RATE_LIMIT_WINDOW_MS}
+    max_requests: ${RATE_LIMIT_MAX_REQUESTS}
+    
+  authentication:
+    method: "${AUTH_METHOD}"  # jwt | oauth2 | session
+    token_expiry: ${AUTH_TOKEN_EXPIRY}
+    type_definitions: "${AUTH_TYPE_DEFINITIONS_PATH}"
+    
+  input_validation:
+    library: "${INPUT_VALIDATION_LIBRARY}"  # zod | yup | io-ts | class-validator
+    runtime_type_checking: ${RUNTIME_TYPE_CHECKING}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  linting:
+    enabled: ${LINTING_ENABLED}
+    config: "${LINT_CONFIG_PATH}"
+    typescript_rules: ${TS_LINT_RULES_ENABLED}
+    
+  formatting:
+    tool: "prettier"
+    config: "${PRETTIER_CONFIG_PATH}"
+    line_width: ${CODE_LINE_WIDTH}
+    semi: ${USE_SEMICOLONS}
+    single_quote: ${USE_SINGLE_QUOTES}
+    trailing_comma: "${TRAILING_COMMA}"
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}
+    max_depth: ${MAX_DEPTH}
+    max_lines_per_function: ${MAX_LINES_PER_FUNCTION}
+    max_file_lines: ${MAX_FILE_LINES}
+    
+  type_quality:
+    no_any_threshold: ${NO_ANY_THRESHOLD}
+    explicit_return_types: ${EXPLICIT_RETURN_TYPES}
+    explicit_member_accessibility: ${EXPLICIT_MEMBER_ACCESSIBILITY}
+    
+  documentation:
+    tool: "typedoc"
+    min_coverage: ${MIN_DOCS_COVERAGE}
+    extract_interfaces: ${EXTRACT_INTERFACES}
+    
+  pre_commit_hooks:
+    enabled: ${PRE_COMMIT_HOOKS_ENABLED}
+    tool: "${PRE_COMMIT_TOOL}"  # husky | pre-commit
+    run_type_check: ${PRE_COMMIT_TYPE_CHECK}
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    type_reference: "${TYPE_REFERENCE_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  type_documentation:
+    auto_generate: ${AUTO_GENERATE_TYPE_DOCS}
+    tool: "typedoc"
+    output_directory: "${TYPE_DOCS_OUTPUT_DIR}"
+    include_private: ${TYPE_DOCS_INCLUDE_PRIVATE}
+    
+  code_docs:
+    auto_generate: ${AUTO_GENERATE_DOCS}
+    tool: "${DOCS_GENERATION_TOOL}"
+    output_format: "${DOCS_OUTPUT_FORMAT}"
+    output_directory: "${DOCS_OUTPUT_DIR}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  database:
+    connection_string: "${DB_CONNECTION_STRING}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    
+  api_keys:
+    service_1: "${API_KEY_SERVICE_1}"
+    service_2: "${API_KEY_SERVICE_2}"
+    
+  authentication:
+    jwt_secret: "${JWT_SECRET_KEY}"
+    oauth_client_id: "${OAUTH_CLIENT_ID}"
+    oauth_client_secret: "${OAUTH_CLIENT_SECRET}"
+    
+  cloud_provider:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  monitoring:
+    sentry_dsn: "${SENTRY_DSN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

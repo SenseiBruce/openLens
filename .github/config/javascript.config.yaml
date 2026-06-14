@@ -1,0 +1,543 @@
+# JavaScript Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for JavaScript projects
+# Usage: Copy and customize for each JavaScript project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "javascript"
+  framework: "${JS_FRAMEWORK}"  # react | vue | angular | express | nest | next | none
+  runtime: "${JS_RUNTIME}"  # node | browser | both
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    frontend_developer:
+      enabled: ${FRONTEND_AGENT_ENABLED}
+      role: "Front-End Developer"
+      responsibilities:
+        - "UI/UX implementation"
+        - "Component development"
+        - "State management"
+        
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "API development"
+        - "Server-side logic"
+        - "Database integration"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  design:
+    ux_ui_designer:
+      enabled: ${UX_UI_AGENT_ENABLED}
+      role: "UX-UI Designer"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_WIREFRAMES}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      - "${PHASE_1_AGENT_2}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_COMPONENT_SPEC}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_DOCUMENTATION}"
+    agents_required:
+      - "Front-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      - "${PHASE_3_AGENT_2}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_QA_REPORT}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    node_version: "${NODE_VERSION_DEV}"  # e.g., 18.x | 20.x
+    npm_registry: "${NPM_REGISTRY_DEV}"
+    debug_mode: ${DEBUG_MODE_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # debug | info | warn | error
+    api_base_url: "${API_BASE_URL_DEV}"
+    database_url: "${DATABASE_URL_DEV}"
+    redis_url: "${REDIS_URL_DEV}"
+    hot_reload: ${HOT_RELOAD_DEV}
+    source_maps: ${SOURCE_MAPS_DEV}
+    
+  staging:
+    name: "staging"
+    node_version: "${NODE_VERSION_STAGING}"
+    npm_registry: "${NPM_REGISTRY_STAGING}"
+    debug_mode: ${DEBUG_MODE_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    redis_url: "${REDIS_URL_STAGING}"
+    hot_reload: false
+    source_maps: ${SOURCE_MAPS_STAGING}
+    
+  production:
+    name: "prod"
+    node_version: "${NODE_VERSION_PROD}"
+    npm_registry: "${NPM_REGISTRY_PROD}"
+    debug_mode: false
+    log_level: "${LOG_LEVEL_PROD}"  # Should be warn or error
+    api_base_url: "${API_BASE_URL_PROD}"
+    database_url: "${DATABASE_URL_PROD}"
+    redis_url: "${REDIS_URL_PROD}"
+    hot_reload: false
+    source_maps: false
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  package_manager: "${PACKAGE_MANAGER}"  # npm | yarn | pnpm
+  lock_file: "${LOCK_FILE_PATH}"  # package-lock.json | yarn.lock | pnpm-lock.yaml
+  
+  dependencies:
+    install_command: "${INSTALL_COMMAND}"
+    update_command: "${UPDATE_COMMAND}"
+    audit_command: "${AUDIT_COMMAND}"
+    clean_install: ${CLEAN_INSTALL_ENABLED}
+    
+  bundler:
+    tool: "${BUNDLER_TOOL}"  # webpack | vite | rollup | esbuild | parcel
+    config_file: "${BUNDLER_CONFIG_PATH}"
+    mode: "${BUILD_MODE}"  # development | production
+    
+  transpilation:
+    enabled: ${TRANSPILATION_ENABLED}
+    tool: "${TRANSPILER_TOOL}"  # babel | swc
+    config_file: "${TRANSPILER_CONFIG_PATH}"
+    target: "${TRANSPILER_TARGET}"  # es5 | es6 | es2020
+    
+  optimization:
+    minify: ${MINIFY_ENABLED}
+    tree_shake: ${TREE_SHAKE_ENABLED}
+    code_split: ${CODE_SPLIT_ENABLED}
+    compress: ${COMPRESS_ENABLED}
+    
+  output:
+    directory: "${BUILD_OUTPUT_DIR}"
+    public_path: "${PUBLIC_PATH}"
+    filename_pattern: "${OUTPUT_FILENAME_PATTERN}"
+    
+  linting:
+    eslint:
+      enabled: ${ESLINT_ENABLED}
+      config_file: "${ESLINT_CONFIG_PATH}"
+      fix_on_save: ${ESLINT_FIX_ON_SAVE}
+      
+  formatting:
+    prettier:
+      enabled: ${PRETTIER_ENABLED}
+      config_file: "${PRETTIER_CONFIG_PATH}"
+      
+  pre_build_scripts:
+    - "${PRE_BUILD_SCRIPT_1}"
+    - "${PRE_BUILD_SCRIPT_2}"
+    
+  post_build_scripts:
+    - "${POST_BUILD_SCRIPT_1}"
+    - "${POST_BUILD_SCRIPT_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "${TEST_FRAMEWORK}"  # jest | mocha | vitest | jasmine
+  
+  coverage:
+    tool: "${COVERAGE_TOOL}"  # jest | nyc | c8
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # html | lcov | json | text
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    thresholds:
+      statements: ${COVERAGE_THRESHOLD_STATEMENTS}
+      branches: ${COVERAGE_THRESHOLD_BRANCHES}
+      functions: ${COVERAGE_THRESHOLD_FUNCTIONS}
+      lines: ${COVERAGE_THRESHOLD_LINES}
+    
+  unit_tests:
+    directory: "${UNIT_TEST_DIR}"
+    pattern: "${UNIT_TEST_PATTERN}"  # **/*.test.js | **/*.spec.js
+    watch_mode: ${UNIT_TEST_WATCH_MODE}
+    parallel: ${UNIT_TEST_PARALLEL}
+    
+  integration_tests:
+    directory: "${INTEGRATION_TEST_DIR}"
+    pattern: "${INTEGRATION_TEST_PATTERN}"
+    requires_server: ${INTEGRATION_TEST_SERVER_REQUIRED}
+    
+  e2e_tests:
+    enabled: ${E2E_TEST_ENABLED}
+    framework: "${E2E_FRAMEWORK}"  # cypress | playwright | puppeteer
+    directory: "${E2E_TEST_DIR}"
+    base_url: "${E2E_BASE_URL}"
+    headless: ${E2E_HEADLESS_MODE}
+    
+  performance_tests:
+    enabled: ${PERFORMANCE_TEST_ENABLED}
+    tool: "${PERFORMANCE_TEST_TOOL}"  # lighthouse | k6
+    
+  mocking:
+    library: "${MOCKING_LIBRARY}"  # jest | sinon | msw
+    
+  snapshot_testing:
+    enabled: ${SNAPSHOT_TEST_ENABLED}
+    update_snapshots: ${UPDATE_SNAPSHOTS}
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # vercel | netlify | aws | gcp | azure | heroku
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    multi_stage_build: ${DOCKER_MULTI_STAGE}
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose | ecs
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    
+  server:
+    type: "${SERVER_TYPE}"  # express | fastify | koa | none (for SPA)
+    host: "${SERVER_HOST}"
+    port: ${SERVER_PORT}
+    cluster_mode: ${CLUSTER_MODE_ENABLED}
+    workers: ${SERVER_WORKERS}
+    
+  static_hosting:
+    enabled: ${STATIC_HOSTING_ENABLED}
+    directory: "${STATIC_FILES_DIR}"
+    cdn_url: "${CDN_URL}"
+    cache_control: "${CACHE_CONTROL_HEADERS}"
+    
+  assets:
+    compression: ${ASSET_COMPRESSION_ENABLED}
+    cdn_upload: ${CDN_UPLOAD_ENABLED}
+    
+  environment_injection:
+    method: "${ENV_INJECTION_METHOD}"  # build-time | runtime
+    prefix: "${ENV_VAR_PREFIX}"  # e.g., REACT_APP_ | VITE_ | NEXT_PUBLIC_
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+    
+  ssl:
+    enabled: ${SSL_ENABLED}
+    certificate_path: "${SSL_CERT_PATH}"
+    key_path: "${SSL_KEY_PATH}"
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    http: "${LOG_LEVEL_HTTP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    external_apis: "${LOG_LEVEL_EXTERNAL_APIS}"
+    
+  library: "${LOGGING_LIBRARY}"  # winston | pino | bunyan | log4js
+  
+  transports:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"  # json | simple | colorized
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"  # daily | size
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      max_files: ${LOG_FILE_MAX_FILES}
+      
+    http:
+      enabled: ${LOG_HTTP_ENABLED}
+      endpoint: "${LOG_HTTP_ENDPOINT}"
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "json"
+    
+  request_logging:
+    enabled: ${REQUEST_LOGGING_ENABLED}
+    include_headers: ${LOG_INCLUDE_HEADERS}
+    include_body: ${LOG_INCLUDE_BODY}
+    sanitize_tokens: ${LOG_SANITIZE_TOKENS}
+    
+  correlation_id:
+    enabled: ${CORRELATION_ID_ENABLED}
+    header_name: "${CORRELATION_ID_HEADER}"
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # npm audit | snyk | dependabot
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    severity_threshold: "${VULNERABILITY_SEVERITY_THRESHOLD}"
+    
+  static_analysis:
+    tool: "${SAST_TOOL}"  # eslint-plugin-security | semgrep
+    config_path: "${SAST_CONFIG_PATH}"
+    
+  secrets_scanning:
+    enabled: ${SECRETS_SCANNING_ENABLED}
+    tool: "${SECRETS_SCAN_TOOL}"  # git-secrets | trufflehog
+    
+  cors:
+    enabled: ${CORS_ENABLED}
+    allowed_origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed_methods: "${CORS_ALLOWED_METHODS}"
+    allowed_headers: "${CORS_ALLOWED_HEADERS}"
+    credentials: ${CORS_ALLOW_CREDENTIALS}
+    
+  helmet:
+    enabled: ${HELMET_ENABLED}  # For Express.js security headers
+    config_path: "${HELMET_CONFIG_PATH}"
+    
+  rate_limiting:
+    enabled: ${RATE_LIMITING_ENABLED}
+    window_ms: ${RATE_LIMIT_WINDOW_MS}
+    max_requests: ${RATE_LIMIT_MAX_REQUESTS}
+    
+  csp:
+    enabled: ${CSP_ENABLED}
+    policy: "${CSP_POLICY}"
+    
+  authentication:
+    method: "${AUTH_METHOD}"  # jwt | oauth2 | session | api-key
+    token_expiry: ${AUTH_TOKEN_EXPIRY}
+    refresh_token_enabled: ${REFRESH_TOKEN_ENABLED}
+    
+  input_validation:
+    library: "${INPUT_VALIDATION_LIBRARY}"  # joi | yup | ajv | zod
+    strict_mode: ${INPUT_VALIDATION_STRICT}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  linting:
+    enabled: ${LINTING_ENABLED}
+    config: "${LINT_CONFIG_PATH}"
+    fix_on_save: ${LINT_FIX_ON_SAVE}
+    
+  formatting:
+    tool: "prettier"
+    config: "${PRETTIER_CONFIG_PATH}"
+    line_width: ${CODE_LINE_WIDTH}
+    semi: ${USE_SEMICOLONS}
+    single_quote: ${USE_SINGLE_QUOTES}
+    trailing_comma: "${TRAILING_COMMA}"  # none | es5 | all
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}
+    max_depth: ${MAX_DEPTH}
+    max_lines_per_function: ${MAX_LINES_PER_FUNCTION}
+    max_file_lines: ${MAX_FILE_LINES}
+    
+  naming_conventions:
+    enforce: ${ENFORCE_NAMING_CONVENTIONS}
+    style_guide: "${STYLE_GUIDE}"  # airbnb | google | standard
+    
+  documentation:
+    tool: "${DOCS_TOOL}"  # jsdoc | tsdoc
+    min_coverage: ${MIN_DOCS_COVERAGE}
+    
+  pre_commit_hooks:
+    enabled: ${PRE_COMMIT_HOOKS_ENABLED}
+    tool: "${PRE_COMMIT_TOOL}"  # husky | pre-commit
+    
+  type_checking:
+    enabled: ${TYPE_CHECKING_ENABLED}
+    tool: "${TYPE_CHECKER}"  # flow | typescript (for JS with JSDoc)
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    component_library: "${COMPONENT_LIBRARY_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  user_docs:
+    user_guide: "${USER_GUIDE_PATH}"
+    installation: "${INSTALLATION_DOC_PATH}"
+    troubleshooting: "${TROUBLESHOOTING_PATH}"
+    
+  code_docs:
+    auto_generate: ${AUTO_GENERATE_DOCS}
+    tool: "${DOCS_GENERATION_TOOL}"  # jsdoc | typedoc | storybook
+    output_format: "${DOCS_OUTPUT_FORMAT}"
+    output_directory: "${DOCS_OUTPUT_DIR}"
+    
+  storybook:
+    enabled: ${STORYBOOK_ENABLED}
+    port: ${STORYBOOK_PORT}
+    static_dir: "${STORYBOOK_STATIC_DIR}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+# Reference secrets from secure storage (environment variables, vault, etc.)
+secrets:
+  database:
+    connection_string: "${DB_CONNECTION_STRING}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    
+  api_keys:
+    third_party_service_1: "${API_KEY_SERVICE_1}"
+    third_party_service_2: "${API_KEY_SERVICE_2}"
+    google_maps: "${GOOGLE_MAPS_API_KEY}"
+    stripe: "${STRIPE_API_KEY}"
+    
+  authentication:
+    jwt_secret: "${JWT_SECRET_KEY}"
+    session_secret: "${SESSION_SECRET_KEY}"
+    oauth_client_id: "${OAUTH_CLIENT_ID}"
+    oauth_client_secret: "${OAUTH_CLIENT_SECRET}"
+    
+  cloud_provider:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    bucket_name: "${S3_BUCKET_NAME}"
+    
+  encryption:
+    encryption_key: "${ENCRYPTION_KEY}"
+    
+  monitoring:
+    sentry_dsn: "${SENTRY_DSN}"
+    datadog_api_key: "${DATADOG_API_KEY}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

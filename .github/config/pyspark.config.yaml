@@ -1,0 +1,485 @@
+# PySpark Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for PySpark projects
+# Usage: Copy and customize for each PySpark project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  data_framework: "pyspark"
+  spark_version: "${SPARK_VERSION}"  # e.g., 3.5.0
+  python_version: "${PYTHON_VERSION}"  # e.g., 3.11
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  processing_type: "${PROCESSING_TYPE}"  # batch | streaming | interactive | ml
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  data_development:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Spark job development"
+        - "ETL pipeline design"
+        - "Performance optimization"
+        
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "ML pipeline development"
+        - "Feature engineering at scale"
+        - "Model training"
+        
+    ml_engineer:
+      enabled: ${ML_ENGINEER_ENABLED}
+      role: "Machine Learning Engineer"
+      responsibilities:
+        - "MLlib integration"
+        - "Model deployment"
+        - "Production pipelines"
+  
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    spark_version: "${SPARK_VERSION_DEV}"
+    cluster_mode: "${CLUSTER_MODE_DEV}"  # local | standalone | yarn | kubernetes
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    data_dir: "${DATA_DIR_DEV}"
+    checkpoint_dir: "${CHECKPOINT_DIR_DEV}"
+    warehouse_dir: "${WAREHOUSE_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    spark_version: "${SPARK_VERSION_STAGING}"
+    cluster_mode: "${CLUSTER_MODE_STAGING}"
+    log_level: "${LOG_LEVEL_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    checkpoint_dir: "${CHECKPOINT_DIR_STAGING}"
+    warehouse_dir: "${WAREHOUSE_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    spark_version: "${SPARK_VERSION_PROD}"
+    cluster_mode: "${CLUSTER_MODE_PROD}"
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    data_dir: "${DATA_DIR_PROD}"
+    checkpoint_dir: "${CHECKPOINT_DIR_PROD}"
+    warehouse_dir: "${WAREHOUSE_DIR_PROD}"
+
+# ============================================================================
+# SPARK SESSION CONFIGURATION
+# ============================================================================
+spark_session:
+  app_name: "${SPARK_APP_NAME}"
+  
+  master:
+    url: "${SPARK_MASTER_URL}"  # local[*] | spark://host:port | yarn | k8s://host:port
+    
+  deploy_mode:
+    mode: "${DEPLOY_MODE}"  # client | cluster
+    
+  config:
+    spark_home: "${SPARK_HOME}"
+    python_path: "${SPARK_PYTHON_PATH}"
+
+# ============================================================================
+# DRIVER CONFIGURATION
+# ============================================================================
+driver:
+  memory: "${DRIVER_MEMORY}"  # e.g., 4g
+  cores: ${DRIVER_CORES}
+  max_result_size: "${DRIVER_MAX_RESULT_SIZE}"  # e.g., 2g
+  
+  java_options:
+    heap_size: "${DRIVER_HEAP_SIZE}"
+    gc_options: "${DRIVER_GC_OPTIONS}"
+    extra_options: "${DRIVER_EXTRA_JAVA_OPTIONS}"
+    
+  class_path:
+    extra_classpath: "${DRIVER_EXTRA_CLASSPATH}"
+    
+  library_path:
+    extra_library_path: "${DRIVER_EXTRA_LIBRARY_PATH}"
+
+# ============================================================================
+# EXECUTOR CONFIGURATION
+# ============================================================================
+executor:
+  instances: ${EXECUTOR_INSTANCES}  # Number of executors
+  memory: "${EXECUTOR_MEMORY}"  # e.g., 8g
+  cores: ${EXECUTOR_CORES}
+  
+  memory_overhead: "${EXECUTOR_MEMORY_OVERHEAD}"  # e.g., 1g
+  
+  heartbeat_interval: "${EXECUTOR_HEARTBEAT_INTERVAL}"  # e.g., 10s
+  
+  java_options:
+    heap_size: "${EXECUTOR_HEAP_SIZE}"
+    gc_options: "${EXECUTOR_GC_OPTIONS}"
+    extra_options: "${EXECUTOR_EXTRA_JAVA_OPTIONS}"
+    
+  class_path:
+    extra_classpath: "${EXECUTOR_EXTRA_CLASSPATH}"
+    
+  library_path:
+    extra_library_path: "${EXECUTOR_EXTRA_LIBRARY_PATH}"
+
+# ============================================================================
+# DYNAMIC ALLOCATION
+# ============================================================================
+dynamic_allocation:
+  enabled: ${DYNAMIC_ALLOCATION_ENABLED}
+  
+  min_executors: ${DYNAMIC_MIN_EXECUTORS}
+  max_executors: ${DYNAMIC_MAX_EXECUTORS}
+  initial_executors: ${DYNAMIC_INITIAL_EXECUTORS}
+  
+  executor_idle_timeout: "${EXECUTOR_IDLE_TIMEOUT}"  # e.g., 60s
+  cached_executor_idle_timeout: "${CACHED_EXECUTOR_IDLE_TIMEOUT}"
+  
+  scheduler_backlog_timeout: "${SCHEDULER_BACKLOG_TIMEOUT}"
+  sustained_scheduler_backlog_timeout: "${SUSTAINED_SCHEDULER_BACKLOG_TIMEOUT}"
+
+# ============================================================================
+# SHUFFLE CONFIGURATION
+# ============================================================================
+shuffle:
+  partitions: ${SHUFFLE_PARTITIONS}  # Default number of partitions
+  
+  service:
+    enabled: ${SHUFFLE_SERVICE_ENABLED}
+    port: ${SHUFFLE_SERVICE_PORT}
+    
+  compress: ${SHUFFLE_COMPRESS}
+  spill_compress: ${SHUFFLE_SPILL_COMPRESS}
+  
+  file_buffer: "${SHUFFLE_FILE_BUFFER}"  # e.g., 32k
+  io_max_retries: ${SHUFFLE_IO_MAX_RETRIES}
+  io_retry_wait: "${SHUFFLE_IO_RETRY_WAIT}"  # e.g., 5s
+  
+  manager: "${SHUFFLE_MANAGER}"  # sort | tungsten-sort | hash
+
+# ============================================================================
+# MEMORY MANAGEMENT
+# ============================================================================
+memory:
+  fraction: ${MEMORY_FRACTION}  # Fraction of heap space for execution/storage
+  storage_fraction: ${STORAGE_MEMORY_FRACTION}
+  
+  off_heap:
+    enabled: ${OFF_HEAP_ENABLED}
+    size: "${OFF_HEAP_SIZE}"  # e.g., 2g
+    
+  unified_memory:
+    enabled: ${UNIFIED_MEMORY_ENABLED}
+
+# ============================================================================
+# SPARK SQL CONFIGURATION
+# ============================================================================
+sql:
+  warehouse_dir: "${SQL_WAREHOUSE_DIR}"
+  
+  autoBroadcastJoinThreshold: ${AUTO_BROADCAST_JOIN_THRESHOLD}  # e.g., 10485760 (10MB)
+  
+  adaptive:
+    enabled: ${ADAPTIVE_QUERY_ENABLED}
+    coalescePartitions:
+      enabled: ${ADAPTIVE_COALESCE_PARTITIONS}
+      initialPartitionNum: ${ADAPTIVE_INITIAL_PARTITION_NUM}
+      minPartitionNum: ${ADAPTIVE_MIN_PARTITION_NUM}
+    
+  shuffle:
+    partitions: ${SQL_SHUFFLE_PARTITIONS}
+    
+  files:
+    maxPartitionBytes: ${MAX_PARTITION_BYTES}  # e.g., 134217728 (128MB)
+    openCostInBytes: ${OPEN_COST_IN_BYTES}
+    
+  parquet:
+    compression: "${PARQUET_COMPRESSION}"  # snappy | gzip | lzo | uncompressed
+    block_size: ${PARQUET_BLOCK_SIZE}
+    page_size: ${PARQUET_PAGE_SIZE}
+    enable_dictionary: ${PARQUET_ENABLE_DICTIONARY}
+    
+  orc:
+    compression: "${ORC_COMPRESSION}"  # snappy | zlib | lzo | none
+    
+  csv:
+    parser_column_pruning: ${CSV_PARSER_COLUMN_PRUNING}
+    
+  cbo:
+    enabled: ${COST_BASED_OPTIMIZATION}
+
+# ============================================================================
+# STREAMING CONFIGURATION
+# ============================================================================
+streaming:
+  enabled: ${STREAMING_ENABLED}
+  
+  checkpoint_location: "${STREAMING_CHECKPOINT_LOCATION}"
+  
+  trigger:
+    type: "${STREAMING_TRIGGER}"  # processingTime | once | continuous
+    interval: "${STREAMING_INTERVAL}"  # e.g., 10 seconds
+    
+  backpressure:
+    enabled: ${STREAMING_BACKPRESSURE_ENABLED}
+    
+  kafka:
+    bootstrap_servers: "${KAFKA_BOOTSTRAP_SERVERS}"
+    topic: "${KAFKA_TOPIC}"
+    starting_offsets: "${KAFKA_STARTING_OFFSETS}"  # earliest | latest
+    max_offsets_per_trigger: ${KAFKA_MAX_OFFSETS_PER_TRIGGER}
+    
+  state:
+    store_provider: "${STATE_STORE_PROVIDER}"  # hdfs | rocksdb
+    
+  continuous:
+    executor_poll_interval: "${CONTINUOUS_EXECUTOR_POLL_INTERVAL}"
+
+# ============================================================================
+# ML CONFIGURATION (MLlib)
+# ============================================================================
+ml:
+  enabled: ${ML_ENABLED}
+  
+  training:
+    parallelism: ${ML_PARALLELISM}
+    
+  cache:
+    use_cache: ${ML_USE_CACHE}
+    
+  checkpointing:
+    enabled: ${ML_CHECKPOINTING_ENABLED}
+    interval: ${ML_CHECKPOINT_INTERVAL}
+    dir: "${ML_CHECKPOINT_DIR}"
+    
+  feature_engineering:
+    max_categories: ${MAX_CATEGORIES}
+    
+  evaluation:
+    metrics_dir: "${ML_METRICS_DIR}"
+
+# ============================================================================
+# I/O CONFIGURATION
+# ============================================================================
+io:
+  compression_codec: "${IO_COMPRESSION_CODEC}"  # snappy | lz4 | gzip | zstd
+  
+  files:
+    max_partition_bytes: ${FILES_MAX_PARTITION_BYTES}
+    
+  network:
+    timeout: "${NETWORK_TIMEOUT}"  # e.g., 120s
+    
+  s3:
+    enabled: ${S3_ENABLED}
+    endpoint: "${S3_ENDPOINT}"
+    access_key: "${S3_ACCESS_KEY}"
+    secret_key: "${S3_SECRET_KEY}"
+    
+  hdfs:
+    enabled: ${HDFS_ENABLED}
+    namenode: "${HDFS_NAMENODE}"
+    
+  delta:
+    enabled: ${DELTA_ENABLED}
+    optimize_write: ${DELTA_OPTIMIZE_WRITE}
+    auto_compact: ${DELTA_AUTO_COMPACT}
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+performance:
+  serialization:
+    serializer: "${SERIALIZER}"  # kryo | java
+    kryo_buffer_max: "${KRYO_BUFFER_MAX}"  # e.g., 64m
+    kryo_registration_required: ${KRYO_REGISTRATION_REQUIRED}
+    
+  locality:
+    wait: "${LOCALITY_WAIT}"  # e.g., 3s
+    wait_process: "${LOCALITY_WAIT_PROCESS}"
+    wait_node: "${LOCALITY_WAIT_NODE}"
+    wait_rack: "${LOCALITY_WAIT_RACK}"
+    
+  speculation:
+    enabled: ${SPECULATION_ENABLED}
+    interval: "${SPECULATION_INTERVAL}"
+    multiplier: ${SPECULATION_MULTIPLIER}
+    quantile: ${SPECULATION_QUANTILE}
+    
+  broadcast:
+    block_size: "${BROADCAST_BLOCK_SIZE}"  # e.g., 4m
+    compress: ${BROADCAST_COMPRESS}
+    
+  rdd:
+    compress: ${RDD_COMPRESS}
+    
+  task:
+    cpus: ${TASK_CPUS}
+    max_failures: ${TASK_MAX_FAILURES}
+
+# ============================================================================
+# MONITORING & METRICS
+# ============================================================================
+monitoring:
+  ui:
+    enabled: ${UI_ENABLED}
+    port: ${UI_PORT}
+    retain_jobs: ${UI_RETAIN_JOBS}
+    retain_stages: ${UI_RETAIN_STAGES}
+    retain_tasks: ${UI_RETAIN_TASKS}
+    
+  event_log:
+    enabled: ${EVENT_LOG_ENABLED}
+    dir: "${EVENT_LOG_DIR}"
+    compress: ${EVENT_LOG_COMPRESS}
+    
+  metrics:
+    enabled: ${METRICS_ENABLED}
+    namespace: "${METRICS_NAMESPACE}"
+    
+  prometheus:
+    enabled: ${PROMETHEUS_ENABLED}
+    port: ${PROMETHEUS_PORT}
+    
+  ganglia:
+    enabled: ${GANGLIA_ENABLED}
+    host: "${GANGLIA_HOST}"
+    port: ${GANGLIA_PORT}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  spark_logging:
+    level: "${SPARK_LOG_LEVEL}"  # ALL | DEBUG | INFO | WARN | ERROR | FATAL | OFF
+    
+  log4j:
+    config_file: "${LOG4J_CONFIG_FILE}"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    spark: "${LOG_LEVEL_SPARK}"
+    sql: "${LOG_LEVEL_SQL}"
+    streaming: "${LOG_LEVEL_STREAMING}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      pattern: "${LOG_CONSOLE_PATTERN}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      pattern: "${LOG_FILE_PATTERN}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      max_backup_index: ${LOG_FILE_MAX_BACKUP_INDEX}
+
+# ============================================================================
+# CLUSTER MANAGER SPECIFIC
+# ============================================================================
+cluster:
+  yarn:
+    enabled: ${YARN_ENABLED}
+    queue: "${YARN_QUEUE}"
+    am_memory: "${YARN_AM_MEMORY}"
+    am_cores: ${YARN_AM_CORES}
+    max_app_attempts: ${YARN_MAX_APP_ATTEMPTS}
+    
+  kubernetes:
+    enabled: ${K8S_ENABLED}
+    namespace: "${K8S_NAMESPACE}"
+    container_image: "${K8S_CONTAINER_IMAGE}"
+    image_pull_policy: "${K8S_IMAGE_PULL_POLICY}"  # Always | Never | IfNotPresent
+    service_account: "${K8S_SERVICE_ACCOUNT}"
+    
+  mesos:
+    enabled: ${MESOS_ENABLED}
+    role: "${MESOS_ROLE}"
+    principal: "${MESOS_PRINCIPAL}"
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  authentication:
+    enabled: ${SECURITY_AUTHENTICATION_ENABLED}
+    secret: "${SECURITY_AUTHENTICATION_SECRET}"
+    
+  encryption:
+    enabled: ${SECURITY_ENCRYPTION_ENABLED}
+    key_length: ${ENCRYPTION_KEY_LENGTH}
+    
+  ssl:
+    enabled: ${SSL_ENABLED}
+    keystore: "${SSL_KEYSTORE_PATH}"
+    keystore_password: "${SSL_KEYSTORE_PASSWORD}"
+    truststore: "${SSL_TRUSTSTORE_PATH}"
+    
+  kerberos:
+    enabled: ${KERBEROS_ENABLED}
+    principal: "${KERBEROS_PRINCIPAL}"
+    keytab: "${KERBEROS_KEYTAB_PATH}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  cloud_storage:
+    aws_access_key_id: "${AWS_ACCESS_KEY_ID}"
+    aws_secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    
+  database:
+    jdbc_url: "${JDBC_URL}"
+    db_username: "${DB_USERNAME}"
+    db_password: "${DB_PASSWORD}"
+    
+  kafka:
+    sasl_username: "${KAFKA_SASL_USERNAME}"
+    sasl_password: "${KAFKA_SASL_PASSWORD}"
+    
+  kerberos:
+    principal: "${KERBEROS_PRINCIPAL}"
+    keytab_path: "${KERBEROS_KEYTAB_PATH}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

@@ -1,0 +1,523 @@
+# Ruby Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for Ruby projects
+# Usage: Copy and customize for each Ruby project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "ruby"
+  ruby_version: "${RUBY_VERSION}"  # 3.1 | 3.2 | 3.3 | 3.4
+  framework: "${RUBY_FRAMEWORK}"  # rails | sinatra | hanami | grape | none
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "API development"
+        - "Business logic implementation"
+        - "Database integration"
+    
+    frontend_developer:
+      enabled: ${FRONTEND_AGENT_ENABLED}
+      role: "Front-End Developer"
+      responsibilities:
+        - "View templates"
+        - "Asset pipeline"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  data:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_ARCHITECTURE}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      - "${PHASE_1_AGENT_2}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_DB_SCHEMA}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_DOCUMENTATION}"
+    agents_required:
+      - "Back-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      - "${PHASE_3_AGENT_2}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_QA_REPORT}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    ruby_version: "${RUBY_VERSION_DEV}"
+    rails_env: "development"
+    rack_env: "development"
+    bundle_path: "${BUNDLE_PATH_DEV}"
+    debug_mode: ${DEBUG_MODE_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # debug | info | warn | error | fatal
+    database_url: "${DATABASE_URL_DEV}"
+    redis_url: "${REDIS_URL_DEV}"
+    api_base_url: "${API_BASE_URL_DEV}"
+    cache_enabled: ${CACHE_ENABLED_DEV}
+    
+  staging:
+    name: "staging"
+    ruby_version: "${RUBY_VERSION_STAGING}"
+    rails_env: "staging"
+    rack_env: "staging"
+    bundle_path: "${BUNDLE_PATH_STAGING}"
+    debug_mode: ${DEBUG_MODE_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    redis_url: "${REDIS_URL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    cache_enabled: ${CACHE_ENABLED_STAGING}
+    
+  production:
+    name: "prod"
+    ruby_version: "${RUBY_VERSION_PROD}"
+    rails_env: "production"
+    rack_env: "production"
+    bundle_path: "${BUNDLE_PATH_PROD}"
+    debug_mode: false
+    log_level: "${LOG_LEVEL_PROD}"  # Should be warn or error
+    database_url: "${DATABASE_URL_PROD}"
+    redis_url: "${REDIS_URL_PROD}"
+    api_base_url: "${API_BASE_URL_PROD}"
+    cache_enabled: true
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  package_manager: "bundler"
+  gemfile_path: "${GEMFILE_PATH}"
+  gemfile_lock: "${GEMFILE_LOCK_PATH}"
+  
+  bundler:
+    version: "${BUNDLER_VERSION}"
+    deployment_mode: ${BUNDLER_DEPLOYMENT_MODE}
+    without_groups: "${BUNDLER_WITHOUT_GROUPS}"  # development:test
+    jobs: ${BUNDLER_JOBS}
+    retry: ${BUNDLER_RETRY}
+    
+  ruby_version_manager:
+    tool: "${RUBY_VERSION_MANAGER}"  # rbenv | rvm | chruby | asdf
+    config_file: "${RUBY_VERSION_FILE}"  # .ruby-version
+    
+  static_analysis:
+    rubocop:
+      enabled: ${RUBOCOP_ENABLED}
+      config_file: "${RUBOCOP_CONFIG_PATH}"
+      auto_correct: ${RUBOCOP_AUTO_CORRECT}
+      fail_level: "${RUBOCOP_FAIL_LEVEL}"  # convention | warning | error
+      
+    reek:
+      enabled: ${REEK_ENABLED}
+      config_file: "${REEK_CONFIG_PATH}"
+      
+    brakeman:
+      enabled: ${BRAKEMAN_ENABLED}
+      config_file: "${BRAKEMAN_CONFIG_PATH}"
+      confidence_level: ${BRAKEMAN_CONFIDENCE_LEVEL}  # 1-3
+      
+    rails_best_practices:
+      enabled: ${RAILS_BEST_PRACTICES_ENABLED}
+      
+  pre_build_commands:
+    - "${PRE_BUILD_CMD_1}"
+    - "${PRE_BUILD_CMD_2}"
+    
+  post_build_commands:
+    - "${POST_BUILD_CMD_1}"
+    - "${POST_BUILD_CMD_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "${TEST_FRAMEWORK}"  # rspec | minitest | test-unit
+  
+  coverage:
+    tool: "${COVERAGE_TOOL}"  # simplecov | coverband
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # html | json | lcov
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    minimum_coverage: ${MINIMUM_COVERAGE}
+    
+  unit_tests:
+    directory: "${UNIT_TEST_DIR}"
+    pattern: "${UNIT_TEST_PATTERN}"  # *_spec.rb
+    parallel_execution: ${UNIT_TEST_PARALLEL}
+    
+  integration_tests:
+    directory: "${INTEGRATION_TEST_DIR}"
+    pattern: "${INTEGRATION_TEST_PATTERN}"
+    requires_database: ${INTEGRATION_TEST_DB_REQUIRED}
+    
+  system_tests:
+    enabled: ${SYSTEM_TEST_ENABLED}
+    directory: "${SYSTEM_TEST_DIR}"
+    driver: "${SYSTEM_TEST_DRIVER}"  # selenium | cuprite | rack-test
+    
+  performance_tests:
+    enabled: ${PERFORMANCE_TEST_ENABLED}
+    directory: "${PERFORMANCE_TEST_DIR}"
+    
+  fixtures:
+    directory: "${FIXTURES_DIR}"
+    format: "${FIXTURES_FORMAT}"  # yml | json | ruby
+    
+  factories:
+    library: "${FACTORY_LIBRARY}"  # factory_bot | fabrication
+    directory: "${FACTORIES_DIR}"
+    
+  mocking:
+    library: "${MOCKING_LIBRARY}"  # rspec-mocks | mocha | webmock
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # heroku | aws | capistrano | docker | kubernetes
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    base_image: "${DOCKER_BASE_IMAGE}"  # ruby:3.3-alpine
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    
+  application_server:
+    type: "${APP_SERVER_TYPE}"  # puma | unicorn | passenger | thin
+    workers: ${APP_SERVER_WORKERS}
+    threads_min: ${APP_SERVER_THREADS_MIN}
+    threads_max: ${APP_SERVER_THREADS_MAX}
+    host: "${APP_SERVER_HOST}"
+    port: ${APP_SERVER_PORT}
+    timeout: ${APP_SERVER_TIMEOUT}
+    preload_app: ${APP_SERVER_PRELOAD}
+    
+  web_server:
+    type: "${WEB_SERVER_TYPE}"  # nginx | apache
+    config_path: "${WEB_SERVER_CONFIG_PATH}"
+    
+  assets:
+    precompile: ${ASSETS_PRECOMPILE}
+    compression: ${ASSETS_COMPRESSION_ENABLED}
+    cdn_url: "${ASSETS_CDN_URL}"
+    
+  database_migrations:
+    auto_migrate: ${AUTO_MIGRATE_ENABLED}
+    rollback_on_failure: ${ROLLBACK_ON_FAILURE}
+    
+  background_jobs:
+    processor: "${BACKGROUND_JOB_PROCESSOR}"  # sidekiq | resque | delayed_job
+    config_path: "${BACKGROUND_JOB_CONFIG}"
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    active_record: "${LOG_LEVEL_ACTIVE_RECORD}"
+    action_controller: "${LOG_LEVEL_ACTION_CONTROLLER}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      colorize: ${LOG_CONSOLE_COLORIZE}
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"  # daily | weekly | monthly
+      max_size: "${LOG_FILE_MAX_SIZE}"  # e.g., 10MB
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+    syslog:
+      enabled: ${LOG_SYSLOG_ENABLED}
+      host: "${LOG_SYSLOG_HOST}"
+      port: ${LOG_SYSLOG_PORT}
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "${STRUCTURED_LOG_FORMAT}"  # json | logfmt
+    library: "${STRUCTURED_LOG_LIBRARY}"  # lograge | semantic_logger
+    
+  request_logging:
+    enabled: ${REQUEST_LOGGING_ENABLED}
+    include_params: ${LOG_REQUEST_PARAMS}
+    exclude_params: "${LOG_EXCLUDE_PARAMS}"  # password, token, secret
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # bundler-audit | ruby_audit | snyk
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    
+  static_application_security_testing:
+    tool: "${SAST_TOOL}"  # brakeman | dawnscanner
+    config_path: "${SAST_CONFIG_PATH}"
+    severity_threshold: "${SAST_SEVERITY_THRESHOLD}"  # low | medium | high
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"  # vault | aws-secrets | rails-credentials | dotenv
+    config_path: "${SECRETS_CONFIG_PATH}"
+    rotation_enabled: ${SECRETS_ROTATION_ENABLED}
+    
+  rails_security:
+    force_ssl: ${RAILS_FORCE_SSL}
+    secret_key_base: "${RAILS_SECRET_KEY_BASE}"
+    allowed_hosts: "${RAILS_ALLOWED_HOSTS}"
+    
+  authentication:
+    method: "${AUTH_METHOD}"  # devise | jwt | oauth2 | api-key
+    token_expiry: ${AUTH_TOKEN_EXPIRY}
+    
+  cors:
+    enabled: ${CORS_ENABLED}
+    allowed_origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed_methods: "${CORS_ALLOWED_METHODS}"
+    
+  rate_limiting:
+    enabled: ${RATE_LIMITING_ENABLED}
+    library: "${RATE_LIMIT_LIBRARY}"  # rack-attack | rack-throttle
+    requests_per_minute: ${RATE_LIMIT_RPM}
+    
+  content_security_policy:
+    enabled: ${CSP_ENABLED}
+    policy: "${CSP_POLICY}"
+    
+  input_validation:
+    library: "${INPUT_VALIDATION_LIBRARY}"  # active_model | dry-validation
+    strict_mode: ${INPUT_VALIDATION_STRICT}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  formatting:
+    tool: "rubocop"
+    auto_fix: ${FORMAT_AUTO_FIX}
+    
+  linting:
+    enabled: ${LINTING_ENABLED}
+    tools:
+      - "${LINTING_TOOL_1}"
+      - "${LINTING_TOOL_2}"
+    fail_on_error: ${LINT_FAIL_ON_ERROR}
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}  # ABC metric
+    max_method_length: ${MAX_METHOD_LENGTH}
+    max_class_length: ${MAX_CLASS_LENGTH}
+    max_module_length: ${MAX_MODULE_LENGTH}
+    
+  documentation:
+    format: "${DOCUMENTATION_FORMAT}"  # rdoc | yard
+    min_coverage: ${MIN_DOCUMENTATION_COVERAGE}
+    
+  code_smells:
+    detector: "reek"
+    max_smells: ${MAX_CODE_SMELLS}
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    database_schema: "${DB_SCHEMA_DOC_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  user_docs:
+    user_guide: "${USER_GUIDE_PATH}"
+    installation: "${INSTALLATION_DOC_PATH}"
+    troubleshooting: "${TROUBLESHOOTING_PATH}"
+    
+  code_docs:
+    auto_generate: ${AUTO_GENERATE_DOCS}
+    tool: "${DOCS_GENERATION_TOOL}"  # yard | rdoc | sdoc
+    output_format: "${DOCS_OUTPUT_FORMAT}"  # html | markdown
+    output_directory: "${DOCS_OUTPUT_DIR}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+# Reference secrets from secure storage (Rails credentials, vault, etc.)
+secrets:
+  database:
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    host: "${DB_HOST}"
+    port: ${DB_PORT}
+    name: "${DB_NAME}"
+    
+  rails:
+    secret_key_base: "${RAILS_SECRET_KEY_BASE}"
+    master_key: "${RAILS_MASTER_KEY}"
+    
+  api_keys:
+    third_party_service_1: "${API_KEY_SERVICE_1}"
+    third_party_service_2: "${API_KEY_SERVICE_2}"
+    
+  authentication:
+    devise_secret_key: "${DEVISE_SECRET_KEY}"
+    jwt_secret: "${JWT_SECRET_KEY}"
+    
+  cloud_provider:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  encryption:
+    encryption_key: "${ENCRYPTION_KEY}"
+    
+  external_services:
+    smtp_username: "${SMTP_USERNAME}"
+    smtp_password: "${SMTP_PASSWORD}"
+    redis_password: "${REDIS_PASSWORD}"
+    s3_access_key: "${S3_ACCESS_KEY}"
+    s3_secret_key: "${S3_SECRET_KEY}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

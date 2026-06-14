@@ -1,0 +1,505 @@
+# C# Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for C# projects
+# Usage: Copy and customize for each C# project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "csharp"
+  dotnet_version: "${DOTNET_VERSION}"  # net6.0 | net7.0 | net8.0 | net9.0
+  framework: "${CSHARP_FRAMEWORK}"  # aspnet-core | blazor | wpf | winforms | maui | console
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "API development"
+        - "Business logic implementation"
+        - "Database integration"
+    
+    frontend_developer:
+      enabled: ${FRONTEND_AGENT_ENABLED}
+      role: "Front-End Developer"
+      responsibilities:
+        - "UI/UX implementation"
+        - "Client-side logic"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  data:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_ARCHITECTURE}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      - "${PHASE_1_AGENT_2}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_DB_SCHEMA}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_DOCUMENTATION}"
+    agents_required:
+      - "Back-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      - "${PHASE_3_AGENT_2}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_QA_REPORT}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    dotnet_version: "${DOTNET_VERSION_DEV}"
+    configuration: "${BUILD_CONFIGURATION_DEV}"  # Debug | Release
+    debug_mode: ${DEBUG_MODE_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # Trace | Debug | Information | Warning | Error
+    database_url: "${DATABASE_URL_DEV}"
+    redis_url: "${REDIS_URL_DEV}"
+    api_base_url: "${API_BASE_URL_DEV}"
+    aspnetcore_environment: "${ASPNETCORE_ENV_DEV}"
+    
+  staging:
+    name: "staging"
+    dotnet_version: "${DOTNET_VERSION_STAGING}"
+    configuration: "${BUILD_CONFIGURATION_STAGING}"
+    debug_mode: ${DEBUG_MODE_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    redis_url: "${REDIS_URL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    aspnetcore_environment: "${ASPNETCORE_ENV_STAGING}"
+    
+  production:
+    name: "prod"
+    dotnet_version: "${DOTNET_VERSION_PROD}"
+    configuration: "Release"
+    debug_mode: false
+    log_level: "${LOG_LEVEL_PROD}"  # Should be Warning or Error
+    database_url: "${DATABASE_URL_PROD}"
+    redis_url: "${REDIS_URL_PROD}"
+    api_base_url: "${API_BASE_URL_PROD}"
+    aspnetcore_environment: "Production"
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  solution_file: "${SOLUTION_FILE_PATH}"  # *.sln
+  project_file: "${PROJECT_FILE_PATH}"  # *.csproj
+  
+  dotnet:
+    sdk_version: "${DOTNET_SDK_VERSION}"
+    runtime: "${DOTNET_RUNTIME}"  # microsoft | mono
+    self_contained: ${DOTNET_SELF_CONTAINED}
+    runtime_identifier: "${RUNTIME_IDENTIFIER}"  # win-x64 | linux-x64 | osx-x64
+    
+  compiler:
+    language_version: "${CSHARP_LANGUAGE_VERSION}"  # 10 | 11 | 12 | latest
+    nullable: "${NULLABLE_CONTEXT}"  # enable | disable | warnings
+    treat_warnings_as_errors: ${TREAT_WARNINGS_AS_ERRORS}
+    warning_level: ${WARNING_LEVEL}  # 0-4
+    
+  nuget:
+    config_file: "${NUGET_CONFIG_PATH}"
+    package_source: "${NUGET_PACKAGE_SOURCE}"
+    restore_locked_mode: ${NUGET_LOCKED_MODE}
+    
+  static_analysis:
+    roslyn_analyzers:
+      enabled: ${ROSLYN_ANALYZERS_ENABLED}
+      rule_set: "${ROSLYN_RULE_SET_PATH}"
+      
+    stylecop:
+      enabled: ${STYLECOP_ENABLED}
+      config_file: "${STYLECOP_CONFIG_PATH}"
+      
+    sonaranalyzer:
+      enabled: ${SONAR_ANALYZER_ENABLED}
+      
+    code_analysis:
+      enabled: ${CODE_ANALYSIS_ENABLED}
+      level: "${CODE_ANALYSIS_LEVEL}"  # none | minimum | recommended | all
+      
+  formatting:
+    editorconfig:
+      enabled: ${EDITORCONFIG_ENABLED}
+      config_file: "${EDITORCONFIG_PATH}"
+      
+  pre_build_commands:
+    - "${PRE_BUILD_CMD_1}"
+    - "${PRE_BUILD_CMD_2}"
+    
+  post_build_commands:
+    - "${POST_BUILD_CMD_1}"
+    - "${POST_BUILD_CMD_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "${TEST_FRAMEWORK}"  # xunit | nunit | mstest
+  
+  coverage:
+    tool: "${COVERAGE_TOOL}"  # coverlet | dotcover | opencover
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # cobertura | opencover | lcov
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    exclude_filters: "${COVERAGE_EXCLUDE_FILTERS}"
+    
+  unit_tests:
+    directory: "${UNIT_TEST_DIR}"
+    pattern: "${UNIT_TEST_PATTERN}"  # *Tests.cs
+    parallel_execution: ${UNIT_TEST_PARALLEL}
+    
+  integration_tests:
+    directory: "${INTEGRATION_TEST_DIR}"
+    pattern: "${INTEGRATION_TEST_PATTERN}"
+    requires_database: ${INTEGRATION_TEST_DB_REQUIRED}
+    
+  performance_tests:
+    enabled: ${PERFORMANCE_TEST_ENABLED}
+    directory: "${PERFORMANCE_TEST_DIR}"
+    tool: "${PERFORMANCE_TEST_TOOL}"  # BenchmarkDotNet | NBench
+    
+  fixtures:
+    directory: "${FIXTURES_DIR}"
+    
+  mocking:
+    library: "${MOCKING_LIBRARY}"  # moq | nsubstitute | fakeiteasy
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # azure | aws | iis | docker | kubernetes
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    base_image: "${DOCKER_BASE_IMAGE}"  # mcr.microsoft.com/dotnet/aspnet
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose | azure-container-apps
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    
+  web_server:
+    type: "${WEB_SERVER_TYPE}"  # kestrel | iis | http.sys
+    host: "${WEB_SERVER_HOST}"
+    port: ${WEB_SERVER_PORT}
+    https_port: ${WEB_SERVER_HTTPS_PORT}
+    
+  publish:
+    output_path: "${PUBLISH_OUTPUT_PATH}"
+    trim_unused_code: ${PUBLISH_TRIM_ENABLED}
+    ready_to_run: ${PUBLISH_READY_TO_RUN}
+    single_file: ${PUBLISH_SINGLE_FILE}
+    
+  database_migrations:
+    tool: "${MIGRATION_TOOL}"  # ef-core | fluentmigrator | dapper
+    directory: "${MIGRATIONS_DIR}"
+    auto_migrate: ${AUTO_MIGRATE_ENABLED}
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  provider: "${LOGGING_PROVIDER}"  # serilog | nlog | log4net | microsoft-extensions
+  
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    external_apis: "${LOG_LEVEL_EXTERNAL_APIS}"
+    microsoft: "${LOG_LEVEL_MICROSOFT}"
+    system: "${LOG_LEVEL_SYSTEM}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"  # daily | size-based | hourly
+      max_size: "${LOG_FILE_MAX_SIZE}"  # e.g., 10MB
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+    event_log:
+      enabled: ${EVENT_LOG_ENABLED}
+      source: "${EVENT_LOG_SOURCE}"
+      
+    application_insights:
+      enabled: ${APP_INSIGHTS_ENABLED}
+      instrumentation_key: "${APP_INSIGHTS_KEY}"
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "${STRUCTURED_LOG_FORMAT}"  # json | compact
+    
+  enrichers:
+    - "${LOG_ENRICHER_1}"  # thread | environment | machine
+    - "${LOG_ENRICHER_2}"
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # owasp-dependency-check | snyk | whitesource
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    
+  static_application_security_testing:
+    tool: "${SAST_TOOL}"  # security-code-scan | sonarqube | checkmarx
+    config_path: "${SAST_CONFIG_PATH}"
+    severity_threshold: "${SAST_SEVERITY_THRESHOLD}"  # low | medium | high
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"  # azure-keyvault | aws-secrets | hashicorp-vault | user-secrets
+    config_path: "${SECRETS_CONFIG_PATH}"
+    rotation_enabled: ${SECRETS_ROTATION_ENABLED}
+    
+  authentication:
+    method: "${AUTH_METHOD}"  # jwt | oauth2 | windows | identity-server
+    token_expiry: ${AUTH_TOKEN_EXPIRY}
+    
+  cors:
+    enabled: ${CORS_ENABLED}
+    allowed_origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed_methods: "${CORS_ALLOWED_METHODS}"
+    allow_credentials: ${CORS_ALLOW_CREDENTIALS}
+    
+  rate_limiting:
+    enabled: ${RATE_LIMITING_ENABLED}
+    requests_per_minute: ${RATE_LIMIT_RPM}
+    
+  data_protection:
+    enabled: ${DATA_PROTECTION_ENABLED}
+    key_storage: "${DATA_PROTECTION_KEY_STORAGE}"
+    
+  input_validation:
+    library: "${INPUT_VALIDATION_LIBRARY}"  # fluent-validation | data-annotations
+    strict_mode: ${INPUT_VALIDATION_STRICT}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  formatting:
+    tool: "dotnet-format"
+    check_only: ${FORMAT_CHECK_ONLY}
+    severity: "${FORMAT_SEVERITY}"  # error | warning | info
+    
+  linting:
+    enabled: ${LINTING_ENABLED}
+    tools:
+      - "${LINTING_TOOL_1}"
+      - "${LINTING_TOOL_2}"
+    fail_on_error: ${LINT_FAIL_ON_ERROR}
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}  # Cyclomatic complexity
+    max_method_length: ${MAX_METHOD_LENGTH}
+    max_class_length: ${MAX_CLASS_LENGTH}
+    max_parameter_count: ${MAX_PARAMETER_COUNT}
+    
+  documentation:
+    xml_comments: ${XML_COMMENTS_ENABLED}
+    generate_doc_file: ${GENERATE_DOC_FILE}
+    min_coverage: ${MIN_DOCUMENTATION_COVERAGE}
+    
+  naming_conventions:
+    enforce_naming_rules: ${ENFORCE_NAMING_RULES}
+    
+  maintainability_index:
+    min_threshold: ${MAINTAINABILITY_INDEX_MIN}
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    database_schema: "${DB_SCHEMA_DOC_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  user_docs:
+    user_guide: "${USER_GUIDE_PATH}"
+    installation: "${INSTALLATION_DOC_PATH}"
+    troubleshooting: "${TROUBLESHOOTING_PATH}"
+    
+  code_docs:
+    auto_generate: ${AUTO_GENERATE_DOCS}
+    tool: "${DOCS_GENERATION_TOOL}"  # docfx | sandcastle | xmldoc2md
+    output_format: "${DOCS_OUTPUT_FORMAT}"  # html | markdown | pdf
+    output_directory: "${DOCS_OUTPUT_DIR}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+# Reference secrets from secure storage (Azure Key Vault, AWS Secrets, etc.)
+secrets:
+  database:
+    connection_string: "${DB_CONNECTION_STRING}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    
+  api_keys:
+    third_party_service_1: "${API_KEY_SERVICE_1}"
+    third_party_service_2: "${API_KEY_SERVICE_2}"
+    
+  authentication:
+    secret_key: "${AUTH_SECRET_KEY}"
+    jwt_secret: "${JWT_SECRET_KEY}"
+    jwt_issuer: "${JWT_ISSUER}"
+    jwt_audience: "${JWT_AUDIENCE}"
+    
+  cloud_provider:
+    azure_tenant_id: "${AZURE_TENANT_ID}"
+    azure_client_id: "${AZURE_CLIENT_ID}"
+    azure_client_secret: "${AZURE_CLIENT_SECRET}"
+    aws_access_key: "${AWS_ACCESS_KEY}"
+    aws_secret_key: "${AWS_SECRET_KEY}"
+    
+  encryption:
+    encryption_key: "${ENCRYPTION_KEY}"
+    certificate_thumbprint: "${CERT_THUMBPRINT}"
+    
+  external_services:
+    smtp_username: "${SMTP_USERNAME}"
+    smtp_password: "${SMTP_PASSWORD}"
+    storage_account_key: "${STORAGE_ACCOUNT_KEY}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

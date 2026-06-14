@@ -1,0 +1,486 @@
+# AgentBase Technology Configuration Defaults
+# This file contains sensible default technology choices for all projects.
+# Agents will show relevant sections and ask for approval before using.
+# 
+# User can:
+# - Accept defaults (most common, fastest)
+# - Override specific values for current project
+# - Permanently change defaults for future projects
+#
+# Last updated: 2026-01-14
+
+# ==============================================================================
+# DEVELOPMENT STRATEGY
+# ==============================================================================
+development:
+  # How developers will work locally
+  strategy: "hybrid"  # Options: full-local | hybrid | cloud-only
+  # full-local: All services run on developer laptop
+  # hybrid: Frontend local, backend/database in cloud (RECOMMENDED)
+  # cloud-only: Everything in cloud (Gitpod, GitHub Codespaces)
+  
+  frontend:
+    workflow: "cloud-backend"  # Options: local-backend | cloud-backend | mock-apis
+    # local-backend: Frontend connects to locally running backend
+    # cloud-backend: Frontend connects to cloud dev environment (RECOMMENDED)
+    # mock-apis: Frontend uses Mock Service Worker for fake data
+    
+    scripts:
+      # NPM scripts to create based on workflow choice
+      local: "vite --mode local"
+      mock: "vite --mode mock"
+      cloud: "vite --mode development"
+  
+  backend:
+    workflow: "docker"  # Options: native | docker | cloud-dev
+    # native: Install Python/Node directly on laptop
+    # docker: Run in Docker containers (RECOMMENDED - consistent across team)
+    # cloud-dev: Backend runs in cloud, developers connect remotely
+    
+  database:
+    workflow: "docker"  # Options: local-install | docker | cloud-dev
+    # local-install: Install PostgreSQL/MySQL on laptop
+    # docker: Run database in Docker container (RECOMMENDED)
+    # cloud-dev: Shared cloud development database
+    
+  ai_models:
+    access: "cloud-only"  # Options: cloud-only | local-inference | hybrid
+    # cloud-only: Always use AWS Bedrock / GCP Vertex AI (RECOMMENDED for most)
+    # local-inference: Use Ollama/LocalAI for local dev, cloud for prod
+    # hybrid: Local for unit tests, cloud for integration tests
+    
+    local_provider: "ollama"  # Options: ollama | localai | mcp
+    # Only used if access is local-inference or hybrid
+    
+    resource_priority: "best"  # Options: best | gpu-cuda | mcp | cpu-multicore | cpu
+    # best: Auto-detect and use best available (GPU → MCP → CPU multicore → CPU) (RECOMMENDED)
+    # gpu-cuda: Force GPU/CUDA only (fails if not available)
+    # mcp: Force Model Context Protocol servers only
+    # cpu-multicore: Force CPU with multicore optimization
+    # cpu: Force single-core CPU (slowest, most compatible)
+    #
+    # "best" priority order:
+    #   1. GPU/CUDA (if NVIDIA GPU detected with CUDA support)
+    #   2. MCP servers (if configured and available)
+    #   3. CPU multicore (if multiple cores available)
+    #   4. CPU single-core (fallback)
+    
+  # ML/Data Science packages
+  ml_packages:
+    deep_learning: "pytorch"  # Options: tensorflow | pytorch | both
+    # tensorflow: TensorFlow + Keras (Google ecosystem, production-ready)
+    # pytorch: PyTorch (research-focused, dynamic graphs) (RECOMMENDED)
+    # both: Use both frameworks (increases complexity)
+    
+    data_processing: "pandas"  # Options: pandas | polars | dask
+    # pandas: Industry standard, huge ecosystem (RECOMMENDED)
+    # polars: Rust-based, faster for large datasets
+    # dask: Distributed computing, scales to clusters
+    
+    numerical: "numpy"  # Options: numpy | cupy
+    # numpy: Standard numerical computing (RECOMMENDED)
+    # cupy: GPU-accelerated numpy (requires CUDA)
+    
+    ml_framework: "scikit-learn"  # Options: scikit-learn | lightgbm | xgboost
+    # scikit-learn: General-purpose ML (RECOMMENDED for classical ML)
+    # lightgbm: Gradient boosting, fast, efficient
+    # xgboost: Gradient boosting, industry standard for competitions
+    
+    big_data: null  # Options: null | pyspark | dask
+    # null: No big data processing (RECOMMENDED for most projects)
+    # pyspark: Apache Spark with Python API
+    # dask: Python-native distributed computing
+    
+    # Package version strategy
+    version_strategy: "latest-stable"  # Options: latest-stable | pinned | flexible
+    # latest-stable: Use latest stable versions (RECOMMENDED)
+    # pinned: Pin exact versions in requirements.txt
+    # flexible: Use version ranges (>=1.0.0,<2.0.0)
+
+# ==============================================================================
+# TECHNOLOGY STACK
+# ==============================================================================
+stack:
+  # Cloud provider selection
+  cloud:
+    provider: "aws"  # Options: aws | gcp | azure | multi-cloud
+    # aws: Amazon Web Services (RECOMMENDED - most mature)
+    # gcp: Google Cloud Platform (good for AI/ML)
+    # azure: Microsoft Azure (good for enterprise)
+    # multi-cloud: AWS + GCP (avoid vendor lock-in, higher complexity)
+    
+    multi_cloud_config:
+      # Only used if provider is multi-cloud
+      primary: "aws"     # Primary cloud for most services
+      secondary: "gcp"   # Secondary cloud for specific services (e.g., Vertex AI)
+  
+  # Frontend framework
+  frontend:
+    framework: "react"  # Options: react | vue | angular | svelte | nextjs
+    # react: Most popular, huge ecosystem (RECOMMENDED)
+    # vue: Progressive framework, easier learning curve
+    # svelte: Fastest performance, smallest bundles
+    # angular: Enterprise, opinionated, batteries-included
+    # nextjs: React + SSR + file routing
+    
+    build_tool: "vite"  # Options: vite | webpack | turbopack | rollup
+    # vite: Fastest dev server (RECOMMENDED)
+    # webpack: Most mature, more config
+    # turbopack: Next.js bundler (only for Next.js)
+    
+    state_management: "context"  # Options: context | redux | zustand | mobx | pinia
+    # context: Built-in React Context API (RECOMMENDED for small/medium apps)
+    # redux: Predictable state, devtools, more boilerplate
+    # zustand: Minimal, modern (good for medium apps)
+    # mobx: Observable-based (less common)
+    # pinia: Vue's state management
+    
+    ui_library: "shadcn"  # Options: custom | mui | antd | chakra | shadcn
+    # custom: Build your own components
+    # mui: Material-UI (Google design)
+    # antd: Ant Design (enterprise)
+    # chakra: Chakra UI (accessible, composable)
+    # shadcn: Copy-paste components, Tailwind-based (RECOMMENDED)
+    
+    styling: "tailwind"  # Options: css-modules | tailwind | styled-components | emotion
+    # css-modules: Scoped CSS files
+    # tailwind: Utility-first CSS (RECOMMENDED)
+    # styled-components: CSS-in-JS
+    # emotion: CSS-in-JS with better performance
+    
+    typescript: true  # Use TypeScript (RECOMMENDED)
+    
+    package_manager: "npm"  # Options: npm | yarn | pnpm | bun
+    # npm: Default, comes with Node (RECOMMENDED)
+    # yarn: Faster, workspaces
+    # pnpm: Disk efficient, strict
+    # bun: Fastest, newer
+  
+  # Backend stack
+  backend:
+    language: "python"  # Options: python | nodejs | go | rust | java | csharp
+    # python: Great for AI/ML, rapid development (RECOMMENDED for AI projects)
+    # nodejs: JavaScript everywhere, async, microservices
+    # go: Performance, concurrency, simple deployment
+    # rust: Maximum performance, memory safety, steep learning
+    # java: Enterprise, mature ecosystem
+    # csharp: Microsoft ecosystem, .NET
+    
+    framework: "fastapi"  # Options: fastapi | flask | django | express | nestjs | gin | actix
+    # Python: fastapi (RECOMMENDED) | flask | django
+    # Node.js: express | nestjs
+    # Go: gin | echo
+    # Rust: actix | rocket
+    
+    api_style: "rest"  # Options: rest | graphql | grpc | trpc
+    # rest: RESTful APIs (RECOMMENDED - simple, universal)
+    # graphql: Flexible queries, over-fetching solution
+    # grpc: High performance, microservices
+    # trpc: Type-safe APIs, TypeScript only
+    
+    orm: "sqlalchemy"  # Options: sqlalchemy | prisma | typeorm | sequelize | gorm
+    # Python: sqlalchemy (RECOMMENDED) | peewee
+    # Node.js: prisma | typeorm | sequelize
+    # Go: gorm
+    
+    testing_framework: "pytest"  # Options: pytest | unittest | jest | mocha | go-test
+    # Python: pytest (RECOMMENDED) | unittest
+    # Node.js: jest | vitest | mocha
+    # Go: built-in testing
+  
+  # Database
+  database:
+    type: "sql"  # Options: sql | nosql | graph | timeseries
+    # sql: Relational (RECOMMENDED for most use cases)
+    # nosql: Document/key-value stores
+    # graph: Relationship-heavy data
+    # timeseries: Time-series data (IoT, metrics)
+    
+    engine: "postgresql"  # Options: postgresql | mysql | mongodb | dynamodb | cassandra | neo4j
+    # SQL: postgresql (RECOMMENDED - feature-rich) | mysql
+    # NoSQL: mongodb | dynamodb
+    # Graph: neo4j
+    # Time-series: influxdb | timescaledb
+    
+    hosting: "managed-cloud"  # Options: managed-cloud | self-hosted | serverless
+    # managed-cloud: RDS, Cloud SQL (RECOMMENDED - less ops work)
+    # self-hosted: EC2, GCE (more control, more ops)
+    # serverless: Aurora Serverless, DynamoDB (auto-scaling)
+    
+    migration_tool: "alembic"  # Options: alembic | flyway | liquibase | prisma | typeorm
+    # Python: alembic (RECOMMENDED)
+    # SQL-based: flyway | liquibase
+    # Node.js: prisma migrate | typeorm
+  
+  # Authentication
+  auth:
+    method: "jwt"  # Options: jwt | session | oauth | saml | passwordless
+    # jwt: JSON Web Tokens (RECOMMENDED - stateless, scalable)
+    # session: Server-side sessions (simpler, requires state)
+    # oauth: Third-party auth (Google, GitHub)
+    # saml: Enterprise SSO
+    # passwordless: Magic links, WebAuthn
+    
+    provider: "cognito"  # Options: cognito | auth0 | okta | firebase | custom
+    # cognito: AWS Cognito (RECOMMENDED for AWS)
+    # auth0: Full-featured, expensive
+    # okta: Enterprise
+    # firebase: Google Firebase Auth
+    # custom: Self-hosted
+
+# ==============================================================================
+# INFRASTRUCTURE & DEPLOYMENT
+# ==============================================================================
+infrastructure:
+  # Deployment strategy
+  deployment:
+    strategy: "serverless"  # Options: serverless | containers | vms | kubernetes
+    # serverless: Lambda, Cloud Functions (RECOMMENDED - auto-scaling, pay-per-use)
+    # containers: ECS, Cloud Run (more control, consistent)
+    # vms: EC2, GCE (most control, most ops)
+    # kubernetes: EKS, GKE (maximum flexibility, complex)
+    
+    container_registry: "ecr"  # Options: ecr | gcr | dockerhub | ghcr
+    # Only used if deployment is containers or kubernetes
+  
+  # Infrastructure as Code
+  iac:
+    tool: "terraform"  # Options: terraform | cloudformation | pulumi | cdk
+    # terraform: Cloud-agnostic, popular (RECOMMENDED)
+    # cloudformation: AWS-native, YAML/JSON
+    # pulumi: Real programming languages
+    # cdk: AWS CDK, TypeScript/Python
+  
+  # CI/CD
+  cicd:
+    platform: "github-actions"  # Options: github-actions | gitlab-ci | jenkins | circleci
+    # github-actions: Built into GitHub (RECOMMENDED)
+    # gitlab-ci: Built into GitLab
+    # jenkins: Self-hosted, flexible
+    # circleci: Cloud-based
+  
+  # Environment strategy
+  environments:
+    count: 2  # Options: 1 | 2 | 3 | 4
+    # 1: Dev-only (single environment for dev+prod)
+    # 2: Dev + Prod (RECOMMENDED for most projects)
+    # 3: Dev + Staging + Prod (best practice for production apps)
+    # 4: Dev + QA + Staging + Prod (large teams)
+    
+    names:
+      - "development"
+      - "production"
+      # Add "staging", "qa" if count is 3 or 4
+    
+    isolation: "tags"  # Options: separate-accounts | regions | tags
+    # separate-accounts: Separate AWS/GCP accounts per environment (most secure)
+    # regions: Same account, different regions
+    # tags: Same account, same region, different resource tags (RECOMMENDED)
+    
+    promotion:
+      strategy: "manual-approval"  # Options: manual-approval | auto-with-gates | fully-auto
+      # manual-approval: Human approval required (RECOMMENDED)
+      # auto-with-gates: Auto-promote if tests pass
+      # fully-auto: Auto to production (risky, requires excellent tests)
+    
+    # Environment-specific configurations
+    specs:
+      development:
+        database:
+          instance_class: "db.t3.micro"  # AWS RDS instance type
+          storage_gb: 20
+          backup_retention_days: 1
+        compute:
+          lambda_memory_mb: 512
+          lambda_timeout_seconds: 30
+          lambda_concurrent_executions: 10
+        budget_monthly_usd: 50
+        
+      production:
+        database:
+          instance_class: "db.t3.small"
+          storage_gb: 100
+          backup_retention_days: 7
+        compute:
+          lambda_memory_mb: 1024
+          lambda_timeout_seconds: 60
+          lambda_concurrent_executions: 100
+        budget_monthly_usd: 200
+
+# ==============================================================================
+# COST MANAGEMENT
+# ==============================================================================
+cost:
+  total_budget_monthly_usd: 250  # Total monthly budget across all environments
+  
+  alerts:
+    enabled: true
+    thresholds: [50, 80, 100]  # Alert at 50%, 80%, 100% of budget
+    channels: ["email"]  # Options: email | slack | pagerduty
+  
+  optimization_priority: "medium"  # Options: low | medium | high
+  # low: Prioritize performance over cost
+  # medium: Balance performance and cost (RECOMMENDED)
+  # high: Aggressively minimize cost
+  
+  reserved_instances: false  # Use reserved instances for predictable workloads (save 30-70%)
+  spot_instances: false      # Use spot instances where possible (save 70%, can be terminated)
+
+# ==============================================================================
+# MONITORING & OBSERVABILITY
+# ==============================================================================
+monitoring:
+  solution: "cloudwatch"  # Options: cloudwatch | datadog | grafana | newrelic
+  # cloudwatch: AWS CloudWatch (RECOMMENDED for AWS, free tier)
+  # datadog: Powerful, expensive, great UX
+  # grafana: Open source, self-hosted (Grafana + Prometheus + Loki)
+  # newrelic: APM focus
+  
+  logging:
+    retention_days: 30  # Log retention period
+    level: "INFO"       # Options: DEBUG | INFO | WARNING | ERROR
+    level_dev: "DEBUG"  # Log level for development environment
+  
+  alerting:
+    enabled: true
+    channels: ["email"]  # Options: email | slack | pagerduty | sns
+    thresholds:
+      error_rate_percent: 1.0      # Alert if error rate > 1%
+      latency_p95_ms: 1000         # Alert if p95 latency > 1000ms
+      lambda_throttles: 10         # Alert if Lambda throttles > 10/hour
+
+# ==============================================================================
+# TESTING & QUALITY
+# ==============================================================================
+testing:
+  scope: "unit-integration"  # Options: unit-only | unit-integration | unit-integration-e2e
+  # unit-only: Only unit tests
+  # unit-integration: Unit + integration tests (RECOMMENDED)
+  # unit-integration-e2e: Full test pyramid
+  
+  coverage:
+    required_percent: 80  # Minimum code coverage required
+    enforce: false        # Block merge if coverage drops below required
+  
+  frameworks:
+    unit: "pytest"        # Options: pytest | jest | vitest | mocha
+    e2e: "playwright"     # Options: playwright | cypress | selenium
+  
+  data_strategy: "fixtures"  # Options: fixtures | factories | subset
+  # fixtures: Static test data files (RECOMMENDED)
+  # factories: Generate test data dynamically
+  # subset: Use subset of real production data
+
+# ==============================================================================
+# SECURITY & COMPLIANCE
+# ==============================================================================
+security:
+  compliance:
+    required: []  # Options: [] | ["GDPR"] | ["HIPAA"] | ["SOC2"] | ["PCI-DSS"]
+    # Empty list for no specific compliance requirements (RECOMMENDED for MVPs)
+  
+  encryption:
+    at_rest: true      # Encrypt data at rest (RECOMMENDED)
+    in_transit: true   # Encrypt data in transit (MANDATORY)
+    end_to_end: false  # End-to-end encryption (for sensitive apps)
+  
+  secrets_management:
+    service: "secrets-manager"  # Options: secrets-manager | vault | parameter-store
+    # secrets-manager: AWS Secrets Manager (RECOMMENDED - auto rotation)
+    # vault: HashiCorp Vault (self-hosted, more features)
+    # parameter-store: AWS Systems Manager Parameter Store (simpler, cheaper)
+  
+  security_tools:
+    waf: false              # Web Application Firewall
+    ddos_protection: false  # DDoS protection
+    vulnerability_scanning: true  # Container/dependency scanning (RECOMMENDED)
+
+# ==============================================================================
+# DATA & ANALYTICS
+# ==============================================================================
+data:
+  pipeline_orchestration: "step-functions"  # Options: airflow | prefect | dagster | step-functions
+  # Only needed for data-heavy projects
+  
+  warehouse: null  # Options: null | snowflake | redshift | bigquery | databricks
+  # null: No data warehouse (RECOMMENDED for most apps)
+  
+  etl_tool: null  # Options: null | dbt | spark | custom
+  
+  experiment_tracking: null  # Options: null | mlflow | wandb | neptune
+  # Only needed for ML projects
+
+# ==============================================================================
+# DOCUMENTATION
+# ==============================================================================
+documentation:
+  platform: "markdown"  # Options: markdown | confluence | notion | docusaurus
+  # markdown: Simple .md files in repo (RECOMMENDED)
+  # confluence: Atlassian Confluence
+  # notion: Notion workspace
+  # docusaurus: Documentation website
+  
+  design_tool: "figma"  # Options: figma | sketch | adobe-xd | penpot
+  # figma: Most popular (RECOMMENDED)
+  # sketch: macOS only
+  # adobe-xd: Adobe ecosystem
+  # penpot: Open source
+
+# ==============================================================================
+# PROJECT-SPECIFIC OVERRIDES
+# ==============================================================================
+# This section is automatically populated when user requests changes
+# for a specific project. These override the defaults above.
+overrides:
+  proj_20260114_130456:
+    # Piracy Website Identification System
+    # Approved: 2026-01-14
+    # Changes from defaults: Cloud-only dev, 3 environments, $100 budget
+    
+    development:
+      strategy: "cloud-only"  # Changed from "hybrid"
+      # Rationale: Minimize local setup, ensure consistency across team
+    
+    infrastructure:
+      environments:
+        count: 3  # Changed from 2
+        names: ["development", "staging", "production"]
+        # Rationale: Staging environment for AI validation before production
+        
+        specs:
+          development:
+            database:
+              instance_class: "db.t3.micro"
+              storage_gb: 20
+              backup_retention_days: 1
+            compute:
+              lambda_memory_mb: 512
+              lambda_timeout_seconds: 30
+              lambda_concurrent_executions: 10
+            budget_monthly_usd: 20  # Changed from $50
+          
+          staging:
+            database:
+              instance_class: "db.t3.small"
+              storage_gb: 50
+              backup_retention_days: 3
+            compute:
+              lambda_memory_mb: 768
+              lambda_timeout_seconds: 45
+              lambda_concurrent_executions: 25
+            budget_monthly_usd: 30  # New environment
+          
+          production:
+            database:
+              instance_class: "db.t3.small"
+              storage_gb: 100
+              backup_retention_days: 7
+            compute:
+              lambda_memory_mb: 1024
+              lambda_timeout_seconds: 60
+              lambda_concurrent_executions: 50
+            budget_monthly_usd: 50  # Changed from $200
+    
+    cost:
+      total_budget_monthly_usd: 100  # Changed from $250
+      # Rationale: Optimized for project needs, AI costs are pay-per-use

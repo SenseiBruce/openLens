@@ -1,0 +1,414 @@
+# Pandas Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for Pandas data projects
+# Usage: Copy and customize for each Pandas-based project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  data_framework: "pandas"
+  pandas_version: "${PANDAS_VERSION}"  # e.g., 2.1.4
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  data_type: "${DATA_TYPE}"  # timeseries | tabular | streaming | batch
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  data_development:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Data pipeline development"
+        - "Data transformation"
+        - "ETL processes"
+        
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "Data analysis"
+        - "Feature engineering"
+        - "Statistical modeling"
+        
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    python_version: "${PYTHON_VERSION_DEV}"
+    pandas_version: "${PANDAS_VERSION_DEV}"
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    data_dir: "${DATA_DIR_DEV}"
+    cache_dir: "${CACHE_DIR_DEV}"
+    output_dir: "${OUTPUT_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    python_version: "${PYTHON_VERSION_STAGING}"
+    pandas_version: "${PANDAS_VERSION_STAGING}"
+    log_level: "${LOG_LEVEL_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    cache_dir: "${CACHE_DIR_STAGING}"
+    output_dir: "${OUTPUT_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    python_version: "${PYTHON_VERSION_PROD}"
+    pandas_version: "${PANDAS_VERSION_PROD}"
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    data_dir: "${DATA_DIR_PROD}"
+    cache_dir: "${CACHE_DIR_PROD}"
+    output_dir: "${OUTPUT_DIR_PROD}"
+
+# ============================================================================
+# PANDAS DISPLAY OPTIONS
+# ============================================================================
+display:
+  max_rows: ${DISPLAY_MAX_ROWS}  # Number of rows to display, None for all
+  max_columns: ${DISPLAY_MAX_COLUMNS}  # Number of columns to display
+  max_colwidth: ${DISPLAY_MAX_COLWIDTH}  # Max width for column display
+  precision: ${DISPLAY_PRECISION}  # Floating point precision
+  width: ${DISPLAY_WIDTH}  # Display width in characters
+  max_info_columns: ${DISPLAY_MAX_INFO_COLUMNS}
+  max_info_rows: ${DISPLAY_MAX_INFO_ROWS}
+  expand_frame_repr: ${DISPLAY_EXPAND_FRAME_REPR}
+  show_dimensions: ${DISPLAY_SHOW_DIMENSIONS}
+  
+  formatting:
+    float_format: "${FLOAT_FORMAT}"  # e.g., "{:.2f}" for 2 decimal places
+    date_format: "${DATE_FORMAT}"  # e.g., "%Y-%m-%d"
+    large_repr: "${LARGE_REPR}"  # truncate | info
+    
+  notebook:
+    repr_html: ${NOTEBOOK_REPR_HTML}
+    max_rows: ${NOTEBOOK_MAX_ROWS}
+    max_columns: ${NOTEBOOK_MAX_COLUMNS}
+
+# ============================================================================
+# PERFORMANCE SETTINGS
+# ============================================================================
+performance:
+  memory:
+    mode: "${MEMORY_MODE}"  # minimal | low | medium | high
+    
+  compute:
+    use_bottleneck: ${USE_BOTTLENECK}  # Faster array operations
+    use_numexpr: ${USE_NUMEXPR}  # Faster numerical operations
+    numexpr_max_threads: ${NUMEXPR_MAX_THREADS}
+    
+  io:
+    hdf_default_format: "${HDF_DEFAULT_FORMAT}"  # fixed | table
+    excel_engine: "${EXCEL_ENGINE}"  # openpyxl | xlsxwriter | xlrd
+    parquet_engine: "${PARQUET_ENGINE}"  # pyarrow | fastparquet
+    
+  chunking:
+    enabled: ${CHUNKING_ENABLED}
+    chunksize: ${CHUNKSIZE}  # Number of rows per chunk
+    
+  copy_on_write:
+    enabled: ${COPY_ON_WRITE}  # Pandas 2.0+ feature for better memory management
+    
+  string_storage:
+    backend: "${STRING_STORAGE}"  # python | pyarrow
+
+# ============================================================================
+# DATA LOADING CONFIGURATION
+# ============================================================================
+data_loading:
+  csv:
+    default_encoding: "${CSV_ENCODING}"  # utf-8 | latin-1 | cp1252
+    delimiter: "${CSV_DELIMITER}"  # , | ; | \t
+    na_values: "${CSV_NA_VALUES}"  # Custom NA values to recognize
+    parse_dates: ${CSV_PARSE_DATES}
+    infer_datetime_format: ${CSV_INFER_DATETIME}
+    low_memory: ${CSV_LOW_MEMORY}
+    engine: "${CSV_ENGINE}"  # c | python | pyarrow
+    
+  excel:
+    engine: "${EXCEL_READ_ENGINE}"  # openpyxl | xlrd
+    na_values: "${EXCEL_NA_VALUES}"
+    
+  parquet:
+    engine: "${PARQUET_READ_ENGINE}"  # pyarrow | fastparquet
+    columns: "${PARQUET_COLUMNS_TO_READ}"  # List of columns to read
+    use_nullable_dtypes: ${PARQUET_NULLABLE_DTYPES}
+    
+  json:
+    orient: "${JSON_ORIENT}"  # split | records | index | columns | values
+    lines: ${JSON_LINES}  # For newline-delimited JSON
+    
+  sql:
+    chunksize: ${SQL_CHUNKSIZE}
+    index_col: "${SQL_INDEX_COL}"
+    parse_dates: "${SQL_PARSE_DATES}"
+    
+  hdf:
+    mode: "${HDF_MODE}"  # r | w | a
+    format: "${HDF_FORMAT}"  # fixed | table
+    complevel: ${HDF_COMPLEVEL}  # Compression level (0-9)
+    complib: "${HDF_COMPLIB}"  # zlib | lzo | bzip2 | blosc
+
+# ============================================================================
+# DATA PROCESSING
+# ============================================================================
+data_processing:
+  dtype_optimization:
+    enabled: ${DTYPE_OPTIMIZATION_ENABLED}
+    downcast_integers: ${DOWNCAST_INTEGERS}
+    downcast_floats: "${DOWNCAST_FLOATS}"  # float | None
+    convert_to_categorical: ${CONVERT_TO_CATEGORICAL}
+    
+  missing_values:
+    strategy: "${MISSING_VALUE_STRATEGY}"  # drop | fill | interpolate | custom
+    fill_method: "${FILL_METHOD}"  # ffill | bfill | mean | median | mode
+    interpolation_method: "${INTERPOLATION_METHOD}"  # linear | polynomial | spline
+    
+  duplicates:
+    keep: "${DUPLICATES_KEEP}"  # first | last | False
+    subset: "${DUPLICATES_SUBSET}"  # Columns to check for duplicates
+    
+  transformations:
+    scaling: "${SCALING_METHOD}"  # standard | minmax | robust | none
+    encoding: "${CATEGORICAL_ENCODING}"  # onehot | label | target | none
+    
+  validation:
+    check_dtypes: ${VALIDATE_DTYPES}
+    check_nulls: ${VALIDATE_NULLS}
+    check_duplicates: ${VALIDATE_DUPLICATES}
+    check_ranges: ${VALIDATE_RANGES}
+
+# ============================================================================
+# INDEXING & SORTING
+# ============================================================================
+indexing:
+  mode:
+    chained_assignment: "${CHAINED_ASSIGNMENT_MODE}"  # warn | raise | None
+    
+  performance:
+    use_inf_as_na: ${USE_INF_AS_NA}
+    
+  sorting:
+    algorithm: "${SORT_ALGORITHM}"  # quicksort | mergesort | heapsort
+    stable_sort: ${STABLE_SORT}
+
+# ============================================================================
+# GROUPBY OPERATIONS
+# ============================================================================
+groupby:
+  dropna: ${GROUPBY_DROPNA}  # Drop NA values in groupby
+  observed: ${GROUPBY_OBSERVED}  # Only show observed values for categoricals
+  sort: ${GROUPBY_SORT}  # Sort group keys
+  
+  aggregation:
+    numeric_only: ${AGG_NUMERIC_ONLY}
+    min_count: ${AGG_MIN_COUNT}
+
+# ============================================================================
+# MERGE & JOIN OPERATIONS
+# ============================================================================
+merge:
+  validate: "${MERGE_VALIDATE}"  # one_to_one | one_to_many | many_to_one | many_to_many | None
+  indicator: ${MERGE_INDICATOR}  # Add merge indicator column
+  suffixes: "${MERGE_SUFFIXES}"  # e.g., ["_left", "_right"]
+  
+  join:
+    how: "${JOIN_HOW}"  # left | right | outer | inner | cross
+    sort: ${JOIN_SORT}
+
+# ============================================================================
+# TIME SERIES CONFIGURATION
+# ============================================================================
+timeseries:
+  freq_inference: ${TS_INFER_FREQ}
+  
+  resampling:
+    default_rule: "${RESAMPLE_RULE}"  # D | W | M | Q | Y | H | T | S
+    closed: "${RESAMPLE_CLOSED}"  # left | right
+    label: "${RESAMPLE_LABEL}"  # left | right
+    
+  rolling:
+    window_size: ${ROLLING_WINDOW_SIZE}
+    min_periods: ${ROLLING_MIN_PERIODS}
+    center: ${ROLLING_CENTER}
+    
+  datetime:
+    timezone: "${DEFAULT_TIMEZONE}"  # UTC | America/New_York | etc.
+    yearfirst: ${DATETIME_YEARFIRST}
+    dayfirst: ${DATETIME_DAYFIRST}
+
+# ============================================================================
+# OUTPUT CONFIGURATION
+# ============================================================================
+output:
+  csv:
+    encoding: "${OUTPUT_CSV_ENCODING}"
+    sep: "${OUTPUT_CSV_SEP}"
+    index: ${OUTPUT_CSV_INDEX}
+    compression: "${OUTPUT_CSV_COMPRESSION}"  # gzip | bz2 | zip | xz | None
+    
+  excel:
+    engine: "${OUTPUT_EXCEL_ENGINE}"  # openpyxl | xlsxwriter
+    index: ${OUTPUT_EXCEL_INDEX}
+    freeze_panes: "${OUTPUT_EXCEL_FREEZE_PANES}"
+    
+  parquet:
+    engine: "${OUTPUT_PARQUET_ENGINE}"  # pyarrow | fastparquet
+    compression: "${OUTPUT_PARQUET_COMPRESSION}"  # snappy | gzip | brotli | lz4 | zstd
+    index: ${OUTPUT_PARQUET_INDEX}
+    
+  json:
+    orient: "${OUTPUT_JSON_ORIENT}"
+    compression: "${OUTPUT_JSON_COMPRESSION}"
+    lines: ${OUTPUT_JSON_LINES}
+    
+  html:
+    escape: ${OUTPUT_HTML_ESCAPE}
+    max_rows: ${OUTPUT_HTML_MAX_ROWS}
+    max_cols: ${OUTPUT_HTML_MAX_COLS}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  pandas_operations:
+    log_operations: ${LOG_PANDAS_OPERATIONS}
+    log_warnings: ${LOG_PANDAS_WARNINGS}
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    pandas: "${LOG_LEVEL_PANDAS}"
+    data_pipeline: "${LOG_LEVEL_DATA_PIPELINE}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+  profiling:
+    enabled: ${PROFILING_ENABLED}
+    memory_usage: ${PROFILE_MEMORY}
+    deep_memory: ${PROFILE_DEEP_MEMORY}
+
+# ============================================================================
+# DATA QUALITY
+# ============================================================================
+data_quality:
+  validation:
+    schema_validation: ${SCHEMA_VALIDATION_ENABLED}
+    schema_path: "${SCHEMA_PATH}"
+    
+  profiling:
+    enabled: ${DATA_PROFILING_ENABLED}
+    tool: "${PROFILING_TOOL}"  # pandas-profiling | sweetviz | autoviz
+    output_path: "${PROFILE_OUTPUT_PATH}"
+    
+  monitoring:
+    track_memory: ${TRACK_MEMORY_USAGE}
+    track_execution_time: ${TRACK_EXECUTION_TIME}
+    
+  constraints:
+    check_constraints: ${CHECK_CONSTRAINTS}
+    constraints_file: "${CONSTRAINTS_FILE_PATH}"
+
+# ============================================================================
+# INTEGRATION
+# ============================================================================
+integration:
+  databases:
+    connection_string: "${DB_CONNECTION_STRING}"
+    connection_pool_size: ${DB_POOL_SIZE}
+    
+  apis:
+    rate_limit: ${API_RATE_LIMIT}
+    retry_attempts: ${API_RETRY_ATTEMPTS}
+    timeout: ${API_TIMEOUT}
+    
+  cloud_storage:
+    provider: "${CLOUD_PROVIDER}"  # s3 | gcs | azure
+    bucket: "${CLOUD_BUCKET}"
+    
+  streaming:
+    enabled: ${STREAMING_ENABLED}
+    platform: "${STREAMING_PLATFORM}"  # kafka | kinesis | pubsub
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  data_encryption:
+    enabled: ${DATA_ENCRYPTION_ENABLED}
+    encryption_key: "${DATA_ENCRYPTION_KEY}"
+    
+  pii_detection:
+    enabled: ${PII_DETECTION_ENABLED}
+    mask_pii: ${MASK_PII}
+    
+  data_anonymization:
+    enabled: ${DATA_ANONYMIZATION_ENABLED}
+    methods: "${ANONYMIZATION_METHODS}"  # hashing | masking | pseudonymization
+    
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  database:
+    connection_string: "${DB_CONNECTION_STRING}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    
+  cloud_storage:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  api_keys:
+    data_source_api_key: "${DATA_SOURCE_API_KEY}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

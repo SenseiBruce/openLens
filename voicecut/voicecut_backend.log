@@ -1,0 +1,176 @@
+INFO:     Will watch for changes in these directories: ['/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [8035] using StatReload
+INFO:     Started server process [8039]
+INFO:     Waiting for application startup.
+2026-06-15 02:15:17,053 [INFO] voicecut.backend.api.main: Starting VoiceCut backend...
+2026-06-15 02:15:17,064 [INFO] voicecut.backend.db.database: Database initialized: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/voicecut.db
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53771 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53774 - "GET /api/projects/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53776 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:53789 - "GET /api/analyze/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
+2026-06-15 02:15:59,197 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
+2026-06-15 02:16:00,231 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
+2026-06-15 02:16:00,231 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/silero-vad/src/silero_vad/utils_vad.py:143: UserWarning: torchaudio.sox_effects.sox_effects.apply_effects_file has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release. 
+  wav, sr = torchaudio.sox_effects.apply_effects_file(path, effects=effects)
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+2026-06-15 02:16:02,281 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 0 speech segments
+2026-06-15 02:16:02,283 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'small' on mps ...
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/pyannote/audio/core/io.py:47: UserWarning: 
+torchcodec is not installed correctly so built-in audio decoding will fail. Solutions are:
+* use audio preloaded in-memory as a {'waveform': (channel, time) torch.Tensor, 'sample_rate': int} dictionary;
+* fix torchcodec installation. Error message was:
+
+Could not load libtorchcodec. Likely causes:
+          1. FFmpeg is not properly installed in your environment. We support
+             versions 4, 5, 6 and 7.
+          2. The PyTorch version (2.8.0) is not compatible with
+             this version of TorchCodec. Refer to the version compatibility
+             table:
+             https://github.com/pytorch/torchcodec?tab=readme-ov-file#installing-torchcodec.
+          3. Another runtime dependency; see exceptions below.
+        The following exceptions were raised as we tried to load libtorchcodec:
+        
+[start of libtorchcodec loading traceback]
+FFmpeg version 7: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib, 0x0006): Library not loaded: @rpath/libavutil.59.dylib
+  Referenced from: <4EE009B0-9B70-3C86-BB0E-E3E97FD75307> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib
+  Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.59.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.59.dylib' (no such file)
+FFmpeg version 6: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib, 0x0006): Library not loaded: @rpath/libavutil.58.dylib
+  Referenced from: <429667FA-10BA-309D-B804-C6862E0D693C> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib
+  Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.58.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.58.dylib' (no such file)
+FFmpeg version 5: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib, 0x0006): Library not loaded: @rpath/libavutil.57.dylib
+  Referenced from: <AF044D12-BBEA-3FC3-9BF0-FE09393BCD48> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib
+  Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.57.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.57.dylib' (no such file)
+FFmpeg version 4: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib, 0x0006): Library not loaded: @rpath/libavutil.56.dylib
+  Referenced from: <F551E475-09B9-3CDC-9702-50798633AD8E> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib
+  Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.56.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.56.dylib' (no such file)
+[end of libtorchcodec loading traceback].
+  warnings.warn(
+2026-06-15 02:16:07,852 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
+2026-06-15 02:16:08 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
+2026-06-15 02:16:08 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
+INFO: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-15 02:16:08,763 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-15 02:16:08,772 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
+2026-06-15 02:16:08,772 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
+2026-06-15 02:16:10 - whisperx.asr - WARNING - Audio is shorter than 30s, language detection may be inaccurate
+2026-06-15 02:16:11 - whisperx.asr - INFO - Detected language: ko (0.27) in first 30s of audio
+2026-06-15 02:16:12,262 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='ko', 1 segments
+2026-06-15 02:17:12 - whisperx.alignment - WARNING - Failed to align segment (" MBC 뉴스 이덕영입니다."): backtrack failed, resorting to original
+INFO:     127.0.0.1:54116 - "GET /api/projects/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54120 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54124 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54125 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54124 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54127 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54643 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54676 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54679 - "GET /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54681 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:54694 - "GET /api/analyze/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
+2026-06-15 02:19:25,775 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
+2026-06-15 02:19:25,868 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
+2026-06-15 02:19:25,869 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/silero-vad/src/silero_vad/utils_vad.py:143: UserWarning: torchaudio.sox_effects.sox_effects.apply_effects_file has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release. 
+  wav, sr = torchaudio.sox_effects.apply_effects_file(path, effects=effects)
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+2026-06-15 02:19:28,083 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 9 speech segments
+2026-06-15 02:19:28,083 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'small' on mps ...
+2026-06-15 02:19:28,313 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
+2026-06-15 02:19:29 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
+2026-06-15 02:19:29 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
+INFO: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-15 02:19:29,415 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-15 02:19:29,423 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
+2026-06-15 02:19:29,423 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
+2026-06-15 02:19:31 - whisperx.asr - WARNING - Audio is shorter than 30s, language detection may be inaccurate
+2026-06-15 02:19:32 - whisperx.asr - INFO - Detected language: hi (0.76) in first 30s of audio
+2026-06-15 02:19:42,949 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='hi', 1 segments
+/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+2026-06-15 02:19:53,394 [INFO] voicecut.backend.pipeline.processor: Gap detection: 4 candidate cuts from 9 speech segments
+INFO:     127.0.0.1:54810 - "GET /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54813 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54816 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54822 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:54822 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:55340 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:55506 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:55506 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:55671 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:55719 - "PATCH /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462/decisions HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 415, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 62, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/backend/api/routes/projects.py", line 39, in update_decisions
+    decision_map = {d.cut_id: d.action for d in decisions}
+                              ^^^^^^^^
+  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/pydantic/main.py", line 1042, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'DecisionUpdate' object has no attribute 'action'
+INFO:     127.0.0.1:55723 - "GET /api/export/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
+2026-06-15 02:23:30,935 [INFO] voicecut.backend.export.renderer: Final video: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/exports/56e678c2-376e-4eab-a6af-8d890b2a0462/final_output.mp4
+INFO:     127.0.0.1:55738 - "GET /api/export/56e678c2-376e-4eab-a6af-8d890b2a0462/download/final_output.mp4 HTTP/1.1" 200 OK

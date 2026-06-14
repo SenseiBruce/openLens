@@ -1,0 +1,7 @@
+backend
+infrastructure
+integrations
+monitoring
+shared
+tests
+web

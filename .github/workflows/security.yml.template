@@ -1,0 +1,556 @@
+# ===============================================================================
+# Security Scanning Workflow Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ===============================================================================
+# 
+# This dedicated security workflow provides comprehensive security scanning:
+# - Static Application Security Testing (SAST)
+# - Dynamic Application Security Testing (DAST)
+# - Dependency vulnerability scanning
+# - Secret detection
+# - Container image scanning
+# - License compliance checking
+# - Security policy enforcement
+# 
+# USAGE:
+# 1. Copy this template to .github/workflows/security.yml
+# 2. Configure security scanning tools and thresholds
+# 3. Set up required secrets in GitHub Settings
+# 4. Customize scan schedules and triggers
+# ===============================================================================
+
+name: Security Scanning
+
+# ===============================================================================
+# WORKFLOW TRIGGERS
+# ===============================================================================
+on:
+  # Run on all pushes to protected branches
+  push:
+    branches:
+      - main
+      - develop
+      - baseline
+  
+  # Run on all pull requests
+  pull_request:
+    branches:
+      - main
+      - develop
+      - baseline
+  
+  # Schedule daily security scans at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - sast
+          - dast
+          - dependencies
+          - secrets
+          - containers
+
+# ===============================================================================
+# ENVIRONMENT VARIABLES
+# ===============================================================================
+env:
+  # Project Configuration
+  PROJECT_NAME: your-project-name
+  
+  # Severity Thresholds
+  SEVERITY_THRESHOLD: HIGH  # Options: LOW, MEDIUM, HIGH, CRITICAL
+  FAIL_ON_SEVERITY: CRITICAL
+  
+  # Scan Configuration
+  ENABLE_SAST: true
+  ENABLE_DAST: true
+  ENABLE_DEPENDENCY_SCAN: true
+  ENABLE_SECRET_SCAN: true
+  ENABLE_CONTAINER_SCAN: true
+  ENABLE_LICENSE_SCAN: true
+
+# ===============================================================================
+# PERMISSIONS
+# ===============================================================================
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: write
+
+# ===============================================================================
+# JOBS
+# ===============================================================================
+jobs:
+
+  # =============================================================================
+  # STATIC APPLICATION SECURITY TESTING (SAST)
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # CodeQL Analysis
+  # ---------------------------------------------------------------------------
+  sast-codeql:
+    name: CodeQL SAST Analysis
+    runs-on: ubuntu-latest
+    if: env.ENABLE_SAST == 'true'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'python', 'java', 'go', 'csharp']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+          config-file: ./.github/codeql/codeql-config.yml
+      
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          upload: true
+          output: sarif-results
+          
+      - name: Upload CodeQL results
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results-${{ matrix.language }}
+          path: sarif-results
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Semgrep SAST Scan
+  # ---------------------------------------------------------------------------
+  sast-semgrep:
+    name: Semgrep SAST Scan
+    runs-on: ubuntu-latest
+    if: env.ENABLE_SAST == 'true'
+    
+    container:
+      image: returntocorp/semgrep
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Semgrep scan
+        run: |
+          semgrep scan \
+            --config=auto \
+            --sarif \
+            --output=semgrep-results.sarif \
+            --severity=${{ env.SEVERITY_THRESHOLD }} \
+            --metrics=off
+      
+      - name: Upload Semgrep results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+      
+      - name: Upload Semgrep results
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: semgrep-results.sarif
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # SonarCloud Analysis
+  # ---------------------------------------------------------------------------
+  sast-sonarcloud:
+    name: SonarCloud SAST Analysis
+    runs-on: ubuntu-latest
+    if: env.ENABLE_SAST == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.PROJECT_NAME }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.coverage.exclusions=**/*test*/**,**/*mock*/**
+
+  # =============================================================================
+  # DEPENDENCY VULNERABILITY SCANNING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Snyk Dependency Scan
+  # ---------------------------------------------------------------------------
+  dependency-snyk:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    if: env.ENABLE_DEPENDENCY_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: |
+            --severity-threshold=${{ env.SEVERITY_THRESHOLD }}
+            --all-projects
+            --detection-depth=4
+            --json-file-output=snyk-results.json
+      
+      - name: Upload Snyk results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: snyk.sarif
+      
+      - name: Upload Snyk results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snyk-results
+          path: snyk-results.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # GitHub Dependency Review
+  # ---------------------------------------------------------------------------
+  dependency-review:
+    name: GitHub Dependency Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      env.ENABLE_DEPENDENCY_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: ${{ env.FAIL_ON_SEVERITY }}
+          deny-licenses: GPL-2.0, GPL-3.0
+          comment-summary-in-pr: true
+
+  # ---------------------------------------------------------------------------
+  # OWASP Dependency Check
+  # ---------------------------------------------------------------------------
+  dependency-owasp:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    if: env.ENABLE_DEPENDENCY_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ env.PROJECT_NAME }}
+          path: '.'
+          format: 'ALL'
+          out: 'dependency-check-report'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
+      
+      - name: Upload OWASP Dependency Check results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-dependency-check-results
+          path: dependency-check-report/
+          retention-days: 30
+
+  # =============================================================================
+  # SECRET DETECTION
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # TruffleHog Secret Scanning
+  # ---------------------------------------------------------------------------
+  secrets-trufflehog:
+    name: TruffleHog Secret Detection
+    runs-on: ubuntu-latest
+    if: env.ENABLE_SECRET_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --json --only-verified
+      
+      - name: Fail on verified secrets
+        run: |
+          if [ -f trufflehog_output.json ]; then
+            VERIFIED_COUNT=$(jq '[.[] | select(.SourceMetadata.Data.Github.link != null)] | length' trufflehog_output.json)
+            if [ "$VERIFIED_COUNT" -gt 0 ]; then
+              echo "::error::Found $VERIFIED_COUNT verified secrets!"
+              exit 1
+            fi
+          fi
+
+  # ---------------------------------------------------------------------------
+  # GitLeaks Secret Scanning
+  # ---------------------------------------------------------------------------
+  secrets-gitleaks:
+    name: GitLeaks Secret Detection
+    runs-on: ubuntu-latest
+    if: env.ENABLE_SECRET_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run GitLeaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+      
+      - name: Upload GitLeaks results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-results
+          path: results.sarif
+          retention-days: 30
+
+  # =============================================================================
+  # CONTAINER SECURITY SCANNING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Trivy Container Scan
+  # ---------------------------------------------------------------------------
+  container-trivy:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+    if: env.ENABLE_CONTAINER_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.PROJECT_NAME }}:${{ github.sha }} .
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.PROJECT_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: '${{ env.SEVERITY_THRESHOLD }},CRITICAL'
+          vuln-type: 'os,library'
+          scanners: 'vuln,config,secret'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: trivy
+      
+      - name: Run Trivy for detailed report
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.PROJECT_NAME }}:${{ github.sha }}
+          format: 'json'
+          output: 'trivy-detailed-results.json'
+      
+      - name: Upload Trivy detailed results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-detailed-results
+          path: trivy-detailed-results.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Grype Container Scan
+  # ---------------------------------------------------------------------------
+  container-grype:
+    name: Grype Container Scan
+    runs-on: ubuntu-latest
+    if: env.ENABLE_CONTAINER_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.PROJECT_NAME }}:${{ github.sha }} .
+      
+      - name: Scan image with Grype
+        uses: anchore/scan-action@v3
+        with:
+          image: ${{ env.PROJECT_NAME }}:${{ github.sha }}
+          fail-build: true
+          severity-cutoff: ${{ env.SEVERITY_THRESHOLD }}
+          output-format: sarif
+      
+      - name: Upload Grype results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: grype
+
+  # =============================================================================
+  # LICENSE COMPLIANCE SCANNING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # License Compliance Check
+  # ---------------------------------------------------------------------------
+  license-compliance:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    if: env.ENABLE_LICENSE_SCAN == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install license checker
+        run: npm install -g license-checker
+      
+      - name: Check licenses
+        run: |
+          license-checker --json --out licenses.json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC"
+      
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-compliance-report
+          path: licenses.json
+          retention-days: 30
+
+  # =============================================================================
+  # SECURITY SUMMARY AND REPORTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Generate Security Report
+  # ---------------------------------------------------------------------------
+  security-summary:
+    name: Security Scan Summary
+    runs-on: ubuntu-latest
+    needs: 
+      - sast-codeql
+      - dependency-snyk
+      - secrets-trufflehog
+      - container-trivy
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-results
+      
+      - name: Generate security summary
+        run: |
+          echo "# Security Scan Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Scan Date:** $(date -u)" >> security-summary.md
+          echo "**Commit:** ${{ github.sha }}" >> security-summary.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## Scan Results" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          # Add results from each scan
+          for result_dir in security-results/*/; do
+            scan_name=$(basename "$result_dir")
+            echo "### $scan_name" >> security-summary.md
+            
+            # Count vulnerabilities if JSON results exist
+            if [ -f "$result_dir"/*.json ]; then
+              echo "Results available in artifacts" >> security-summary.md
+            fi
+            echo "" >> security-summary.md
+          done
+      
+      - name: Comment PR with security summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('security-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+      
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: security-summary.md
+          retention-days: 90
+
+# ===============================================================================
+# END OF WORKFLOW
+# ===============================================================================

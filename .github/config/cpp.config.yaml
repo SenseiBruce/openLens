@@ -1,0 +1,498 @@
+# C++ Project Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for C++ projects
+# Usage: Copy and customize for each C++ project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  language: "cpp"
+  standard: "${CPP_STANDARD}"  # c++11 | c++14 | c++17 | c++20 | c++23
+  framework: "${CPP_FRAMEWORK}"  # qt | boost | poco | none
+  version: "${PROJECT_VERSION}"  # Semantic versioning (e.g., 1.0.0)
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  development:
+    backend_developer:
+      enabled: ${BACKEND_AGENT_ENABLED}
+      role: "Back-End Developer"
+      responsibilities:
+        - "Core library development"
+        - "Performance optimization"
+        - "Memory management"
+    
+    frontend_developer:
+      enabled: ${FRONTEND_AGENT_ENABLED}
+      role: "Front-End Developer"
+      responsibilities:
+        - "UI implementation"
+        - "Event handling"
+    
+  architecture:
+    technical_architect:
+      enabled: ${ARCHITECT_AGENT_ENABLED}
+      role: "Technical Architect"
+      consultation_required: ${ARCHITECT_CONSULTATION_REQUIRED}
+      
+    database_architect:
+      enabled: ${DB_ARCHITECT_AGENT_ENABLED}
+      role: "Database Architect"
+      consultation_required: ${DB_ARCHITECT_CONSULTATION_REQUIRED}
+      
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+      
+  quality:
+    qa_engineer:
+      enabled: ${QA_AGENT_ENABLED}
+      role: "QA-Test Engineer"
+      
+  data:
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+
+# ============================================================================
+# PHASE DEFINITIONS
+# ============================================================================
+phases:
+  phase_1_planning:
+    name: "Planning & Requirements"
+    duration_estimate: "${PHASE_1_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_PRD}"
+      - "${DELIVERABLE_CHARTER}"
+      - "${DELIVERABLE_ARCHITECTURE}"
+    agents_required:
+      - "Project Lifecycle Manager"
+      - "${PHASE_1_AGENT_1}"
+      - "${PHASE_1_AGENT_2}"
+      
+  phase_2_design:
+    name: "Design & Architecture"
+    duration_estimate: "${PHASE_2_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SYSTEM_DESIGN}"
+      - "${DELIVERABLE_CLASS_DIAGRAMS}"
+      - "${DELIVERABLE_API_SPEC}"
+    agents_required:
+      - "Technical Architect"
+      - "${PHASE_2_AGENT_1}"
+      
+  phase_3_implementation:
+    name: "Implementation"
+    duration_estimate: "${PHASE_3_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_SOURCE_CODE}"
+      - "${DELIVERABLE_TESTS}"
+      - "${DELIVERABLE_DOCUMENTATION}"
+    agents_required:
+      - "Back-End Developer"
+      - "${PHASE_3_AGENT_1}"
+      - "${PHASE_3_AGENT_2}"
+      
+  phase_4_testing:
+    name: "Testing & QA"
+    duration_estimate: "${PHASE_4_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_TEST_RESULTS}"
+      - "${DELIVERABLE_QA_REPORT}"
+      - "${DELIVERABLE_PERFORMANCE_REPORT}"
+    agents_required:
+      - "QA-Test Engineer"
+      
+  phase_5_deployment:
+    name: "Deployment & Handover"
+    duration_estimate: "${PHASE_5_DURATION}"
+    deliverables:
+      - "${DELIVERABLE_DEPLOYMENT_GUIDE}"
+      - "${DELIVERABLE_RUNBOOK}"
+    agents_required:
+      - "DevOps Engineer"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    compiler: "${COMPILER_DEV}"  # g++ | clang++ | msvc
+    compiler_version: "${COMPILER_VERSION_DEV}"
+    build_type: "${BUILD_TYPE_DEV}"  # Debug | Release | RelWithDebInfo
+    optimization_level: "${OPTIMIZATION_LEVEL_DEV}"  # O0 | O1 | O2 | O3
+    debug_symbols: ${DEBUG_SYMBOLS_DEV}
+    sanitizers: "${SANITIZERS_DEV}"  # address | thread | memory | undefined
+    log_level: "${LOG_LEVEL_DEV}"  # TRACE | DEBUG | INFO | WARNING | ERROR
+    database_url: "${DATABASE_URL_DEV}"
+    api_base_url: "${API_BASE_URL_DEV}"
+    
+  staging:
+    name: "staging"
+    compiler: "${COMPILER_STAGING}"
+    compiler_version: "${COMPILER_VERSION_STAGING}"
+    build_type: "${BUILD_TYPE_STAGING}"
+    optimization_level: "${OPTIMIZATION_LEVEL_STAGING}"
+    debug_symbols: ${DEBUG_SYMBOLS_STAGING}
+    sanitizers: "${SANITIZERS_STAGING}"
+    log_level: "${LOG_LEVEL_STAGING}"
+    database_url: "${DATABASE_URL_STAGING}"
+    api_base_url: "${API_BASE_URL_STAGING}"
+    
+  production:
+    name: "prod"
+    compiler: "${COMPILER_PROD}"
+    compiler_version: "${COMPILER_VERSION_PROD}"
+    build_type: "Release"
+    optimization_level: "O3"
+    debug_symbols: false
+    sanitizers: "none"
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    database_url: "${DATABASE_URL_PROD}"
+    api_base_url: "${API_BASE_URL_PROD}"
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+build:
+  build_system: "${BUILD_SYSTEM}"  # cmake | make | bazel | meson
+  generator: "${BUILD_GENERATOR}"  # Unix Makefiles | Ninja | Visual Studio
+  
+  cmake:
+    version_required: "${CMAKE_VERSION_REQUIRED}"
+    source_dir: "${CMAKE_SOURCE_DIR}"
+    binary_dir: "${CMAKE_BINARY_DIR}"
+    install_prefix: "${CMAKE_INSTALL_PREFIX}"
+    toolchain_file: "${CMAKE_TOOLCHAIN_FILE}"
+    
+  compiler:
+    flags: "${COMPILER_FLAGS}"
+    warnings: "${COMPILER_WARNINGS}"  # -Wall -Wextra -Wpedantic
+    errors: "${COMPILER_ERRORS}"  # -Werror
+    standard: "${CPP_STANDARD_FLAG}"  # -std=c++17
+    
+  linker:
+    flags: "${LINKER_FLAGS}"
+    libraries: "${LINKER_LIBRARIES}"
+    library_paths: "${LIBRARY_PATHS}"
+    
+  dependencies:
+    package_manager: "${PACKAGE_MANAGER}"  # conan | vcpkg | none
+    requirements_file: "${REQUIREMENTS_FILE_PATH}"  # conanfile.txt | vcpkg.json
+    
+  static_analysis:
+    clang_tidy:
+      enabled: ${CLANG_TIDY_ENABLED}
+      config_file: "${CLANG_TIDY_CONFIG_PATH}"
+      checks: "${CLANG_TIDY_CHECKS}"
+      
+    cppcheck:
+      enabled: ${CPPCHECK_ENABLED}
+      severity: "${CPPCHECK_SEVERITY}"  # error | warning | style | performance
+      
+    clang_format:
+      enabled: ${CLANG_FORMAT_ENABLED}
+      style: "${CLANG_FORMAT_STYLE}"  # LLVM | Google | Chromium | Mozilla | WebKit
+      config_file: "${CLANG_FORMAT_CONFIG_PATH}"
+      
+  memory_analysis:
+    valgrind:
+      enabled: ${VALGRIND_ENABLED}
+      tool: "${VALGRIND_TOOL}"  # memcheck | cachegrind | callgrind | helgrind
+      
+  pre_build_commands:
+    - "${PRE_BUILD_CMD_1}"
+    - "${PRE_BUILD_CMD_2}"
+    
+  post_build_commands:
+    - "${POST_BUILD_CMD_1}"
+    - "${POST_BUILD_CMD_2}"
+
+# ============================================================================
+# TESTING CONFIGURATION
+# ============================================================================
+testing:
+  framework: "${TEST_FRAMEWORK}"  # gtest | catch2 | boost-test | doctest
+  
+  coverage:
+    tool: "${COVERAGE_TOOL}"  # gcov | lcov | llvm-cov
+    
+    # Coverage requirements by project type
+    requirements:
+      POC: ${COVERAGE_POC}  # 85%
+      Prototype: ${COVERAGE_PROTOTYPE}  # 90%
+      MVP: ${COVERAGE_MVP}  # 95%
+      Production: ${COVERAGE_PRODUCTION}  # 95%
+      Handover: ${COVERAGE_HANDOVER}  # 95%
+      
+    current_requirement: ${COVERAGE_CURRENT_REQUIREMENT}
+    report_format: "${COVERAGE_REPORT_FORMAT}"  # html | xml | lcov
+    output_dir: "${COVERAGE_OUTPUT_DIR}"
+    
+  unit_tests:
+    directory: "${UNIT_TEST_DIR}"
+    pattern: "${UNIT_TEST_PATTERN}"  # *_test.cpp
+    parallel_execution: ${UNIT_TEST_PARALLEL}
+    timeout: ${UNIT_TEST_TIMEOUT}
+    
+  integration_tests:
+    directory: "${INTEGRATION_TEST_DIR}"
+    pattern: "${INTEGRATION_TEST_PATTERN}"
+    requires_database: ${INTEGRATION_TEST_DB_REQUIRED}
+    
+  performance_tests:
+    enabled: ${PERFORMANCE_TEST_ENABLED}
+    directory: "${PERFORMANCE_TEST_DIR}"
+    benchmark_tool: "${BENCHMARK_TOOL}"  # google-benchmark | catch2-benchmark
+    
+  fixtures:
+    directory: "${FIXTURES_DIR}"
+    
+  mocking:
+    library: "${MOCKING_LIBRARY}"  # gmock | trompeloeil | hippomocks
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+deployment:
+  platform: "${DEPLOYMENT_PLATFORM}"  # linux | windows | macos | embedded
+  
+  containerization:
+    enabled: ${DOCKER_ENABLED}
+    dockerfile_path: "${DOCKERFILE_PATH}"
+    base_image: "${DOCKER_BASE_IMAGE}"  # ubuntu | alpine | debian
+    image_name: "${DOCKER_IMAGE_NAME}"
+    image_tag: "${DOCKER_IMAGE_TAG}"
+    registry_url: "${DOCKER_REGISTRY_URL}"
+    
+  orchestration:
+    tool: "${ORCHESTRATION_TOOL}"  # kubernetes | docker-compose
+    config_path: "${ORCHESTRATION_CONFIG_PATH}"
+    
+  binary:
+    type: "${BINARY_TYPE}"  # executable | shared-library | static-library
+    name: "${BINARY_NAME}"
+    install_path: "${BINARY_INSTALL_PATH}"
+    strip_symbols: ${STRIP_SYMBOLS}
+    
+  packaging:
+    format: "${PACKAGE_FORMAT}"  # deb | rpm | tar.gz | zip
+    maintainer: "${PACKAGE_MAINTAINER}"
+    dependencies: "${PACKAGE_DEPENDENCIES}"
+    
+  systemd:
+    enabled: ${SYSTEMD_ENABLED}
+    service_file: "${SYSTEMD_SERVICE_FILE}"
+    
+  health_check:
+    endpoint: "${HEALTH_CHECK_ENDPOINT}"
+    interval: ${HEALTH_CHECK_INTERVAL}
+    timeout: ${HEALTH_CHECK_TIMEOUT}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  phase_logging:
+    enabled: true
+    pattern: "logs/${PROJECT_ID}/phase_${PHASE_NUMBER}_${PHASE_NAME}/"
+    
+  library: "${LOGGING_LIBRARY}"  # spdlog | glog | boost-log | log4cpp
+  
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    app: "${LOG_LEVEL_APP}"
+    database: "${LOG_LEVEL_DATABASE}"
+    network: "${LOG_LEVEL_NETWORK}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      color: ${LOG_CONSOLE_COLOR}
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"  # daily | size-based | hourly
+      max_size: "${LOG_FILE_MAX_SIZE}"  # e.g., 10MB
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+      
+    syslog:
+      enabled: ${LOG_SYSLOG_ENABLED}
+      host: "${LOG_SYSLOG_HOST}"
+      port: ${LOG_SYSLOG_PORT}
+      facility: "${LOG_SYSLOG_FACILITY}"
+      
+  structured_logging:
+    enabled: ${STRUCTURED_LOGGING_ENABLED}
+    format: "${STRUCTURED_LOG_FORMAT}"  # json | text
+    
+  async_logging:
+    enabled: ${ASYNC_LOGGING_ENABLED}
+    queue_size: ${ASYNC_LOG_QUEUE_SIZE}
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"  # owasp-dependency-check | snyk
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    fail_on_vulnerability: ${FAIL_ON_VULNERABILITY}
+    
+  static_application_security_testing:
+    tool: "${SAST_TOOL}"  # flawfinder | cppcheck | clang-analyzer
+    config_path: "${SAST_CONFIG_PATH}"
+    severity_threshold: "${SAST_SEVERITY_THRESHOLD}"  # low | medium | high
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"  # vault | aws-secrets | azure-keyvault | env
+    config_path: "${SECRETS_CONFIG_PATH}"
+    rotation_enabled: ${SECRETS_ROTATION_ENABLED}
+    
+  buffer_overflow_protection:
+    stack_canary: ${STACK_CANARY_ENABLED}
+    aslr: ${ASLR_ENABLED}
+    dep: ${DEP_ENABLED}  # Data Execution Prevention
+    
+  encryption:
+    library: "${ENCRYPTION_LIBRARY}"  # openssl | botan | crypto++
+    algorithm: "${ENCRYPTION_ALGORITHM}"
+    
+  input_validation:
+    enabled: ${INPUT_VALIDATION_ENABLED}
+    strict_mode: ${INPUT_VALIDATION_STRICT}
+
+# ============================================================================
+# CODE QUALITY SETTINGS
+# ============================================================================
+code_quality:
+  formatting:
+    tool: "clang-format"
+    config_file: "${CLANG_FORMAT_CONFIG}"
+    check_only: ${FORMAT_CHECK_ONLY}
+    
+  linting:
+    enabled: ${LINTING_ENABLED}
+    tools:
+      - "${LINTING_TOOL_1}"
+      - "${LINTING_TOOL_2}"
+    fail_on_error: ${LINT_FAIL_ON_ERROR}
+    
+  complexity:
+    max_complexity: ${MAX_COMPLEXITY}  # McCabe complexity
+    max_function_length: ${MAX_FUNCTION_LENGTH}
+    max_file_length: ${MAX_FILE_LENGTH}
+    max_nesting_depth: ${MAX_NESTING_DEPTH}
+    
+  documentation:
+    style: "${DOCUMENTATION_STYLE}"  # doxygen | javadoc
+    min_coverage: ${MIN_DOCUMENTATION_COVERAGE}
+    
+  naming_conventions:
+    class_style: "${CLASS_NAMING_STYLE}"  # PascalCase | snake_case
+    function_style: "${FUNCTION_NAMING_STYLE}"
+    variable_style: "${VARIABLE_NAMING_STYLE}"
+    constant_style: "${CONSTANT_NAMING_STYLE}"
+
+# ============================================================================
+# DOCUMENTATION PATHS
+# ============================================================================
+documentation:
+  root_directory: "${DOCS_ROOT_DIR}"
+  
+  project_docs:
+    readme: "${README_PATH}"
+    changelog: "${CHANGELOG_PATH}"
+    contributing: "${CONTRIBUTING_PATH}"
+    license: "${LICENSE_PATH}"
+    
+  technical_docs:
+    architecture: "${ARCHITECTURE_DOC_PATH}"
+    api_reference: "${API_REFERENCE_PATH}"
+    class_diagrams: "${CLASS_DIAGRAMS_PATH}"
+    deployment_guide: "${DEPLOYMENT_GUIDE_PATH}"
+    
+  user_docs:
+    user_guide: "${USER_GUIDE_PATH}"
+    installation: "${INSTALLATION_DOC_PATH}"
+    troubleshooting: "${TROUBLESHOOTING_PATH}"
+    
+  code_docs:
+    auto_generate: ${AUTO_GENERATE_DOCS}
+    tool: "${DOCS_GENERATION_TOOL}"  # doxygen | sphinx | mkdocs
+    output_format: "${DOCS_OUTPUT_FORMAT}"  # html | pdf | latex
+    output_directory: "${DOCS_OUTPUT_DIR}"
+    config_file: "${DOCS_CONFIG_FILE}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+# Reference secrets from secure storage (environment variables, vault, etc.)
+secrets:
+  database:
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    host: "${DB_HOST}"
+    port: ${DB_PORT}
+    name: "${DB_NAME}"
+    connection_string: "${DB_CONNECTION_STRING}"
+    
+  api_keys:
+    third_party_service_1: "${API_KEY_SERVICE_1}"
+    third_party_service_2: "${API_KEY_SERVICE_2}"
+    
+  authentication:
+    secret_key: "${AUTH_SECRET_KEY}"
+    jwt_secret: "${JWT_SECRET_KEY}"
+    
+  cloud_provider:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    region: "${CLOUD_REGION}"
+    
+  encryption:
+    encryption_key: "${ENCRYPTION_KEY}"
+    private_key_path: "${PRIVATE_KEY_PATH}"
+    certificate_path: "${CERTIFICATE_PATH}"
+    
+  external_services:
+    service_endpoint: "${EXTERNAL_SERVICE_ENDPOINT}"
+    service_token: "${EXTERNAL_SERVICE_TOKEN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

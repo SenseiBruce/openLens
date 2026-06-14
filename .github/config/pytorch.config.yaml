@@ -1,0 +1,415 @@
+# PyTorch Configuration Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# Description: Zero hardcoded values configuration for PyTorch ML projects
+# Usage: Copy and customize for each PyTorch project in AgentBase
+
+# ============================================================================
+# PROJECT METADATA
+# ============================================================================
+project:
+  id: "${PROJECT_ID}"  # Unique project identifier (e.g., proj_20260209_154530)
+  name: "${PROJECT_NAME}"  # Human-readable project name
+  type: "${PROJECT_TYPE}"  # POC | Prototype | MVP | Production | Handover
+  ml_framework: "pytorch"
+  torch_version: "${PYTORCH_VERSION}"  # e.g., 2.1.0
+  cuda_version: "${CUDA_VERSION}"  # e.g., 11.8 | cpu
+  description: "${PROJECT_DESCRIPTION}"
+  created_date: "${PROJECT_CREATED_DATE}"  # ISO 8601 format
+  owner: "${PROJECT_OWNER}"
+  team_size: ${TEAM_SIZE}  # Number of agents assigned
+  priority: "${PROJECT_PRIORITY}"  # low | medium | high | critical
+  model_type: "${MODEL_TYPE}"  # classification | regression | detection | segmentation | nlp | rl | gan
+
+# ============================================================================
+# AGENT SETTINGS
+# ============================================================================
+agents:
+  orchestrator:
+    enabled: true
+    role: "Project Lifecycle Manager"
+    authority_level: "full"
+    
+  ml_development:
+    data_scientist:
+      enabled: ${DATA_SCIENTIST_ENABLED}
+      role: "Data Scientist"
+      responsibilities:
+        - "Model architecture design"
+        - "Hyperparameter tuning"
+        - "Model evaluation"
+        
+    ml_engineer:
+      enabled: ${ML_ENGINEER_ENABLED}
+      role: "Machine Learning Engineer"
+      responsibilities:
+        - "Model optimization"
+        - "Production deployment"
+        - "Model serving"
+        
+    data_engineer:
+      enabled: ${DATA_ENGINEER_ENABLED}
+      role: "Data Engineer"
+      responsibilities:
+        - "Data preprocessing"
+        - "DataLoader optimization"
+        - "Feature engineering"
+  
+  operations:
+    devops_engineer:
+      enabled: ${DEVOPS_AGENT_ENABLED}
+      role: "DevOps Engineer"
+      
+    security_engineer:
+      enabled: ${SECURITY_AGENT_ENABLED}
+      role: "Security Engineer"
+      consultation_required: true
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+environments:
+  development:
+    name: "dev"
+    python_version: "${PYTHON_VERSION_DEV}"
+    torch_version: "${TORCH_VERSION_DEV}"
+    device: "${DEVICE_DEV}"  # cuda | cuda:0 | cpu | mps
+    num_workers: ${NUM_WORKERS_DEV}
+    log_level: "${LOG_LEVEL_DEV}"  # DEBUG | INFO | WARNING | ERROR
+    tensorboard_enabled: ${TENSORBOARD_ENABLED_DEV}
+    checkpoint_dir: "${CHECKPOINT_DIR_DEV}"
+    data_dir: "${DATA_DIR_DEV}"
+    model_dir: "${MODEL_DIR_DEV}"
+    
+  staging:
+    name: "staging"
+    python_version: "${PYTHON_VERSION_STAGING}"
+    torch_version: "${TORCH_VERSION_STAGING}"
+    device: "${DEVICE_STAGING}"
+    num_workers: ${NUM_WORKERS_STAGING}
+    log_level: "${LOG_LEVEL_STAGING}"
+    tensorboard_enabled: ${TENSORBOARD_ENABLED_STAGING}
+    checkpoint_dir: "${CHECKPOINT_DIR_STAGING}"
+    data_dir: "${DATA_DIR_STAGING}"
+    model_dir: "${MODEL_DIR_STAGING}"
+    
+  production:
+    name: "prod"
+    python_version: "${PYTHON_VERSION_PROD}"
+    torch_version: "${TORCH_VERSION_PROD}"
+    device: "${DEVICE_PROD}"
+    num_workers: ${NUM_WORKERS_PROD}
+    log_level: "${LOG_LEVEL_PROD}"  # Should be WARNING or ERROR
+    tensorboard_enabled: false
+    checkpoint_dir: "${CHECKPOINT_DIR_PROD}"
+    data_dir: "${DATA_DIR_PROD}"
+    model_dir: "${MODEL_DIR_PROD}"
+
+# ============================================================================
+# MODEL CONFIGURATION
+# ============================================================================
+model:
+  architecture:
+    name: "${MODEL_ARCHITECTURE_NAME}"  # resnet50 | vit | bert | gpt | custom
+    backbone: "${MODEL_BACKBONE}"  # For transfer learning
+    pretrained: ${MODEL_PRETRAINED}
+    pretrained_weights: "${MODEL_PRETRAINED_WEIGHTS}"  # imagenet | coco | custom | none
+    
+  parameters:
+    num_classes: ${MODEL_NUM_CLASSES}
+    hidden_size: ${MODEL_HIDDEN_SIZE}
+    num_layers: ${MODEL_NUM_LAYERS}
+    dropout: ${MODEL_DROPOUT}
+    batch_norm: ${MODEL_BATCH_NORM}
+    
+  initialization:
+    method: "${WEIGHT_INIT_METHOD}"  # xavier | kaiming | normal | uniform | custom
+    seed: ${INIT_SEED}
+    
+  optimizer:
+    type: "${OPTIMIZER_TYPE}"  # adam | sgd | adamw | rmsprop | adagrad
+    learning_rate: ${LEARNING_RATE}
+    weight_decay: ${WEIGHT_DECAY}
+    momentum: ${OPTIMIZER_MOMENTUM}  # For SGD
+    betas: "${OPTIMIZER_BETAS}"  # For Adam/AdamW, e.g., [0.9, 0.999]
+    eps: ${OPTIMIZER_EPS}
+    amsgrad: ${OPTIMIZER_AMSGRAD}  # For Adam
+    
+  scheduler:
+    type: "${LR_SCHEDULER_TYPE}"  # step | cosine | exponential | plateau | onecycle | custom
+    step_size: ${SCHEDULER_STEP_SIZE}
+    gamma: ${SCHEDULER_GAMMA}
+    warmup_epochs: ${WARMUP_EPOCHS}
+    
+  loss_function:
+    type: "${LOSS_FUNCTION}"  # crossentropy | mse | bce | focal | custom
+    custom_loss_path: "${CUSTOM_LOSS_PATH}"
+    label_smoothing: ${LABEL_SMOOTHING}
+
+# ============================================================================
+# TRAINING CONFIGURATION
+# ============================================================================
+training:
+  epochs: ${EPOCHS}
+  batch_size: ${BATCH_SIZE}
+  gradient_accumulation_steps: ${GRADIENT_ACCUMULATION_STEPS}
+  max_grad_norm: ${MAX_GRAD_NORM}  # Gradient clipping
+  seed: ${RANDOM_SEED}
+  deterministic: ${DETERMINISTIC_MODE}
+  benchmark: ${CUDNN_BENCHMARK}
+  
+  validation:
+    validation_split: ${VALIDATION_SPLIT}
+    val_check_interval: ${VAL_CHECK_INTERVAL}  # Validate every N batches
+    
+  mixed_precision:
+    enabled: ${MIXED_PRECISION_ENABLED}
+    dtype: "${AMP_DTYPE}"  # float16 | bfloat16
+    
+  data_augmentation:
+    enabled: ${DATA_AUGMENTATION_ENABLED}
+    transforms:
+      - type: "${TRANSFORM_1_TYPE}"
+        params: "${TRANSFORM_1_PARAMS}"
+      - type: "${TRANSFORM_2_TYPE}"
+        params: "${TRANSFORM_2_PARAMS}"
+      - type: "${TRANSFORM_3_TYPE}"
+        params: "${TRANSFORM_3_PARAMS}"
+    
+  checkpointing:
+    save_top_k: ${SAVE_TOP_K}  # Save top K checkpoints
+    monitor: "${CHECKPOINT_MONITOR}"  # val_loss | val_accuracy
+    mode: "${CHECKPOINT_MODE}"  # min | max
+    save_last: ${SAVE_LAST_CHECKPOINT}
+    save_freq: ${CHECKPOINT_SAVE_FREQ}  # Save every N epochs
+    
+  early_stopping:
+    enabled: ${EARLY_STOPPING_ENABLED}
+    monitor: "${EARLY_STOPPING_MONITOR}"
+    patience: ${EARLY_STOPPING_PATIENCE}
+    min_delta: ${EARLY_STOPPING_MIN_DELTA}
+    mode: "${EARLY_STOPPING_MODE}"  # min | max
+    
+  logging:
+    log_every_n_steps: ${LOG_EVERY_N_STEPS}
+    log_gradients: ${LOG_GRADIENTS}
+    log_parameters: ${LOG_PARAMETERS}
+
+# ============================================================================
+# DATA CONFIGURATION
+# ============================================================================
+data:
+  dataloader:
+    num_workers: ${DATALOADER_NUM_WORKERS}
+    pin_memory: ${PIN_MEMORY}
+    persistent_workers: ${PERSISTENT_WORKERS}
+    prefetch_factor: ${PREFETCH_FACTOR}
+    shuffle: ${SHUFFLE_TRAIN}
+    drop_last: ${DROP_LAST}
+    
+  dataset:
+    type: "${DATASET_TYPE}"  # custom | torchvision | huggingface | torchaudio
+    path: "${DATASET_PATH}"
+    split_ratio: "${TRAIN_VAL_TEST_SPLIT}"  # e.g., [0.7, 0.15, 0.15]
+    
+  preprocessing:
+    normalization_mean: "${NORMALIZATION_MEAN}"  # e.g., [0.485, 0.456, 0.406]
+    normalization_std: "${NORMALIZATION_STD}"  # e.g., [0.229, 0.224, 0.225]
+    resize: "${RESIZE_DIMS}"  # e.g., [224, 224]
+    
+  caching:
+    cache_data: ${CACHE_DATA}
+    cache_dir: "${CACHE_DIR}"
+
+# ============================================================================
+# DISTRIBUTED TRAINING
+# ============================================================================
+distributed:
+  enabled: ${DISTRIBUTED_TRAINING_ENABLED}
+  backend: "${DISTRIBUTED_BACKEND}"  # nccl | gloo | mpi
+  strategy: "${DISTRIBUTED_STRATEGY}"  # ddp | fsdp | deepspeed | horovod
+  
+  ddp:
+    find_unused_parameters: ${DDP_FIND_UNUSED_PARAMETERS}
+    gradient_as_bucket_view: ${DDP_GRADIENT_AS_BUCKET_VIEW}
+    
+  fsdp:
+    sharding_strategy: "${FSDP_SHARDING_STRATEGY}"  # full | grad_op | hybrid
+    auto_wrap_policy: "${FSDP_AUTO_WRAP_POLICY}"
+    
+  nodes: ${NUM_NODES}
+  gpus_per_node: ${GPUS_PER_NODE}
+  
+  launcher:
+    type: "${LAUNCHER_TYPE}"  # torchrun | slurm | custom
+    master_addr: "${MASTER_ADDR}"
+    master_port: ${MASTER_PORT}
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+performance:
+  cuda:
+    enabled: ${CUDA_ENABLED}
+    device_ids: "${CUDA_DEVICE_IDS}"  # e.g., [0, 1, 2, 3]
+    empty_cache_freq: ${EMPTY_CACHE_FREQ}
+    
+  cudnn:
+    benchmark: ${CUDNN_BENCHMARK}
+    deterministic: ${CUDNN_DETERMINISTIC}
+    
+  torch_compile:
+    enabled: ${TORCH_COMPILE_ENABLED}  # PyTorch 2.0+ feature
+    mode: "${COMPILE_MODE}"  # default | reduce-overhead | max-autotune
+    
+  memory:
+    empty_cache: ${EMPTY_CACHE_BETWEEN_EPOCHS}
+    max_memory_allocated: "${MAX_MEMORY_ALLOCATED}"
+    
+  profiling:
+    enabled: ${PROFILING_ENABLED}
+    profile_memory: ${PROFILE_MEMORY}
+    with_stack: ${PROFILE_WITH_STACK}
+    record_shapes: ${RECORD_SHAPES}
+
+# ============================================================================
+# MODEL DEPLOYMENT
+# ============================================================================
+deployment:
+  export:
+    format: "${EXPORT_FORMAT}"  # torchscript | onnx | tensorrt | torch_mobile
+    jit_mode: "${JIT_MODE}"  # trace | script
+    export_path: "${MODEL_EXPORT_PATH}"
+    
+  onnx:
+    opset_version: ${ONNX_OPSET_VERSION}
+    dynamic_axes: "${ONNX_DYNAMIC_AXES}"
+    
+  quantization:
+    enabled: ${QUANTIZATION_ENABLED}
+    method: "${QUANTIZATION_METHOD}"  # dynamic | static | qat
+    backend: "${QUANTIZATION_BACKEND}"  # fbgemm | qnnpack
+    
+  pruning:
+    enabled: ${PRUNING_ENABLED}
+    method: "${PRUNING_METHOD}"  # l1_unstructured | random_unstructured | custom
+    amount: ${PRUNING_AMOUNT}
+    
+  serving:
+    platform: "${SERVING_PLATFORM}"  # torchserve | triton | sagemaker | custom
+    batch_size: ${SERVING_BATCH_SIZE}
+    max_batch_delay: ${MAX_BATCH_DELAY}
+    timeout: ${SERVING_TIMEOUT}
+    workers: ${SERVING_WORKERS}
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  base_directory: "logs/${PROJECT_ID}"
+  
+  experiment_tracking:
+    backend: "${EXPERIMENT_TRACKER}"  # tensorboard | wandb | mlflow | neptune | comet
+    
+  tensorboard:
+    enabled: ${TENSORBOARD_ENABLED}
+    log_dir: "${TENSORBOARD_LOG_DIR}"
+    flush_secs: ${TENSORBOARD_FLUSH_SECS}
+    
+  wandb:
+    enabled: ${WANDB_ENABLED}
+    project: "${WANDB_PROJECT}"
+    entity: "${WANDB_ENTITY}"
+    group: "${WANDB_GROUP}"
+    tags: "${WANDB_TAGS}"
+    
+  mlflow:
+    enabled: ${MLFLOW_ENABLED}
+    tracking_uri: "${MLFLOW_TRACKING_URI}"
+    experiment_name: "${MLFLOW_EXPERIMENT_NAME}"
+    
+  levels:
+    root: "${LOG_LEVEL_ROOT}"
+    pytorch: "${LOG_LEVEL_PYTORCH}"
+    model: "${LOG_LEVEL_MODEL}"
+    
+  handlers:
+    console:
+      enabled: ${LOG_CONSOLE_ENABLED}
+      format: "${LOG_CONSOLE_FORMAT}"
+      
+    file:
+      enabled: ${LOG_FILE_ENABLED}
+      path: "${LOG_FILE_PATH}"
+      format: "${LOG_FILE_FORMAT}"
+      rotation: "${LOG_FILE_ROTATION}"
+      max_size: "${LOG_FILE_MAX_SIZE}"
+      backup_count: ${LOG_FILE_BACKUP_COUNT}
+
+# ============================================================================
+# EVALUATION CONFIGURATION
+# ============================================================================
+evaluation:
+  metrics:
+    primary: "${PRIMARY_METRIC}"  # accuracy | f1 | auc | mse | mae
+    additional:
+      - "${EVAL_METRIC_1}"
+      - "${EVAL_METRIC_2}"
+      - "${EVAL_METRIC_3}"
+    
+  test_time_augmentation:
+    enabled: ${TTA_ENABLED}
+    num_augmentations: ${TTA_NUM_AUGMENTATIONS}
+    
+  inference:
+    batch_size: ${INFERENCE_BATCH_SIZE}
+    half_precision: ${INFERENCE_HALF_PRECISION}
+    
+  visualization:
+    confusion_matrix: ${GENERATE_CONFUSION_MATRIX}
+    roc_curve: ${GENERATE_ROC_CURVE}
+    feature_maps: ${VISUALIZE_FEATURE_MAPS}
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+security:
+  model_encryption:
+    enabled: ${MODEL_ENCRYPTION_ENABLED}
+    encryption_key: "${MODEL_ENCRYPTION_KEY}"
+    
+  data_privacy:
+    anonymization_enabled: ${DATA_ANONYMIZATION_ENABLED}
+    differential_privacy: ${DIFFERENTIAL_PRIVACY_ENABLED}
+    noise_multiplier: ${DP_NOISE_MULTIPLIER}
+    max_grad_norm: ${DP_MAX_GRAD_NORM}
+    
+  dependency_scanning:
+    tool: "${DEPENDENCY_SCAN_TOOL}"
+    schedule: "${DEPENDENCY_SCAN_SCHEDULE}"
+    
+  secrets_management:
+    provider: "${SECRETS_PROVIDER}"
+    config_path: "${SECRETS_CONFIG_PATH}"
+
+# ============================================================================
+# SECRETS PLACEHOLDERS
+# ============================================================================
+# DO NOT STORE ACTUAL SECRETS IN THIS FILE
+secrets:
+  cloud_storage:
+    access_key_id: "${CLOUD_ACCESS_KEY_ID}"
+    secret_access_key: "${CLOUD_SECRET_ACCESS_KEY}"
+    
+  wandb:
+    api_key: "${WANDB_API_KEY}"
+    
+  mlflow:
+    tracking_token: "${MLFLOW_TRACKING_TOKEN}"
+    
+  model_registry:
+    registry_token: "${MODEL_REGISTRY_TOKEN}"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

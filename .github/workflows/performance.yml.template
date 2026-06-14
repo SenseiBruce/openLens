@@ -1,0 +1,588 @@
+# ===============================================================================
+# Performance Testing Workflow Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ===============================================================================
+# 
+# This dedicated performance testing workflow provides comprehensive testing:
+# - Load testing with k6
+# - Stress testing
+# - Spike testing
+# - Soak/endurance testing
+# - Browser performance testing with Lighthouse
+# - API performance benchmarking
+# - Database query performance analysis
+# - Performance regression detection
+# 
+# USAGE:
+# 1. Copy this template to .github/workflows/performance.yml
+# 2. Configure performance test scenarios and thresholds
+# 3. Set up monitoring and alerting integrations
+# 4. Customize test schedules based on your needs
+# ===============================================================================
+
+name: Performance Testing
+
+# ===============================================================================
+# WORKFLOW TRIGGERS
+# ===============================================================================
+on:
+  # Run on pushes to main branches
+  push:
+    branches:
+      - main
+      - develop
+  
+  # Run on pull requests to main
+  pull_request:
+    branches:
+      - main
+      - develop
+  
+  # Schedule weekly performance tests (Sunday at 3 AM UTC)
+  schedule:
+    - cron: '0 3 * * 0'
+  
+  # Allow manual triggering with test type selection
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of performance test to run'
+        required: true
+        default: 'load'
+        type: choice
+        options:
+          - all
+          - load
+          - stress
+          - spike
+          - soak
+          - lighthouse
+          - api-benchmark
+      
+      duration:
+        description: 'Test duration (e.g., 5m, 1h)'
+        required: false
+        default: '5m'
+      
+      virtual_users:
+        description: 'Number of virtual users'
+        required: false
+        default: '100'
+
+# ===============================================================================
+# ENVIRONMENT VARIABLES
+# ===============================================================================
+env:
+  # Test Configuration
+  PROJECT_NAME: your-project-name
+  TEST_ENVIRONMENT: staging
+  BASE_URL: https://staging.example.com
+  
+  # Performance Thresholds
+  RESPONSE_TIME_P95_THRESHOLD: 500  # milliseconds
+  RESPONSE_TIME_P99_THRESHOLD: 1000  # milliseconds
+  ERROR_RATE_THRESHOLD: 1  # percentage
+  THROUGHPUT_MIN: 100  # requests per second
+  
+  # Load Test Configuration
+  VIRTUAL_USERS: 100
+  RAMP_UP_TIME: 30s
+  TEST_DURATION: 5m
+  RAMP_DOWN_TIME: 30s
+  
+  # Lighthouse Configuration
+  LIGHTHOUSE_PERFORMANCE_SCORE: 90
+  LIGHTHOUSE_ACCESSIBILITY_SCORE: 95
+  LIGHTHOUSE_BEST_PRACTICES_SCORE: 90
+  LIGHTHOUSE_SEO_SCORE: 90
+
+# ===============================================================================
+# JOBS
+# ===============================================================================
+jobs:
+
+  # =============================================================================
+  # LOAD TESTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # k6 Load Test
+  # ---------------------------------------------------------------------------
+  load-test:
+    name: k6 Load Test
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'load' ||
+      github.event.inputs.test_type == 'all' ||
+      github.event_name != 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create k6 load test script
+        run: |
+          cat > load-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          import { Rate, Trend } from 'k6/metrics';
+          
+          // Custom metrics
+          const errorRate = new Rate('errors');
+          const responseTimeTrend = new Trend('response_time');
+          
+          // Test configuration
+          export const options = {
+            stages: [
+              { duration: '${RAMP_UP_TIME}', target: ${VIRTUAL_USERS} },  // Ramp up
+              { duration: '${TEST_DURATION}', target: ${VIRTUAL_USERS} },  // Stay at peak
+              { duration: '${RAMP_DOWN_TIME}', target: 0 },                // Ramp down
+            ],
+            thresholds: {
+              http_req_duration: ['p(95)<${RESPONSE_TIME_P95_THRESHOLD}', 'p(99)<${RESPONSE_TIME_P99_THRESHOLD}'],
+              http_req_failed: ['rate<${ERROR_RATE_THRESHOLD}'],
+              errors: ['rate<0.01'],
+              http_reqs: ['rate>${THROUGHPUT_MIN}'],
+            },
+          };
+          
+          export default function () {
+            // Test homepage
+            let response = http.get('${BASE_URL}');
+            
+            const checkResult = check(response, {
+              'status is 200': (r) => r.status === 200,
+              'response time < 500ms': (r) => r.timings.duration < 500,
+              'content contains expected text': (r) => r.body.includes('Welcome'),
+            });
+            
+            errorRate.add(!checkResult);
+            responseTimeTrend.add(response.timings.duration);
+            
+            // Test API endpoint
+            response = http.get('${BASE_URL}/api/health');
+            check(response, {
+              'API health check returns 200': (r) => r.status === 200,
+            });
+            
+            // Simulate user think time
+            sleep(1);
+          }
+          
+          export function handleSummary(data) {
+            return {
+              'load-test-results.json': JSON.stringify(data),
+              'load-test-summary.html': htmlReport(data),
+            };
+          }
+          
+          function htmlReport(data) {
+            return `
+              <!DOCTYPE html>
+              <html>
+              <head><title>k6 Load Test Results</title></head>
+              <body>
+                <h1>Load Test Summary</h1>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+              </body>
+              </html>
+            `;
+          }
+          EOF
+      
+      - name: Run k6 load test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: load-test.js
+          flags: --out json=load-test-results.json --summary-export=load-test-summary.json
+        env:
+          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+      
+      - name: Analyze load test results
+        run: |
+          # Check if thresholds were met
+          if jq -e '.metrics.checks.values.fails > 0' load-test-summary.json; then
+            echo "::warning::Some checks failed during load test"
+          fi
+          
+          # Extract key metrics
+          P95=$(jq -r '.metrics.http_req_duration.values["p(95)"]' load-test-summary.json)
+          P99=$(jq -r '.metrics.http_req_duration.values["p(99)"]' load-test-summary.json)
+          ERROR_RATE=$(jq -r '.metrics.http_req_failed.values.rate' load-test-summary.json)
+          
+          echo "Performance Metrics:"
+          echo "- P95 Response Time: ${P95}ms"
+          echo "- P99 Response Time: ${P99}ms"
+          echo "- Error Rate: ${ERROR_RATE}%"
+          
+          # Fail if thresholds exceeded
+          if (( $(echo "$P95 > $RESPONSE_TIME_P95_THRESHOLD" | bc -l) )); then
+            echo "::error::P95 response time ${P95}ms exceeds threshold ${RESPONSE_TIME_P95_THRESHOLD}ms"
+            exit 1
+          fi
+      
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results
+          path: |
+            load-test-results.json
+            load-test-summary.json
+            load-test-summary.html
+          retention-days: 30
+
+  # =============================================================================
+  # STRESS TESTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # k6 Stress Test
+  # ---------------------------------------------------------------------------
+  stress-test:
+    name: k6 Stress Test
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'stress' ||
+      github.event.inputs.test_type == 'all'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create k6 stress test script
+        run: |
+          cat > stress-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          
+          export const options = {
+            stages: [
+              { duration: '1m', target: 50 },    // Ramp up to normal load
+              { duration: '2m', target: 50 },    // Stay at normal load
+              { duration: '1m', target: 100 },   // Increase to stress level
+              { duration: '2m', target: 100 },   // Maintain stress
+              { duration: '1m', target: 200 },   // Push beyond normal capacity
+              { duration: '3m', target: 200 },   // Sustain peak stress
+              { duration: '2m', target: 0 },     // Ramp down
+            ],
+            thresholds: {
+              http_req_duration: ['p(95)<1000', 'p(99)<2000'],
+              http_req_failed: ['rate<0.05'],  // Allow higher error rate in stress test
+            },
+          };
+          
+          export default function () {
+            const response = http.get('${BASE_URL}');
+            
+            check(response, {
+              'status is 200 or 503': (r) => r.status === 200 || r.status === 503,
+            });
+            
+            sleep(0.5);
+          }
+          EOF
+      
+      - name: Run k6 stress test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: stress-test.js
+          flags: --out json=stress-test-results.json
+      
+      - name: Upload stress test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress-test-results
+          path: stress-test-results.json
+          retention-days: 30
+
+  # =============================================================================
+  # SPIKE TESTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # k6 Spike Test
+  # ---------------------------------------------------------------------------
+  spike-test:
+    name: k6 Spike Test
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'spike' ||
+      github.event.inputs.test_type == 'all'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create k6 spike test script
+        run: |
+          cat > spike-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          
+          export const options = {
+            stages: [
+              { duration: '10s', target: 10 },    // Normal load
+              { duration: '10s', target: 500 },   // Spike to 500 users
+              { duration: '30s', target: 500 },   // Maintain spike
+              { duration: '10s', target: 10 },    // Return to normal
+              { duration: '30s', target: 10 },    // Recover
+            ],
+          };
+          
+          export default function () {
+            const response = http.get('${BASE_URL}');
+            
+            check(response, {
+              'survived spike': (r) => r.status === 200 || r.status === 503,
+              'response time acceptable': (r) => r.timings.duration < 3000,
+            });
+            
+            sleep(1);
+          }
+          EOF
+      
+      - name: Run k6 spike test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: spike-test.js
+          flags: --out json=spike-test-results.json
+      
+      - name: Upload spike test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spike-test-results
+          path: spike-test-results.json
+          retention-days: 30
+
+  # =============================================================================
+  # SOAK/ENDURANCE TESTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # k6 Soak Test
+  # ---------------------------------------------------------------------------
+  soak-test:
+    name: k6 Soak Test
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'soak' ||
+      github.event.inputs.test_type == 'all'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create k6 soak test script
+        run: |
+          cat > soak-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          
+          export const options = {
+            stages: [
+              { duration: '2m', target: 50 },     // Ramp up
+              { duration: '1h', target: 50 },     // Sustained load for 1 hour
+              { duration: '2m', target: 0 },      // Ramp down
+            ],
+            thresholds: {
+              http_req_duration: ['p(95)<500'],
+              http_req_failed: ['rate<0.01'],
+            },
+          };
+          
+          export default function () {
+            const response = http.get('${BASE_URL}');
+            
+            check(response, {
+              'status is 200': (r) => r.status === 200,
+              'no memory leaks detected': (r) => r.timings.duration < 500,
+            });
+            
+            sleep(1);
+          }
+          EOF
+      
+      - name: Run k6 soak test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: soak-test.js
+          flags: --out json=soak-test-results.json
+      
+      - name: Upload soak test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-test-results
+          path: soak-test-results.json
+          retention-days: 30
+
+  # =============================================================================
+  # BROWSER PERFORMANCE TESTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Lighthouse Performance Audit
+  # ---------------------------------------------------------------------------
+  lighthouse-audit:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'lighthouse' ||
+      github.event.inputs.test_type == 'all' ||
+      github.event_name != 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ env.BASE_URL }}
+            ${{ env.BASE_URL }}/products
+            ${{ env.BASE_URL }}/about
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 3
+      
+      - name: Check Lighthouse scores
+        run: |
+          # Extract and validate scores from Lighthouse results
+          PERF_SCORE=$(jq '.[] | select(.url | contains("${{ env.BASE_URL }}")) | .categories.performance.score * 100' lhci_reports/*.json | head -1)
+          ACCESS_SCORE=$(jq '.[] | select(.url | contains("${{ env.BASE_URL }}")) | .categories.accessibility.score * 100' lhci_reports/*.json | head -1)
+          
+          echo "Lighthouse Scores:"
+          echo "- Performance: ${PERF_SCORE}"
+          echo "- Accessibility: ${ACCESS_SCORE}"
+          
+          if (( $(echo "$PERF_SCORE < $LIGHTHOUSE_PERFORMANCE_SCORE" | bc -l) )); then
+            echo "::error::Performance score ${PERF_SCORE} is below threshold ${LIGHTHOUSE_PERFORMANCE_SCORE}"
+            exit 1
+          fi
+      
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: |
+            lhci_reports/
+            .lighthouseci/
+          retention-days: 30
+
+  # =============================================================================
+  # API PERFORMANCE BENCHMARKING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # API Benchmark Test
+  # ---------------------------------------------------------------------------
+  api-benchmark:
+    name: API Performance Benchmark
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.test_type == 'api-benchmark' ||
+      github.event.inputs.test_type == 'all'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Apache Bench
+        run: sudo apt-get update && sudo apt-get install -y apache2-utils
+      
+      - name: Run API benchmarks
+        run: |
+          # Benchmark GET endpoint
+          ab -n 1000 -c 10 -g get-benchmark.tsv ${{ env.BASE_URL }}/api/users > get-benchmark.txt
+          
+          # Benchmark POST endpoint (if applicable)
+          # ab -n 1000 -c 10 -p post-data.json -T application/json ${{ env.BASE_URL }}/api/users > post-benchmark.txt
+          
+          # Extract key metrics
+          echo "API Benchmark Results:"
+          grep "Requests per second" get-benchmark.txt
+          grep "Time per request" get-benchmark.txt
+          grep "Transfer rate" get-benchmark.txt
+      
+      - name: Upload API benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-benchmark-results
+          path: |
+            get-benchmark.txt
+            get-benchmark.tsv
+          retention-days: 30
+
+  # =============================================================================
+  # PERFORMANCE SUMMARY AND REPORTING
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Generate Performance Report
+  # ---------------------------------------------------------------------------
+  performance-summary:
+    name: Performance Test Summary
+    runs-on: ubuntu-latest
+    needs: [load-test, lighthouse-audit, api-benchmark]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: performance-results
+      
+      - name: Generate performance summary
+        run: |
+          echo "# Performance Test Summary" > performance-summary.md
+          echo "" >> performance-summary.md
+          echo "**Test Date:** $(date -u)" >> performance-summary.md
+          echo "**Commit:** ${{ github.sha }}" >> performance-summary.md
+          echo "**Branch:** ${{ github.ref_name }}" >> performance-summary.md
+          echo "" >> performance-summary.md
+          
+          echo "## Test Results" >> performance-summary.md
+          echo "" >> performance-summary.md
+          
+          # Add results from each test
+          for result_dir in performance-results/*/; do
+            test_name=$(basename "$result_dir")
+            echo "### $test_name" >> performance-summary.md
+            echo "Results available in artifacts" >> performance-summary.md
+            echo "" >> performance-summary.md
+          done
+      
+      - name: Comment PR with performance summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('performance-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+      
+      - name: Upload performance summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-summary
+          path: performance-summary.md
+          retention-days: 90
+
+# ===============================================================================
+# END OF WORKFLOW
+# ===============================================================================

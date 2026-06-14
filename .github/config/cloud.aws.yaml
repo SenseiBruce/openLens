@@ -1,0 +1,814 @@
+# ============================================================================
+# AWS Cloud Infrastructure Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ============================================================================
+# This template provides comprehensive AWS infrastructure configuration
+# supporting multiple authentication methods, services, and deployment patterns.
+# ============================================================================
+
+# AWS Authentication Configuration
+# Multiple authentication methods are supported for different use cases
+authentication:
+  # Method 1: IAM Role-based authentication (recommended for EC2/ECS)
+  iam_role:
+    enabled: true
+    role_arn: "arn:aws:iam::123456789012:role/MyApplicationRole"
+    session_name: "application-session"
+    duration_seconds: 3600
+    external_id: "unique-external-id"  # Optional, for cross-account access
+    
+  # Method 2: Access Keys (not recommended for production)
+  access_keys:
+    enabled: false
+    access_key_id: "${AWS_ACCESS_KEY_ID}"  # Use environment variables
+    secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    region: "us-east-1"
+    
+  # Method 3: AWS CLI Profile
+  cli_profile:
+    enabled: false
+    profile_name: "default"
+    config_file: "~/.aws/config"
+    credentials_file: "~/.aws/credentials"
+    
+  # Method 4: Environment Variables (automatic)
+  environment_variables:
+    enabled: true
+    # Automatically uses AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+    
+  # Method 5: EC2 Instance Profile (automatic on EC2)
+  instance_profile:
+    enabled: true
+    # Automatically uses instance metadata service
+    
+  # Method 6: AssumeRole with Web Identity (for EKS/IRSA)
+  assume_role_web_identity:
+    enabled: false
+    role_arn: "arn:aws:iam::123456789012:role/EKSPodRole"
+    web_identity_token_file: "/var/run/secrets/eks.amazonaws.com/serviceaccount/token"
+    session_name: "eks-pod-session"
+
+# Region and Availability Configuration
+regions:
+  primary:
+    name: "us-east-1"
+    availability_zones:
+      - "us-east-1a"
+      - "us-east-1b"
+      - "us-east-1c"
+  secondary:
+    name: "us-west-2"
+    availability_zones:
+      - "us-west-2a"
+      - "us-west-2b"
+      - "us-west-2c"
+  disaster_recovery:
+    name: "eu-west-1"
+    availability_zones:
+      - "eu-west-1a"
+      - "eu-west-1b"
+
+# VPC and Networking Configuration
+networking:
+  vpc:
+    cidr_block: "10.0.0.0/16"
+    enable_dns_support: true
+    enable_dns_hostnames: true
+    instance_tenancy: "default"
+    tags:
+      Name: "application-vpc"
+      Environment: "production"
+      ManagedBy: "terraform"
+      
+  # Subnet Configuration
+  subnets:
+    public:
+      - cidr: "10.0.1.0/24"
+        availability_zone: "us-east-1a"
+        map_public_ip: true
+        name: "public-subnet-1a"
+      - cidr: "10.0.2.0/24"
+        availability_zone: "us-east-1b"
+        map_public_ip: true
+        name: "public-subnet-1b"
+      - cidr: "10.0.3.0/24"
+        availability_zone: "us-east-1c"
+        map_public_ip: true
+        name: "public-subnet-1c"
+        
+    private:
+      - cidr: "10.0.11.0/24"
+        availability_zone: "us-east-1a"
+        name: "private-subnet-1a"
+      - cidr: "10.0.12.0/24"
+        availability_zone: "us-east-1b"
+        name: "private-subnet-1b"
+      - cidr: "10.0.13.0/24"
+        availability_zone: "us-east-1c"
+        name: "private-subnet-1c"
+        
+    database:
+      - cidr: "10.0.21.0/24"
+        availability_zone: "us-east-1a"
+        name: "database-subnet-1a"
+      - cidr: "10.0.22.0/24"
+        availability_zone: "us-east-1b"
+        name: "database-subnet-1b"
+        
+  # Internet Gateway
+  internet_gateway:
+    enabled: true
+    name: "main-igw"
+    
+  # NAT Gateway (for private subnet internet access)
+  nat_gateway:
+    enabled: true
+    allocation_method: "eip"  # Elastic IP
+    subnets:
+      - "public-subnet-1a"
+      - "public-subnet-1b"
+    high_availability: true  # One NAT gateway per AZ
+    
+  # Route Tables
+  route_tables:
+    public:
+      name: "public-rt"
+      routes:
+        - destination: "0.0.0.0/0"
+          target: "internet_gateway"
+    private:
+      name: "private-rt"
+      routes:
+        - destination: "0.0.0.0/0"
+          target: "nat_gateway"
+          
+  # VPC Peering (for multi-VPC architecture)
+  vpc_peering:
+    enabled: false
+    peer_vpc_id: "vpc-0123456789abcdef0"
+    peer_region: "us-west-2"
+    auto_accept: false
+
+# EC2 Compute Configuration
+ec2:
+  instances:
+    web_server:
+      ami_id: "ami-0c55b159cbfafe1f0"  # Amazon Linux 2
+      instance_type: "t3.medium"
+      key_name: "my-key-pair"
+      monitoring: true
+      ebs_optimized: true
+      
+      # Root volume configuration
+      root_volume:
+        volume_type: "gp3"
+        volume_size: 30
+        iops: 3000
+        throughput: 125
+        encrypted: true
+        kms_key_id: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+        delete_on_termination: true
+        
+      # Additional EBS volumes
+      additional_volumes:
+        - device_name: "/dev/sdf"
+          volume_type: "gp3"
+          volume_size: 100
+          encrypted: true
+          
+      # Network configuration
+      subnet_id: "private-subnet-1a"
+      security_groups:
+        - "web-server-sg"
+      associate_public_ip: false
+      
+      # User data script
+      user_data_script: |
+        #!/bin/bash
+        yum update -y
+        yum install -y docker
+        systemctl start docker
+        systemctl enable docker
+        
+      # Tags
+      tags:
+        Name: "web-server-01"
+        Role: "web"
+        Environment: "production"
+        
+    app_server:
+      ami_id: "ami-0c55b159cbfafe1f0"
+      instance_type: "t3.large"
+      key_name: "my-key-pair"
+      subnet_id: "private-subnet-1a"
+      security_groups:
+        - "app-server-sg"
+
+# Auto Scaling Groups
+autoscaling:
+  groups:
+    web_asg:
+      name: "web-server-asg"
+      min_size: 2
+      max_size: 10
+      desired_capacity: 4
+      health_check_type: "ELB"
+      health_check_grace_period: 300
+      default_cooldown: 300
+      
+      # Launch template
+      launch_template:
+        name: "web-server-lt"
+        instance_type: "t3.medium"
+        ami_id: "ami-0c55b159cbfafe1f0"
+        key_name: "my-key-pair"
+        security_groups:
+          - "web-server-sg"
+        
+      # Subnets for multi-AZ deployment
+      vpc_zone_identifier:
+        - "private-subnet-1a"
+        - "private-subnet-1b"
+        - "private-subnet-1c"
+        
+      # Target group attachment
+      target_group_arns:
+        - "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/web-tg/50dc6c495c0c9188"
+        
+      # Scaling policies
+      scaling_policies:
+        scale_up:
+          adjustment_type: "ChangeInCapacity"
+          scaling_adjustment: 2
+          cooldown: 300
+          metric_name: "CPUUtilization"
+          threshold: 70
+          comparison_operator: "GreaterThanThreshold"
+          evaluation_periods: 2
+          
+        scale_down:
+          adjustment_type: "ChangeInCapacity"
+          scaling_adjustment: -1
+          cooldown: 300
+          metric_name: "CPUUtilization"
+          threshold: 30
+          comparison_operator: "LessThanThreshold"
+          evaluation_periods: 2
+
+# Elastic Container Service (ECS)
+ecs:
+  cluster:
+    name: "application-cluster"
+    capacity_providers:
+      - "FARGATE"
+      - "FARGATE_SPOT"
+    default_capacity_provider_strategy:
+      - capacity_provider: "FARGATE"
+        weight: 1
+        base: 2
+      - capacity_provider: "FARGATE_SPOT"
+        weight: 4
+        
+  task_definitions:
+    web_app:
+      family: "web-app"
+      network_mode: "awsvpc"
+      requires_compatibilities:
+        - "FARGATE"
+      cpu: "1024"  # 1 vCPU
+      memory: "2048"  # 2 GB
+      
+      # Container definitions
+      containers:
+        - name: "web"
+          image: "123456789012.dkr.ecr.us-east-1.amazonaws.com/web-app:latest"
+          port_mappings:
+            - container_port: 8080
+              protocol: "tcp"
+          environment:
+            - name: "ENV"
+              value: "production"
+          secrets:
+            - name: "DB_PASSWORD"
+              value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:db-password-ABC123"
+          log_configuration:
+            log_driver: "awslogs"
+            options:
+              awslogs-group: "/ecs/web-app"
+              awslogs-region: "us-east-1"
+              awslogs-stream-prefix: "web"
+              
+  services:
+    web_service:
+      name: "web-service"
+      cluster: "application-cluster"
+      task_definition: "web-app"
+      desired_count: 3
+      launch_type: "FARGATE"
+      
+      network_configuration:
+        subnets:
+          - "private-subnet-1a"
+          - "private-subnet-1b"
+        security_groups:
+          - "ecs-service-sg"
+        assign_public_ip: false
+        
+      load_balancer:
+        target_group_arn: "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/web-tg/50dc6c495c0c9188"
+        container_name: "web"
+        container_port: 8080
+
+# Lambda Functions
+lambda:
+  functions:
+    api_handler:
+      function_name: "api-handler"
+      runtime: "python3.11"
+      handler: "index.handler"
+      memory_size: 512
+      timeout: 30
+      
+      # Code location
+      code:
+        s3_bucket: "my-lambda-code"
+        s3_key: "api-handler.zip"
+        
+      # Environment variables
+      environment:
+        variables:
+          ENV: "production"
+          DB_HOST: "${DB_ENDPOINT}"
+          
+      # VPC configuration (for accessing RDS)
+      vpc_config:
+        subnet_ids:
+          - "private-subnet-1a"
+          - "private-subnet-1b"
+        security_group_ids:
+          - "lambda-sg"
+          
+      # IAM role
+      role: "arn:aws:iam::123456789012:role/LambdaExecutionRole"
+      
+      # Layers
+      layers:
+        - "arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1"
+        
+      # Reserved concurrency
+      reserved_concurrent_executions: 10
+
+# Load Balancers
+load_balancers:
+  application:
+    main_alb:
+      name: "main-alb"
+      type: "application"
+      scheme: "internet-facing"
+      subnets:
+        - "public-subnet-1a"
+        - "public-subnet-1b"
+        - "public-subnet-1c"
+      security_groups:
+        - "alb-sg"
+        
+      # Listeners
+      listeners:
+        - port: 443
+          protocol: "HTTPS"
+          ssl_policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
+          certificate_arn: "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+          default_actions:
+            - type: "forward"
+              target_group_arn: "web-tg"
+        - port: 80
+          protocol: "HTTP"
+          default_actions:
+            - type: "redirect"
+              redirect:
+                protocol: "HTTPS"
+                port: "443"
+                status_code: "HTTP_301"
+                
+  network:
+    main_nlb:
+      name: "main-nlb"
+      type: "network"
+      scheme: "internal"
+      subnets:
+        - "private-subnet-1a"
+        - "private-subnet-1b"
+        
+      # Target groups
+      target_groups:
+        - name: "tcp-tg"
+          port: 5432
+          protocol: "TCP"
+          vpc_id: "vpc-id"
+          health_check:
+            protocol: "TCP"
+            interval: 30
+            healthy_threshold: 3
+            unhealthy_threshold: 3
+
+# RDS Database Configuration
+rds:
+  instances:
+    primary:
+      identifier: "production-db"
+      engine: "postgres"
+      engine_version: "15.3"
+      instance_class: "db.r6g.xlarge"
+      allocated_storage: 100
+      storage_type: "gp3"
+      iops: 3000
+      storage_encrypted: true
+      kms_key_id: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+      
+      # Master credentials (use Secrets Manager)
+      master_username: "admin"
+      master_password: "${DB_MASTER_PASSWORD}"  # From Secrets Manager
+      
+      # Network configuration
+      db_subnet_group_name: "database-subnet-group"
+      vpc_security_group_ids:
+        - "database-sg"
+      publicly_accessible: false
+      
+      # Backup configuration
+      backup_retention_period: 7
+      backup_window: "03:00-04:00"
+      maintenance_window: "mon:04:00-mon:05:00"
+      
+      # High availability
+      multi_az: true
+      
+      # Read replicas
+      read_replicas:
+        - identifier: "production-db-replica-1"
+          instance_class: "db.r6g.large"
+          availability_zone: "us-east-1b"
+        - identifier: "production-db-replica-2"
+          instance_class: "db.r6g.large"
+          availability_zone: "us-east-1c"
+          
+      # Performance Insights
+      performance_insights_enabled: true
+      performance_insights_retention_period: 7
+      
+      # Monitoring
+      enabled_cloudwatch_logs_exports:
+        - "postgresql"
+        - "upgrade"
+
+# S3 Storage Configuration
+s3:
+  buckets:
+    application_data:
+      name: "my-application-data-${ACCOUNT_ID}"
+      region: "us-east-1"
+      
+      # Versioning
+      versioning:
+        enabled: true
+        
+      # Encryption
+      server_side_encryption:
+        algorithm: "aws:kms"
+        kms_master_key_id: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+        
+      # Lifecycle policies
+      lifecycle_rules:
+        - id: "archive-old-data"
+          status: "Enabled"
+          transitions:
+            - days: 90
+              storage_class: "STANDARD_IA"
+            - days: 180
+              storage_class: "GLACIER"
+          expiration:
+            days: 365
+            
+      # Public access block
+      public_access_block:
+        block_public_acls: true
+        block_public_policy: true
+        ignore_public_acls: true
+        restrict_public_buckets: true
+        
+      # CORS configuration
+      cors_rules:
+        - allowed_headers: ["*"]
+          allowed_methods: ["GET", "PUT", "POST"]
+          allowed_origins: ["https://example.com"]
+          max_age_seconds: 3000
+          
+    static_assets:
+      name: "my-static-assets-${ACCOUNT_ID}"
+      region: "us-east-1"
+      
+      # CloudFront integration
+      website:
+        index_document: "index.html"
+        error_document: "error.html"
+
+# CloudFront CDN Configuration
+cloudfront:
+  distributions:
+    main:
+      enabled: true
+      comment: "Main application CDN"
+      price_class: "PriceClass_All"
+      
+      # Origins
+      origins:
+        - id: "s3-origin"
+          domain_name: "my-static-assets-${ACCOUNT_ID}.s3.amazonaws.com"
+          origin_access_control_id: "E1234567890ABC"
+        - id: "alb-origin"
+          domain_name: "main-alb-123456789.us-east-1.elb.amazonaws.com"
+          custom_origin_config:
+            http_port: 80
+            https_port: 443
+            origin_protocol_policy: "https-only"
+            
+      # Default cache behavior
+      default_cache_behavior:
+        target_origin_id: "s3-origin"
+        viewer_protocol_policy: "redirect-to-https"
+        allowed_methods: ["GET", "HEAD", "OPTIONS"]
+        cached_methods: ["GET", "HEAD"]
+        compress: true
+        cache_policy_id: "658327ea-f89d-4fab-a63d-7e88639e58f6"  # CachingOptimized
+        
+      # Custom SSL certificate
+      viewer_certificate:
+        acm_certificate_arn: "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+        ssl_support_method: "sni-only"
+        minimum_protocol_version: "TLSv1.2_2021"
+        
+      # Custom domain
+      aliases:
+        - "www.example.com"
+        - "example.com"
+
+# Route53 DNS Configuration
+route53:
+  hosted_zones:
+    main:
+      name: "example.com"
+      comment: "Main application domain"
+      
+      # Record sets
+      records:
+        - name: "example.com"
+          type: "A"
+          alias:
+            dns_name: "d1234567890abc.cloudfront.net"
+            hosted_zone_id: "Z2FDTNDATAQYW2"  # CloudFront hosted zone
+            evaluate_target_health: false
+            
+        - name: "www.example.com"
+          type: "A"
+          alias:
+            dns_name: "d1234567890abc.cloudfront.net"
+            hosted_zone_id: "Z2FDTNDATAQYW2"
+            
+        - name: "api.example.com"
+          type: "A"
+          alias:
+            dns_name: "main-alb-123456789.us-east-1.elb.amazonaws.com"
+            hosted_zone_id: "Z35SXDOTRQ7X7K"  # ALB hosted zone
+            evaluate_target_health: true
+
+# Security Groups
+security_groups:
+  alb_sg:
+    name: "alb-security-group"
+    description: "Security group for Application Load Balancer"
+    vpc_id: "vpc-id"
+    
+    ingress_rules:
+      - from_port: 443
+        to_port: 443
+        protocol: "tcp"
+        cidr_blocks: ["0.0.0.0/0"]
+        description: "HTTPS from internet"
+      - from_port: 80
+        to_port: 80
+        protocol: "tcp"
+        cidr_blocks: ["0.0.0.0/0"]
+        description: "HTTP from internet"
+        
+    egress_rules:
+      - from_port: 0
+        to_port: 0
+        protocol: "-1"
+        cidr_blocks: ["0.0.0.0/0"]
+        
+  web_server_sg:
+    name: "web-server-security-group"
+    description: "Security group for web servers"
+    vpc_id: "vpc-id"
+    
+    ingress_rules:
+      - from_port: 8080
+        to_port: 8080
+        protocol: "tcp"
+        source_security_group_id: "alb-sg"
+        description: "Traffic from ALB"
+        
+  database_sg:
+    name: "database-security-group"
+    description: "Security group for RDS database"
+    vpc_id: "vpc-id"
+    
+    ingress_rules:
+      - from_port: 5432
+        to_port: 5432
+        protocol: "tcp"
+        source_security_group_id: "web-server-sg"
+        description: "PostgreSQL from web servers"
+      - from_port: 5432
+        to_port: 5432
+        protocol: "tcp"
+        source_security_group_id: "lambda-sg"
+        description: "PostgreSQL from Lambda"
+
+# IAM Policies and Roles
+iam:
+  roles:
+    ec2_instance_role:
+      name: "EC2InstanceRole"
+      assume_role_policy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      managed_policies:
+        - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      inline_policies:
+        s3_access:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "s3:GetObject"
+                - "s3:PutObject"
+              Resource: "arn:aws:s3:::my-application-data-*/*"
+              
+    ecs_task_execution_role:
+      name: "ECSTaskExecutionRole"
+      assume_role_policy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+            Action: "sts:AssumeRole"
+      managed_policies:
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+# CloudWatch Monitoring
+cloudwatch:
+  log_groups:
+    application:
+      name: "/aws/application/logs"
+      retention_in_days: 30
+      kms_key_id: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+      
+  alarms:
+    high_cpu:
+      alarm_name: "high-cpu-utilization"
+      comparison_operator: "GreaterThanThreshold"
+      evaluation_periods: 2
+      metric_name: "CPUUtilization"
+      namespace: "AWS/EC2"
+      period: 300
+      statistic: "Average"
+      threshold: 80
+      alarm_description: "Triggers when CPU exceeds 80%"
+      alarm_actions:
+        - "arn:aws:sns:us-east-1:123456789012:alerts"
+        
+    database_connections:
+      alarm_name: "high-database-connections"
+      comparison_operator: "GreaterThanThreshold"
+      evaluation_periods: 1
+      metric_name: "DatabaseConnections"
+      namespace: "AWS/RDS"
+      period: 300
+      statistic: "Average"
+      threshold: 80
+      
+  dashboards:
+    main:
+      dashboard_name: "ApplicationDashboard"
+      widgets:
+        - type: "metric"
+          properties:
+            metrics:
+              - ["AWS/EC2", "CPUUtilization"]
+              - ["AWS/RDS", "DatabaseConnections"]
+            period: 300
+            stat: "Average"
+            region: "us-east-1"
+
+# Secrets Manager
+secrets_manager:
+  secrets:
+    database_credentials:
+      name: "production/database/credentials"
+      description: "Database master credentials"
+      kms_key_id: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+      rotation:
+        enabled: true
+        rotation_lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:SecretsManagerRotation"
+        rotation_rules:
+          automatically_after_days: 30
+          
+    api_keys:
+      name: "production/api/keys"
+      description: "Third-party API keys"
+
+# Cost Optimization Settings
+cost_optimization:
+  # Savings Plans
+  savings_plans:
+    compute:
+      commitment: "1-year"
+      payment_option: "All Upfront"
+      
+  # Reserved Instances
+  reserved_instances:
+    enabled: true
+    instance_types:
+      - "t3.medium"
+      - "t3.large"
+    term: "1-year"
+    payment_option: "Partial Upfront"
+    
+  # Auto-stop non-production resources
+  scheduled_actions:
+    - name: "stop-dev-instances"
+      schedule: "cron(0 20 * * ? *)"  # 8 PM daily
+      target: "dev-*"
+      action: "stop"
+    - name: "start-dev-instances"
+      schedule: "cron(0 8 * * ? *)"  # 8 AM daily
+      target: "dev-*"
+      action: "start"
+      
+  # Budget alerts
+  budgets:
+    monthly:
+      amount: 5000
+      unit: "USD"
+      time_period:
+        start: "2026-01-01"
+      notifications:
+        - threshold: 80
+          notification_type: "ACTUAL"
+          subscriber_email_addresses:
+            - "devops@example.com"
+
+# Disaster Recovery Configuration
+disaster_recovery:
+  # Cross-region replication
+  backup_region: "us-west-2"
+  
+  # RDS automated backups
+  rds_snapshots:
+    automated: true
+    retention_period: 7
+    copy_to_region: "us-west-2"
+    
+  # S3 cross-region replication
+  s3_replication:
+    enabled: true
+    destination_bucket: "my-application-data-backup-${ACCOUNT_ID}"
+    destination_region: "us-west-2"
+    
+  # AMI backups
+  ami_lifecycle:
+    create_snapshots: true
+    snapshot_schedule: "daily"
+    retention_days: 14
+    
+  # Recovery Time Objective (RTO) and Recovery Point Objective (RPO)
+  objectives:
+    rto_hours: 4
+    rpo_hours: 1
+
+# Tags (applied to all resources)
+global_tags:
+  Project: "MyApplication"
+  Environment: "production"
+  ManagedBy: "terraform"
+  CostCenter: "engineering"
+  Owner: "devops-team"
+  Compliance: "pci-dss"

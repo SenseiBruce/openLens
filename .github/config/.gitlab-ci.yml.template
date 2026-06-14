@@ -1,0 +1,849 @@
+# ===============================================================================
+# GitLab CI/CD Pipeline Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ===============================================================================
+# 
+# This template provides a comprehensive CI/CD pipeline for GitLab with:
+# - Multi-language build support (Python, JavaScript, Java, Go, etc.)
+# - Comprehensive testing (unit, integration, e2e, security, performance, accessibility)
+# - Security scanning (SAST, DAST, dependency scanning, secrets detection)
+# - Automated deployments with manual approval gates
+# - Rollback procedures
+# - Branch strategy support (baseline/develop/main)
+# 
+# USAGE:
+# 1. Copy this template to .gitlab-ci.yml in your project root
+# 2. Customize the VARIABLES section with your project details
+# 3. Enable/disable jobs based on your project requirements
+# 4. Configure CI/CD variables in GitLab Settings > CI/CD > Variables
+# ===============================================================================
+
+# ===============================================================================
+# GLOBAL CONFIGURATION
+# ===============================================================================
+
+# Specify GitLab CI version
+workflow:
+  rules:
+    # Run pipeline for merge requests
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Run pipeline for commits to baseline, develop, or main branches
+    - if: '$CI_COMMIT_BRANCH == "baseline" || $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"'
+    # Run pipeline for tags
+    - if: '$CI_COMMIT_TAG'
+
+# Define pipeline stages in execution order
+stages:
+  - build
+  - test
+  - security
+  - deploy-staging
+  - deploy-production
+
+# ===============================================================================
+# GLOBAL VARIABLES
+# ===============================================================================
+# Configure these variables for your project
+
+variables:
+  # Project Configuration
+  PROJECT_NAME: "your-project-name"
+  PROJECT_TYPE: "MVP"  # Options: POC, Prototype, MVP, Handover
+  
+  # Language/Framework Detection (set to "true" for your stack)
+  PYTHON_PROJECT: "false"
+  JAVASCRIPT_PROJECT: "false"
+  JAVA_PROJECT: "false"
+  GO_PROJECT: "false"
+  DOTNET_PROJECT: "false"
+  
+  # Coverage Requirements by Project Type
+  COVERAGE_THRESHOLD_POC: "85"
+  COVERAGE_THRESHOLD_PROTOTYPE: "90"
+  COVERAGE_THRESHOLD_MVP: "95"
+  COVERAGE_THRESHOLD_HANDOVER: "95"
+  
+  # Docker Configuration
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_BUILDKIT: "1"
+  
+  # Cache Configuration
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  NPM_CACHE_DIR: "$CI_PROJECT_DIR/.cache/npm"
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  
+  # Security Scanning Configuration
+  SAST_EXCLUDED_PATHS: "tests/,docs/,*.md"
+  DEPENDENCY_SCANNING_DISABLED: "false"
+  SECRET_DETECTION_DISABLED: "false"
+  
+  # Deployment Configuration
+  STAGING_URL: "https://staging.example.com"
+  PRODUCTION_URL: "https://production.example.com"
+
+# ===============================================================================
+# CACHE CONFIGURATION
+# ===============================================================================
+# Define cache policies for faster builds
+
+.cache_python: &cache_python
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-python
+    paths:
+      - .cache/pip
+      - .venv/
+
+.cache_node: &cache_node
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-node
+    paths:
+      - .cache/npm
+      - node_modules/
+
+.cache_maven: &cache_maven
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-maven
+    paths:
+      - .m2/repository
+
+.cache_go: &cache_go
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-go
+    paths:
+      - .go/pkg/mod
+
+# ===============================================================================
+# BUILD STAGE
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# Python Build
+# -----------------------------------------------------------------------------
+build:python:
+  stage: build
+  image: python:3.11-slim
+  <<: *cache_python
+  rules:
+    - if: '$PYTHON_PROJECT == "true"'
+  before_script:
+    - apt-get update && apt-get install -y build-essential
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip setuptools wheel
+  script:
+    - echo "Building Python project..."
+    - pip install -r requirements.txt
+    - python -m compileall .
+    - echo "Python build completed successfully"
+  artifacts:
+    paths:
+      - .venv/
+    expire_in: 1 hour
+
+# -----------------------------------------------------------------------------
+# JavaScript/Node.js Build
+# -----------------------------------------------------------------------------
+build:javascript:
+  stage: build
+  image: node:20-alpine
+  <<: *cache_node
+  rules:
+    - if: '$JAVASCRIPT_PROJECT == "true"'
+  before_script:
+    - npm config set cache $NPM_CACHE_DIR --global
+  script:
+    - echo "Building JavaScript project..."
+    - npm ci --prefer-offline
+    - npm run build
+    - echo "JavaScript build completed successfully"
+  artifacts:
+    paths:
+      - node_modules/
+      - dist/
+      - build/
+    expire_in: 1 hour
+
+# -----------------------------------------------------------------------------
+# Java/Maven Build
+# -----------------------------------------------------------------------------
+build:java:
+  stage: build
+  image: maven:3.9-eclipse-temurin-17
+  <<: *cache_maven
+  rules:
+    - if: '$JAVA_PROJECT == "true"'
+  script:
+    - echo "Building Java project..."
+    - mvn clean compile -DskipTests
+    - echo "Java build completed successfully"
+  artifacts:
+    paths:
+      - target/
+      - .m2/repository
+    expire_in: 1 hour
+
+# -----------------------------------------------------------------------------
+# Go Build
+# -----------------------------------------------------------------------------
+build:go:
+  stage: build
+  image: golang:1.21-alpine
+  <<: *cache_go
+  rules:
+    - if: '$GO_PROJECT == "true"'
+  before_script:
+    - apk add --no-cache git
+  script:
+    - echo "Building Go project..."
+    - go mod download
+    - go build -v ./...
+    - echo "Go build completed successfully"
+  artifacts:
+    paths:
+      - bin/
+    expire_in: 1 hour
+
+# -----------------------------------------------------------------------------
+# .NET Build
+# -----------------------------------------------------------------------------
+build:dotnet:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  rules:
+    - if: '$DOTNET_PROJECT == "true"'
+  script:
+    - echo "Building .NET project..."
+    - dotnet restore
+    - dotnet build --no-restore --configuration Release
+    - echo ".NET build completed successfully"
+  artifacts:
+    paths:
+      - bin/
+      - obj/
+    expire_in: 1 hour
+
+# ===============================================================================
+# TEST STAGE
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# Unit Tests - Python
+# -----------------------------------------------------------------------------
+test:unit:python:
+  stage: test
+  image: python:3.11-slim
+  <<: *cache_python
+  rules:
+    - if: '$PYTHON_PROJECT == "true"'
+  dependencies:
+    - build:python
+  before_script:
+    - source .venv/bin/activate
+    - pip install pytest pytest-cov pytest-xdist
+  script:
+    - echo "Running Python unit tests..."
+    - pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html --cov-report=term -n auto
+    - |
+      COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(root.attrib['line-rate'])" | awk '{print int($1 * 100)}')
+      case "$PROJECT_TYPE" in
+        POC) THRESHOLD=$COVERAGE_THRESHOLD_POC ;;
+        Prototype) THRESHOLD=$COVERAGE_THRESHOLD_PROTOTYPE ;;
+        MVP) THRESHOLD=$COVERAGE_THRESHOLD_MVP ;;
+        Handover) THRESHOLD=$COVERAGE_THRESHOLD_HANDOVER ;;
+        *) THRESHOLD=85 ;;
+      esac
+      echo "Coverage: ${COVERAGE}%, Required: ${THRESHOLD}%"
+      if [ "$COVERAGE" -lt "$THRESHOLD" ]; then
+        echo "Coverage ${COVERAGE}% is below required threshold ${THRESHOLD}%"
+        exit 1
+      fi
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.xml
+      - htmlcov/
+    expire_in: 30 days
+
+# -----------------------------------------------------------------------------
+# Unit Tests - JavaScript
+# -----------------------------------------------------------------------------
+test:unit:javascript:
+  stage: test
+  image: node:20-alpine
+  <<: *cache_node
+  rules:
+    - if: '$JAVASCRIPT_PROJECT == "true"'
+  dependencies:
+    - build:javascript
+  script:
+    - echo "Running JavaScript unit tests..."
+    - npm run test:unit -- --coverage --coverageReporters=text --coverageReporters=cobertura
+    - |
+      COVERAGE=$(cat coverage/cobertura-coverage.xml | grep -oP 'line-rate="\K[^"]+' | head -1 | awk '{print int($1 * 100)}')
+      case "$PROJECT_TYPE" in
+        POC) THRESHOLD=$COVERAGE_THRESHOLD_POC ;;
+        Prototype) THRESHOLD=$COVERAGE_THRESHOLD_PROTOTYPE ;;
+        MVP) THRESHOLD=$COVERAGE_THRESHOLD_MVP ;;
+        Handover) THRESHOLD=$COVERAGE_THRESHOLD_HANDOVER ;;
+        *) THRESHOLD=85 ;;
+      esac
+      echo "Coverage: ${COVERAGE}%, Required: ${THRESHOLD}%"
+      if [ "$COVERAGE" -lt "$THRESHOLD" ]; then
+        echo "Coverage ${COVERAGE}% is below required threshold ${THRESHOLD}%"
+        exit 1
+      fi
+  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+
+# -----------------------------------------------------------------------------
+# Integration Tests
+# -----------------------------------------------------------------------------
+test:integration:
+  stage: test
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  before_script:
+    - apk add --no-cache docker-compose python3 py3-pip nodejs npm
+  script:
+    - echo "Running integration tests..."
+    - docker-compose -f docker-compose.test.yml up -d
+    - sleep 10  # Wait for services to be ready
+    - |
+      if [ "$PYTHON_PROJECT" = "true" ]; then
+        pip3 install pytest requests
+        pytest tests/integration/ -v
+      elif [ "$JAVASCRIPT_PROJECT" = "true" ]; then
+        npm run test:integration
+      fi
+    - docker-compose -f docker-compose.test.yml down
+  artifacts:
+    reports:
+      junit: test-results/integration/*.xml
+    paths:
+      - test-results/integration/
+    expire_in: 30 days
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# End-to-End Tests
+# -----------------------------------------------------------------------------
+test:e2e:
+  stage: test
+  image: cypress/browsers:node20.11.0-chrome121.0.6167.85-1-ff120.0-edge121.0.2277.83-1
+  rules:
+    - if: '$JAVASCRIPT_PROJECT == "true"'
+  before_script:
+    - npm ci --prefer-offline
+  script:
+    - echo "Running E2E tests..."
+    - npm run test:e2e
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/
+      - cypress/screenshots/
+    reports:
+      junit: cypress/results/junit/*.xml
+    expire_in: 30 days
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# Performance Tests
+# -----------------------------------------------------------------------------
+test:performance:
+  stage: test
+  image: grafana/k6:latest
+  script:
+    - echo "Running performance tests..."
+    - k6 run --out json=test-results/performance.json tests/performance/load-test.js
+    - |
+      # Check performance thresholds
+      if grep -q "\"thresholds_failed\":true" test-results/performance.json; then
+        echo "Performance thresholds failed"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - test-results/performance.json
+    expire_in: 30 days
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# Accessibility Tests (WCAG 2.1)
+# -----------------------------------------------------------------------------
+test:accessibility:
+  stage: test
+  image: node:20-alpine
+  rules:
+    - if: '$JAVASCRIPT_PROJECT == "true"'
+  before_script:
+    - npm install -g pa11y-ci
+  script:
+    - echo "Running accessibility tests (WCAG 2.1 Level AA)..."
+    - pa11y-ci --config .pa11yci.json || true
+    - |
+      # Generate accessibility report
+      npx pa11y-ci-reporter-html
+  artifacts:
+    paths:
+      - pa11y-ci-report/
+    expire_in: 30 days
+  allow_failure: true
+
+# ===============================================================================
+# SECURITY STAGE
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# SAST (Static Application Security Testing)
+# -----------------------------------------------------------------------------
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+sast:
+  stage: security
+  variables:
+    SAST_EXCLUDED_PATHS: "tests/,docs/,*.md"
+
+# -----------------------------------------------------------------------------
+# SonarQube Analysis
+# -----------------------------------------------------------------------------
+security:sonarqube:
+  stage: security
+  image: sonarsource/sonar-scanner-cli:latest
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: 0
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - echo "Running SonarQube analysis..."
+    - |
+      sonar-scanner \
+        -Dsonar.projectKey=${PROJECT_NAME} \
+        -Dsonar.sources=src \
+        -Dsonar.host.url=${SONAR_HOST_URL} \
+        -Dsonar.login=${SONAR_TOKEN} \
+        -Dsonar.qualitygate.wait=true
+  only:
+    - develop
+    - main
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# Dependency Scanning - Snyk
+# -----------------------------------------------------------------------------
+security:snyk:
+  stage: security
+  image: snyk/snyk:python
+  before_script:
+    - snyk auth ${SNYK_TOKEN}
+  script:
+    - echo "Running Snyk dependency scanning..."
+    - |
+      if [ "$PYTHON_PROJECT" = "true" ]; then
+        snyk test --file=requirements.txt --severity-threshold=high
+      elif [ "$JAVASCRIPT_PROJECT" = "true" ]; then
+        snyk test --file=package.json --severity-threshold=high
+      elif [ "$JAVA_PROJECT" = "true" ]; then
+        snyk test --file=pom.xml --severity-threshold=high
+      fi
+    - snyk monitor
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# DAST (Dynamic Application Security Testing)
+# -----------------------------------------------------------------------------
+security:dast:
+  stage: security
+  image: owasp/zap2docker-stable
+  services:
+    - name: your-app-image:${CI_COMMIT_SHA}
+      alias: app
+  script:
+    - echo "Running DAST scan..."
+    - mkdir -p /zap/wrk
+    - |
+      zap-baseline.py \
+        -t http://app:8080 \
+        -g gen.conf \
+        -r dast-report.html \
+        -J dast-report.json \
+        -w dast-report.md
+  artifacts:
+    paths:
+      - dast-report.html
+      - dast-report.json
+      - dast-report.md
+    expire_in: 30 days
+  allow_failure: true
+  only:
+    - develop
+    - main
+
+# -----------------------------------------------------------------------------
+# Container Scanning
+# -----------------------------------------------------------------------------
+security:container:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - echo "Scanning Docker image for vulnerabilities..."
+    - trivy image --exit-code 1 --severity HIGH,CRITICAL ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+  only:
+    - develop
+    - main
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# Secrets Detection
+# -----------------------------------------------------------------------------
+security:secrets:
+  stage: security
+  image: trufflesecurity/trufflehog:latest
+  script:
+    - echo "Scanning for exposed secrets..."
+    - trufflehog filesystem . --json --fail > secrets-report.json || EXIT_CODE=$?
+    - |
+      if [ "${EXIT_CODE}" -eq 183 ]; then
+        echo "Secrets detected!"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - secrets-report.json
+    expire_in: 30 days
+  allow_failure: false
+
+# ===============================================================================
+# DEPLOY STAGING STAGE
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# Deploy to Staging Environment
+# -----------------------------------------------------------------------------
+deploy:staging:
+  stage: deploy-staging
+  image: alpine:latest
+  environment:
+    name: staging
+    url: ${STAGING_URL}
+    on_stop: stop:staging
+  before_script:
+    - apk add --no-cache curl bash openssh-client
+    - mkdir -p ~/.ssh
+    - echo "${STAGING_SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H ${STAGING_HOST} >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying to staging environment..."
+    - |
+      # Create deployment package
+      tar -czf deployment.tar.gz \
+        --exclude='.git' \
+        --exclude='tests' \
+        --exclude='node_modules' \
+        --exclude='.venv' \
+        .
+    - |
+      # Upload and deploy
+      scp deployment.tar.gz ${STAGING_USER}@${STAGING_HOST}:${STAGING_DEPLOY_PATH}/
+      ssh ${STAGING_USER}@${STAGING_HOST} << 'EOF'
+        cd ${STAGING_DEPLOY_PATH}
+        
+        # Backup current deployment
+        if [ -d "current" ]; then
+          cp -r current backup-$(date +%Y%m%d-%H%M%S)
+        fi
+        
+        # Extract new deployment
+        mkdir -p new_release
+        tar -xzf deployment.tar.gz -C new_release/
+        
+        # Install dependencies and restart services
+        cd new_release
+        if [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+        elif [ -f "package.json" ]; then
+          npm install --production
+        fi
+        
+        # Atomic swap
+        cd ..
+        rm -f current
+        ln -s new_release current
+        
+        # Restart application
+        systemctl restart ${APP_SERVICE_NAME} || pm2 restart all
+        
+        echo "Staging deployment completed"
+      EOF
+    - |
+      # Health check
+      echo "Performing health check..."
+      sleep 10
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" ${STAGING_URL}/health)
+      if [ "$RESPONSE" != "200" ]; then
+        echo "Health check failed with status $RESPONSE"
+        exit 1
+      fi
+      echo "Health check passed"
+  artifacts:
+    paths:
+      - deployment.tar.gz
+    expire_in: 7 days
+  only:
+    - develop
+    - main
+  when: manual
+
+# -----------------------------------------------------------------------------
+# Stop Staging Environment
+# -----------------------------------------------------------------------------
+stop:staging:
+  stage: deploy-staging
+  image: alpine:latest
+  environment:
+    name: staging
+    action: stop
+  before_script:
+    - apk add --no-cache openssh-client
+  script:
+    - echo "Stopping staging environment..."
+    - ssh ${STAGING_USER}@${STAGING_HOST} "systemctl stop ${APP_SERVICE_NAME}"
+  when: manual
+  only:
+    - develop
+    - main
+
+# ===============================================================================
+# DEPLOY PRODUCTION STAGE
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# Deploy to Production Environment
+# -----------------------------------------------------------------------------
+deploy:production:
+  stage: deploy-production
+  image: alpine:latest
+  environment:
+    name: production
+    url: ${PRODUCTION_URL}
+    on_stop: rollback:production
+  before_script:
+    - apk add --no-cache curl bash openssh-client
+    - mkdir -p ~/.ssh
+    - echo "${PRODUCTION_SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H ${PRODUCTION_HOST} >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying to production environment..."
+    - export RELEASE_VERSION="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"
+    - |
+      # Create deployment package
+      tar -czf deployment-prod.tar.gz \
+        --exclude='.git' \
+        --exclude='tests' \
+        --exclude='node_modules' \
+        --exclude='.venv' \
+        .
+    - |
+      # Upload and deploy with blue-green strategy
+      scp deployment-prod.tar.gz ${PRODUCTION_USER}@${PRODUCTION_HOST}:${PRODUCTION_DEPLOY_PATH}/
+      ssh ${PRODUCTION_USER}@${PRODUCTION_HOST} << EOF
+        cd ${PRODUCTION_DEPLOY_PATH}
+        
+        # Backup current deployment
+        if [ -d "current" ]; then
+          BACKUP_DIR="backup-${RELEASE_VERSION}-\$(date +%Y%m%d-%H%M%S)"
+          cp -r current \$BACKUP_DIR
+          echo \$BACKUP_DIR > .last_backup
+        fi
+        
+        # Extract new deployment
+        mkdir -p release-${RELEASE_VERSION}
+        tar -xzf deployment-prod.tar.gz -C release-${RELEASE_VERSION}/
+        
+        # Install dependencies
+        cd release-${RELEASE_VERSION}
+        if [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+        elif [ -f "package.json" ]; then
+          npm install --production
+        fi
+        
+        # Run database migrations
+        if [ -f "manage.py" ]; then
+          python manage.py migrate --no-input
+        fi
+        
+        # Atomic swap (blue-green deployment)
+        cd ..
+        rm -f current
+        ln -s release-${RELEASE_VERSION} current
+        
+        # Rolling restart with zero downtime
+        if command -v pm2 > /dev/null; then
+          pm2 reload all --update-env
+        else
+          systemctl reload ${APP_SERVICE_NAME}
+        fi
+        
+        echo "Production deployment completed"
+      EOF
+    - |
+      # Comprehensive health check
+      echo "Performing production health checks..."
+      sleep 15
+      
+      # Check application health
+      for i in {1..5}; do
+        RESPONSE=\$(curl -s -o /dev/null -w "%{http_code}" ${PRODUCTION_URL}/health)
+        if [ "\$RESPONSE" = "200" ]; then
+          echo "Health check passed (attempt \$i)"
+          break
+        fi
+        if [ \$i -eq 5 ]; then
+          echo "Health check failed after 5 attempts"
+          exit 1
+        fi
+        sleep 10
+      done
+      
+      # Check critical endpoints
+      curl -f ${PRODUCTION_URL}/api/status || exit 1
+      
+      echo "All health checks passed"
+  artifacts:
+    paths:
+      - deployment-prod.tar.gz
+    expire_in: 30 days
+  only:
+    - main
+    - tags
+  when: manual  # Require manual approval for production deployment
+
+# -----------------------------------------------------------------------------
+# Rollback Production Deployment
+# -----------------------------------------------------------------------------
+rollback:production:
+  stage: deploy-production
+  image: alpine:latest
+  environment:
+    name: production
+    action: rollback
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "${PRODUCTION_SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H ${PRODUCTION_HOST} >> ~/.ssh/known_hosts
+  script:
+    - echo "Rolling back production deployment..."
+    - |
+      ssh ${PRODUCTION_USER}@${PRODUCTION_HOST} << 'EOF'
+        cd ${PRODUCTION_DEPLOY_PATH}
+        
+        # Get last backup
+        if [ ! -f ".last_backup" ]; then
+          echo "No backup found for rollback"
+          exit 1
+        fi
+        
+        BACKUP_DIR=$(cat .last_backup)
+        
+        if [ ! -d "$BACKUP_DIR" ]; then
+          echo "Backup directory not found: $BACKUP_DIR"
+          exit 1
+        fi
+        
+        echo "Rolling back to: $BACKUP_DIR"
+        
+        # Atomic swap to previous version
+        rm -f current
+        ln -s $BACKUP_DIR current
+        
+        # Restart services
+        if command -v pm2 > /dev/null; then
+          pm2 reload all
+        else
+          systemctl restart ${APP_SERVICE_NAME}
+        fi
+        
+        echo "Rollback completed"
+      EOF
+    - |
+      # Verify rollback
+      sleep 10
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" ${PRODUCTION_URL}/health)
+      if [ "$RESPONSE" != "200" ]; then
+        echo "Rollback verification failed"
+        exit 1
+      fi
+      echo "Rollback verified successfully"
+  only:
+    - main
+  when: manual  # Manual trigger for rollback
+
+# ===============================================================================
+# NOTIFICATION AND CLEANUP JOBS
+# ===============================================================================
+
+# -----------------------------------------------------------------------------
+# Deployment Notification
+# -----------------------------------------------------------------------------
+notify:deployment:
+  stage: deploy-production
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      # Send Slack notification
+      if [ -n "${SLACK_WEBHOOK_URL}" ]; then
+        curl -X POST ${SLACK_WEBHOOK_URL} \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"text\": \"🚀 Deployment Notification\",
+            \"attachments\": [{
+              \"color\": \"good\",
+              \"fields\": [
+                {\"title\": \"Project\", \"value\": \"${PROJECT_NAME}\", \"short\": true},
+                {\"title\": \"Environment\", \"value\": \"${CI_ENVIRONMENT_NAME}\", \"short\": true},
+                {\"title\": \"Branch\", \"value\": \"${CI_COMMIT_BRANCH}\", \"short\": true},
+                {\"title\": \"Commit\", \"value\": \"${CI_COMMIT_SHORT_SHA}\", \"short\": true},
+                {\"title\": \"Pipeline\", \"value\": \"${CI_PIPELINE_URL}\", \"short\": false}
+              ]
+            }]
+          }"
+      fi
+  when: on_success
+  only:
+    - main
+    - develop
+
+# ===============================================================================
+# END OF PIPELINE
+# ===============================================================================

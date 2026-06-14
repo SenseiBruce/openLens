@@ -1,0 +1,1001 @@
+# ===============================================================================
+# GitHub Actions CI/CD Pipeline Template
+# Version: 1.0
+# Last Updated: 2026-02-09
+# ===============================================================================
+# 
+# This template provides a comprehensive CI/CD pipeline for GitHub Actions with:
+# - Multi-language build support (Python, JavaScript, Java, Go, etc.)
+# - Comprehensive testing (unit, integration, e2e, security, performance, accessibility)
+# - Security scanning (SAST, dependency scanning, secrets detection)
+# - Automated deployments with manual approval gates
+# - Rollback procedures
+# - Branch strategy support (baseline/develop/main)
+# 
+# USAGE:
+# 1. Copy this template to .github/workflows/ci-cd.yml in your project
+# 2. Customize the environment variables section
+# 3. Enable/disable jobs based on your project requirements
+# 4. Configure secrets in GitHub Settings > Secrets and variables > Actions
+# ===============================================================================
+
+name: CI/CD Pipeline
+
+# ===============================================================================
+# WORKFLOW TRIGGERS
+# ===============================================================================
+on:
+  # Trigger on push to main branches
+  push:
+    branches:
+      - baseline
+      - develop
+      - main
+    tags:
+      - 'v*.*.*'
+  
+  # Trigger on pull requests
+  pull_request:
+    branches:
+      - baseline
+      - develop
+      - main
+  
+  # Allow manual workflow dispatch
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+# ===============================================================================
+# ENVIRONMENT VARIABLES
+# ===============================================================================
+env:
+  # Project Configuration
+  PROJECT_NAME: your-project-name
+  PROJECT_TYPE: MVP  # Options: POC, Prototype, MVP, Handover
+  
+  # Language/Framework Detection
+  PYTHON_PROJECT: 'false'
+  JAVASCRIPT_PROJECT: 'false'
+  JAVA_PROJECT: 'false'
+  GO_PROJECT: 'false'
+  DOTNET_PROJECT: 'false'
+  
+  # Coverage Requirements by Project Type
+  COVERAGE_THRESHOLD_POC: 85
+  COVERAGE_THRESHOLD_PROTOTYPE: 90
+  COVERAGE_THRESHOLD_MVP: 95
+  COVERAGE_THRESHOLD_HANDOVER: 95
+  
+  # Node.js Configuration
+  NODE_VERSION: '20'
+  
+  # Python Configuration
+  PYTHON_VERSION: '3.11'
+  
+  # Java Configuration
+  JAVA_VERSION: '17'
+  
+  # Go Configuration
+  GO_VERSION: '1.21'
+  
+  # Docker Configuration
+  DOCKER_BUILDKIT: 1
+  
+  # Deployment URLs
+  STAGING_URL: https://staging.example.com
+  PRODUCTION_URL: https://production.example.com
+
+# ===============================================================================
+# CONCURRENCY CONTROL
+# ===============================================================================
+# Cancel in-progress runs of the same workflow for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ===============================================================================
+# JOBS
+# ===============================================================================
+jobs:
+
+  # =============================================================================
+  # BUILD JOBS
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Build Python Project
+  # ---------------------------------------------------------------------------
+  build-python:
+    name: Build Python Project
+    runs-on: ubuntu-latest
+    if: env.PYTHON_PROJECT == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+      
+      - name: Compile Python files
+        run: python -m compileall .
+      
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-build
+          path: |
+            ./**/*.pyc
+            requirements.txt
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Build JavaScript/Node.js Project
+  # ---------------------------------------------------------------------------
+  build-javascript:
+    name: Build JavaScript Project
+    runs-on: ubuntu-latest
+    if: env.JAVASCRIPT_PROJECT == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-build
+          path: |
+            dist/
+            build/
+            node_modules/
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Build Java Project
+  # ---------------------------------------------------------------------------
+  build-java:
+    name: Build Java Project
+    runs-on: ubuntu-latest
+    if: env.JAVA_PROJECT == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Build with Maven
+        run: mvn clean compile -DskipTests
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-build
+          path: target/
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Build Go Project
+  # ---------------------------------------------------------------------------
+  build-go:
+    name: Build Go Project
+    runs-on: ubuntu-latest
+    if: env.GO_PROJECT == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      
+      - name: Download dependencies
+        run: go mod download
+      
+      - name: Build application
+        run: go build -v ./...
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-build
+          path: bin/
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Build .NET Project
+  # ---------------------------------------------------------------------------
+  build-dotnet:
+    name: Build .NET Project
+    runs-on: ubuntu-latest
+    if: env.DOTNET_PROJECT == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build application
+        run: dotnet build --no-restore --configuration Release
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-build
+          path: bin/
+          retention-days: 1
+
+  # =============================================================================
+  # TEST JOBS
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Unit Tests - Python
+  # ---------------------------------------------------------------------------
+  test-unit-python:
+    name: Unit Tests (Python)
+    runs-on: ubuntu-latest
+    if: env.PYTHON_PROJECT == 'true'
+    needs: build-python
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-xdist pytest-html
+      
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/unit/ \
+            -v \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --html=test-results/unit-tests.html \
+            --self-contained-html \
+            -n auto
+      
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(int(float(root.attrib['line-rate']) * 100))")
+          
+          case "${{ env.PROJECT_TYPE }}" in
+            POC) THRESHOLD=${{ env.COVERAGE_THRESHOLD_POC }} ;;
+            Prototype) THRESHOLD=${{ env.COVERAGE_THRESHOLD_PROTOTYPE }} ;;
+            MVP) THRESHOLD=${{ env.COVERAGE_THRESHOLD_MVP }} ;;
+            Handover) THRESHOLD=${{ env.COVERAGE_THRESHOLD_HANDOVER }} ;;
+            *) THRESHOLD=85 ;;
+          esac
+          
+          echo "Coverage: ${COVERAGE}%, Required: ${THRESHOLD}%"
+          
+          if [ "$COVERAGE" -lt "$THRESHOLD" ]; then
+            echo "::error::Coverage ${COVERAGE}% is below required threshold ${THRESHOLD}%"
+            exit 1
+          fi
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-unit-test-results
+          path: |
+            coverage.xml
+            htmlcov/
+            test-results/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Unit Tests - JavaScript
+  # ---------------------------------------------------------------------------
+  test-unit-javascript:
+    name: Unit Tests (JavaScript)
+    runs-on: ubuntu-latest
+    if: env.JAVASCRIPT_PROJECT == 'true'
+    needs: build-javascript
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: javascript-build
+      
+      - name: Run unit tests
+        run: npm run test:unit -- --coverage --coverageReporters=text --coverageReporters=cobertura --coverageReporters=html
+      
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(node -e "const fs = require('fs'); const xml = fs.readFileSync('coverage/cobertura-coverage.xml', 'utf8'); const match = xml.match(/line-rate=\"([^\"]+)\"/); console.log(Math.floor(parseFloat(match[1]) * 100));")
+          
+          case "${{ env.PROJECT_TYPE }}" in
+            POC) THRESHOLD=${{ env.COVERAGE_THRESHOLD_POC }} ;;
+            Prototype) THRESHOLD=${{ env.COVERAGE_THRESHOLD_PROTOTYPE }} ;;
+            MVP) THRESHOLD=${{ env.COVERAGE_THRESHOLD_MVP }} ;;
+            Handover) THRESHOLD=${{ env.COVERAGE_THRESHOLD_HANDOVER }} ;;
+            *) THRESHOLD=85 ;;
+          esac
+          
+          echo "Coverage: ${COVERAGE}%, Required: ${THRESHOLD}%"
+          
+          if [ "$COVERAGE" -lt "$THRESHOLD" ]; then
+            echo "::error::Coverage ${COVERAGE}% is below required threshold ${THRESHOLD}%"
+            exit 1
+          fi
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/cobertura-coverage.xml
+          flags: unittests
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: javascript-unit-test-results
+          path: coverage/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Integration Tests
+  # ---------------------------------------------------------------------------
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-python, build-javascript]
+    if: |
+      always() &&
+      (needs.build-python.result == 'success' || needs.build-javascript.result == 'success')
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up environment
+        run: |
+          if [ "${{ env.PYTHON_PROJECT }}" = "true" ]; then
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
+            pip install pytest requests
+          fi
+          
+          if [ "${{ env.JAVASCRIPT_PROJECT }}" = "true" ]; then
+            npm ci --prefer-offline
+          fi
+      
+      - name: Start application services
+        run: docker-compose -f docker-compose.test.yml up -d
+      
+      - name: Wait for services to be ready
+        run: sleep 15
+      
+      - name: Run integration tests
+        run: |
+          if [ "${{ env.PYTHON_PROJECT }}" = "true" ]; then
+            pytest tests/integration/ -v --junitxml=test-results/integration.xml
+          elif [ "${{ env.JAVASCRIPT_PROJECT }}" = "true" ]; then
+            npm run test:integration
+          fi
+      
+      - name: Stop services
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: test-results/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # End-to-End Tests
+  # ---------------------------------------------------------------------------
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    if: env.JAVASCRIPT_PROJECT == 'true'
+    needs: build-javascript
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run E2E tests
+        run: npm run test:e2e
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Performance Tests
+  # ---------------------------------------------------------------------------
+  test-performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [build-python, build-javascript]
+    if: |
+      always() &&
+      (needs.build-python.result == 'success' || needs.build-javascript.result == 'success')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run k6 performance tests
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/performance/load-test.js
+          flags: --out json=test-results/performance.json
+      
+      - name: Check performance thresholds
+        run: |
+          if grep -q '"thresholds_failed":true' test-results/performance.json; then
+            echo "::error::Performance thresholds failed"
+            exit 1
+          fi
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-test-results
+          path: test-results/performance.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Accessibility Tests (WCAG 2.1)
+  # ---------------------------------------------------------------------------
+  test-accessibility:
+    name: Accessibility Tests (WCAG 2.1)
+    runs-on: ubuntu-latest
+    if: env.JAVASCRIPT_PROJECT == 'true'
+    needs: build-javascript
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install pa11y-ci
+        run: npm install -g pa11y-ci pa11y-ci-reporter-html
+      
+      - name: Start application
+        run: |
+          npm start &
+          sleep 10
+      
+      - name: Run accessibility tests
+        run: pa11y-ci --config .pa11yci.json || true
+      
+      - name: Generate accessibility report
+        if: always()
+        run: npx pa11y-ci-reporter-html
+      
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: pa11y-ci-report/
+          retention-days: 30
+
+  # =============================================================================
+  # SECURITY JOBS
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # CodeQL Analysis (SAST)
+  # ---------------------------------------------------------------------------
+  security-codeql:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'python']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+      
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # ---------------------------------------------------------------------------
+  # Dependency Scanning
+  # ---------------------------------------------------------------------------
+  security-dependencies:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      
+      - name: Upload Snyk results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
+  # ---------------------------------------------------------------------------
+  # Secret Scanning
+  # ---------------------------------------------------------------------------
+  security-secrets:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  # ---------------------------------------------------------------------------
+  # Container Scanning
+  # ---------------------------------------------------------------------------
+  security-container:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: docker build -t ${{ env.PROJECT_NAME }}:${{ github.sha }} .
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.PROJECT_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # DEPLOYMENT JOBS
+  # =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # Deploy to Staging
+  # ---------------------------------------------------------------------------
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test-unit-python, test-unit-javascript, test-integration, security-codeql]
+    if: |
+      github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: ${{ env.STAGING_URL }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create deployment package
+        run: |
+          tar -czf deployment.tar.gz \
+            --exclude='.git' \
+            --exclude='tests' \
+            --exclude='node_modules' \
+            --exclude='.venv' \
+            --exclude='*.pyc' \
+            .
+      
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy to staging server
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          # Upload deployment package
+          scp deployment.tar.gz ${STAGING_USER}@${STAGING_HOST}:${STAGING_DEPLOY_PATH}/
+          
+          # Deploy on remote server
+          ssh ${STAGING_USER}@${STAGING_HOST} << 'EOF'
+            cd ${STAGING_DEPLOY_PATH}
+            
+            # Backup current deployment
+            if [ -d "current" ]; then
+              cp -r current backup-$(date +%Y%m%d-%H%M%S)
+            fi
+            
+            # Extract new deployment
+            mkdir -p new_release
+            tar -xzf deployment.tar.gz -C new_release/
+            
+            # Install dependencies
+            cd new_release
+            if [ -f "requirements.txt" ]; then
+              pip install -r requirements.txt
+            elif [ -f "package.json" ]; then
+              npm install --production
+            fi
+            
+            # Atomic swap
+            cd ..
+            rm -f current
+            ln -s new_release current
+            
+            # Restart application
+            sudo systemctl restart app || pm2 restart all
+          EOF
+      
+      - name: Health check
+        run: |
+          sleep 10
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.STAGING_URL }}/health)
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Health check failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Health check passed"
+
+  # ---------------------------------------------------------------------------
+  # Deploy to Production
+  # ---------------------------------------------------------------------------
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, security-dependencies, security-secrets]
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: ${{ env.PRODUCTION_URL }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create deployment package
+        run: |
+          tar -czf deployment-prod.tar.gz \
+            --exclude='.git' \
+            --exclude='tests' \
+            --exclude='node_modules' \
+            --exclude='.venv' \
+            --exclude='*.pyc' \
+            .
+      
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy to production server
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+          PRODUCTION_DEPLOY_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+          RELEASE_VERSION: ${{ github.sha }}
+        run: |
+          # Upload deployment package
+          scp deployment-prod.tar.gz ${PRODUCTION_USER}@${PRODUCTION_HOST}:${PRODUCTION_DEPLOY_PATH}/
+          
+          # Deploy with blue-green strategy
+          ssh ${PRODUCTION_USER}@${PRODUCTION_HOST} << EOF
+            cd ${PRODUCTION_DEPLOY_PATH}
+            
+            # Backup current deployment
+            if [ -d "current" ]; then
+              BACKUP_DIR="backup-${RELEASE_VERSION}-\$(date +%Y%m%d-%H%M%S)"
+              cp -r current \$BACKUP_DIR
+              echo \$BACKUP_DIR > .last_backup
+            fi
+            
+            # Extract new deployment
+            mkdir -p release-${RELEASE_VERSION}
+            tar -xzf deployment-prod.tar.gz -C release-${RELEASE_VERSION}/
+            
+            # Install dependencies
+            cd release-${RELEASE_VERSION}
+            if [ -f "requirements.txt" ]; then
+              pip install -r requirements.txt
+            elif [ -f "package.json" ]; then
+              npm install --production
+            fi
+            
+            # Run migrations if needed
+            if [ -f "manage.py" ]; then
+              python manage.py migrate --no-input
+            fi
+            
+            # Atomic swap
+            cd ..
+            rm -f current
+            ln -s release-${RELEASE_VERSION} current
+            
+            # Rolling restart
+            sudo systemctl reload app || pm2 reload all --update-env
+          EOF
+      
+      - name: Comprehensive health check
+        run: |
+          sleep 15
+          
+          # Check application health
+          for i in {1..5}; do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.PRODUCTION_URL }}/health)
+            if [ "$RESPONSE" = "200" ]; then
+              echo "Health check passed (attempt $i)"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "::error::Health check failed after 5 attempts"
+              exit 1
+            fi
+            sleep 10
+          done
+          
+          # Check critical endpoints
+          curl -f ${{ env.PRODUCTION_URL }}/api/status || exit 1
+          
+          echo "All health checks passed"
+      
+      - name: Send deployment notification
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Production Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment Successful*\n\n*Project:* ${{ env.PROJECT_NAME }}\n*Version:* ${{ github.sha }}\n*URL:* ${{ env.PRODUCTION_URL }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ---------------------------------------------------------------------------
+  # Rollback Production
+  # ---------------------------------------------------------------------------
+  rollback-production:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: production
+    
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Rollback deployment
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+          PRODUCTION_DEPLOY_PATH: ${{ secrets.PRODUCTION_DEPLOY_PATH }}
+        run: |
+          ssh ${PRODUCTION_USER}@${PRODUCTION_HOST} << 'EOF'
+            cd ${PRODUCTION_DEPLOY_PATH}
+            
+            # Get last backup
+            if [ ! -f ".last_backup" ]; then
+              echo "::error::No backup found for rollback"
+              exit 1
+            fi
+            
+            BACKUP_DIR=$(cat .last_backup)
+            
+            if [ ! -d "$BACKUP_DIR" ]; then
+              echo "::error::Backup directory not found: $BACKUP_DIR"
+              exit 1
+            fi
+            
+            echo "Rolling back to: $BACKUP_DIR"
+            
+            # Atomic swap to previous version
+            rm -f current
+            ln -s $BACKUP_DIR current
+            
+            # Restart services
+            sudo systemctl restart app || pm2 reload all
+          EOF
+      
+      - name: Verify rollback
+        run: |
+          sleep 10
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.PRODUCTION_URL }}/health)
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Rollback verification failed"
+            exit 1
+          fi
+          echo "Rollback verified successfully"
+
+# ===============================================================================
+# END OF WORKFLOW
+# ===============================================================================
