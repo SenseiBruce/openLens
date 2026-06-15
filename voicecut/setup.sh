@@ -22,7 +22,11 @@ pip install --upgrade pip
 echo "Installing backend dependencies (this will also install silero-vad and whisperX locally)..."
 pip install -r requirements.txt
 
-# 4. Setup frontend
+# 4. Install voicecut package in editable mode
+echo "Installing voicecut package in editable mode..."
+pip install -e .
+
+# 5. Setup frontend
 if [ ! -d "web" ]; then
     echo "Frontend web directory not found. Please scaffold it with Vite."
 else
