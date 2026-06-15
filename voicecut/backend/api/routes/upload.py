@@ -18,7 +18,7 @@ UPLOADS_DIR = BASE_DIR / "data" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".flv"}
-MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024 * 1024  # 4GB
+MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024 * 1024  # 8GB
 
 
 @router.post("/upload")
@@ -53,7 +53,7 @@ async def upload_video(file: UploadFile = File(...)):
                 size += len(chunk)
                 if size > MAX_FILE_SIZE_BYTES:
                     dest_path.unlink(missing_ok=True)
-                    raise HTTPException(status_code=413, detail="File too large (max 4GB)")
+                    raise HTTPException(status_code=413, detail="File too large (max 8GB)")
                 f.write(chunk)
     except HTTPException:
         raise
