@@ -18,6 +18,8 @@ function fmt(s: number): string {
 export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, isUploading }) => {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -40,9 +42,47 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
     try {
       await apiClient.deleteProject(id);
       fetchProjects();
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     } catch (err) {
       console.error(err);
       alert('Failed to delete');
+    }
+  };
+
+  const handleMassDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} projects?`)) return;
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await apiClient.deleteProject(id);
+      }
+      setSelectedIds(new Set());
+      setIsSelectMode(false);
+      fetchProjects();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete some projects');
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCardClick = (id: string) => {
+    if (isSelectMode) {
+      toggleSelect(id);
+    } else {
+      onSelect(id);
     }
   };
 
@@ -56,11 +96,37 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
             <h1 className="text-3xl font-bold text-white tracking-tight">Your Projects</h1>
             <p className="text-sm text-zinc-400 mt-1">Manage and resume your video edits.</p>
           </div>
-          <label className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-lg px-5 py-2.5 transition-colors">
-            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            Import New Video
-            <input type="file" className="hidden" accept="video/*" onChange={onUpload} disabled={isUploading} />
-          </label>
+          <div className="flex items-center gap-3">
+            {projects.length > 0 && (
+              <button
+                onClick={() => {
+                  setIsSelectMode(!isSelectMode);
+                  if (isSelectMode) setSelectedIds(new Set());
+                }}
+                className={`text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors ${
+                  isSelectMode ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                {isSelectMode ? 'Cancel Selection' : 'Select'}
+              </button>
+            )}
+
+            {isSelectMode && selectedIds.size > 0 && (
+              <button
+                onClick={handleMassDelete}
+                className="flex items-center gap-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg px-4 py-2.5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete ({selectedIds.size})
+              </button>
+            )}
+
+            <label className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-lg px-5 py-2.5 transition-colors">
+              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              Import New Video
+              <input type="file" className="hidden" accept="video/*" onChange={onUpload} disabled={isUploading} />
+            </label>
+          </div>
         </div>
 
         {/* List */}
@@ -80,58 +146,76 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((p) => (
-              <div
-                key={p.id}
-                onClick={() => onSelect(p.id)}
-                className="group relative bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-xl p-5 cursor-pointer transition-all hover:shadow-lg"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                      <Scissors className="w-5 h-5 text-indigo-400" />
+            {projects.map((p) => {
+              const isSelected = selectedIds.has(p.id);
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => handleCardClick(p.id)}
+                  className={`group relative bg-zinc-900 border hover:border-zinc-600 rounded-xl p-5 cursor-pointer transition-all hover:shadow-lg ${
+                    isSelected ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-zinc-800'
+                  }`}
+                >
+                  {isSelectMode && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
+                        isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-zinc-600 bg-zinc-950 group-hover:border-indigo-400'
+                      }`}>
+                        {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-white truncate w-40" title={p.name}>
-                        {p.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-500">
-                        <span className={
-                          p.status === 'ready' ? 'text-green-400' :
-                          p.status === 'error' ? 'text-red-400' :
-                          p.status === 'idle' ? 'text-zinc-400' :
-                          'text-indigo-400'
-                        }>
-                          • {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
-                        </span>
+                  )}
+
+                  <div className={`flex justify-between items-start mb-4 ${isSelectMode ? 'ml-8' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+                        <Scissors className="w-5 h-5 text-indigo-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-white truncate" title={p.name}>
+                          {p.name}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-500">
+                          <span className={
+                            p.status === 'ready' ? 'text-green-400' :
+                            p.status === 'error' ? 'text-red-400' :
+                            p.status === 'idle' ? 'text-zinc-400' :
+                            'text-indigo-400'
+                          }>
+                            • {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-zinc-800 pt-4 mt-2">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    {p.video_duration ? fmt(p.video_duration) : '--:--'}
+                  <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-zinc-800 pt-4 mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {p.video_duration ? fmt(p.video_duration) : '--:--'}
+                    </div>
+                    <span>
+                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
+                    </span>
                   </div>
-                  <span>
-                    {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
-                  </span>
-                </div>
 
-                {/* Delete button (shows on hover) */}
-                <button
-                  onClick={(e) => handleDelete(e, p.id)}
-                  className="absolute top-4 right-4 p-2 text-zinc-600 hover:text-red-400 bg-zinc-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Delete project"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  {/* Delete button (shows on hover, disabled in select mode) */}
+                  {!isSelectMode && (
+                    <button
+                      onClick={(e) => handleDelete(e, p.id)}
+                      className="absolute top-4 right-4 p-2 text-zinc-600 hover:text-red-400 bg-zinc-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Delete project"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
     </div>
   );
 };
+
