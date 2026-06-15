@@ -244,20 +244,19 @@ function App() {
           </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* ── Top area: transcript left + video center ── */}
+            {/* Transcript left + video center */}
             <div className="flex-1 flex overflow-hidden">
-              {/* Left: Transcript */}
               <TranscriptPanel />
-              {/* Center: Video */}
               <div className="flex-1 flex flex-col bg-zinc-950 overflow-hidden">
                 <VideoPlayer />
               </div>
             </div>
-            {/* ── Bottom: full-width waveform ── */}
+            {/* Full-width waveform at bottom */}
             {project?.status === 'ready' && <WaveformTimeline />}
           </div>
-
+        )}
       </div>
+
 
       {showExport && (
         <ExportModal onClose={() => setShowExport(false)} />
