@@ -1,4 +1,4 @@
-import type { Project, PipelineEvent } from '../types';
+import type { Project, PipelineEvent, ProjectSummary } from '../types';
 
 const API_BASE = '/api';
 
@@ -16,10 +16,23 @@ export const apiClient = {
     return res.json();
   },
 
+  async getProjects(): Promise<ProjectSummary[]> {
+    const res = await fetch(`${API_BASE}/projects`);
+    if (!res.ok) throw new Error('Failed to fetch projects');
+    return res.json();
+  },
+
   async getProject(projectId: string): Promise<Project> {
     const res = await fetch(`${API_BASE}/projects/${projectId}`);
     if (!res.ok) throw new Error('Failed to fetch project');
     return res.json();
+  },
+
+  async deleteProject(projectId: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/projects/${projectId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete project');
   },
 
   async updateCutDecision(projectId: string, cutId: string, status: string): Promise<void> {

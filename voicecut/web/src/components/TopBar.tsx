@@ -36,6 +36,11 @@ export const TopBar: React.FC<{
     };
   }, [project?.user_decisions, project?.candidate_cuts, project?.video_duration]);
 
+  const handleHome = () => {
+    setProject(null);
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -58,10 +63,10 @@ export const TopBar: React.FC<{
   return (
     <div className="h-12 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between px-5 shrink-0 gap-4">
       {/* Brand */}
-      <div className="flex items-center gap-2 shrink-0">
+      <button onClick={handleHome} className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity focus:outline-none">
         <Scissors className="w-4 h-4 text-indigo-400" />
         <span className="font-bold text-sm tracking-tight text-white">VoiceCut</span>
-      </div>
+      </button>
 
       {/* Duration indicator */}
       {showDuration ? (
@@ -110,34 +115,38 @@ export const TopBar: React.FC<{
         ) : <div className="flex-1" />
       )}
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
-        <label className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-3 py-1.5 transition-colors">
-          <Upload className="w-3.5 h-3.5" />
-          Import Video
-          <input type="file" className="hidden" accept="video/*" onChange={handleUpload} />
-        </label>
+      {/* Actions (Only show if project exists) */}
+      {project ? (
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-3 py-1.5 transition-colors">
+            <Upload className="w-3.5 h-3.5" />
+            Import Video
+            <input type="file" className="hidden" accept="video/*" onChange={handleUpload} />
+          </label>
 
-        <button
-          onClick={onAnalyzeStart}
-          disabled={!project || project.status !== 'idle'}
-          className="flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
-        >
-          {project?.status === 'analyzing'
-            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            : <Play className="w-3.5 h-3.5" />}
-          Remove Silences
-        </button>
+          <button
+            onClick={onAnalyzeStart}
+            disabled={project.status !== 'idle'}
+            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
+          >
+            {project.status === 'analyzing'
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <Play className="w-3.5 h-3.5" />}
+            Remove Silences
+          </button>
 
-        <button
-          onClick={onExportStart}
-          disabled={!project || project.status !== 'ready'}
-          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 bg-white hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export
-        </button>
-      </div>
+          <button
+            onClick={onExportStart}
+            disabled={project.status !== 'ready'}
+            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 bg-white hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+        </div>
+      ) : (
+        <div className="shrink-0 w-32" /> /* Placeholder to balance the layout */
+      )}
     </div>
   );
 };

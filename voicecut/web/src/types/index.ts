@@ -82,3 +82,12 @@ export interface PipelineEvent {
   cuts_count?: number;
   files?: Record<string, string>;
 }
+
+export interface ProjectSummary {
+  id: string;
+  name: string;
+  status: ProjectStatus;
+  video_duration?: number;
+  created_at?: string;
+  updated_at?: string;
+}

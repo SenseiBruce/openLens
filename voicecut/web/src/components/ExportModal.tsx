@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Download, X, ChevronDown } from 'lucide-react';
+import { Loader2, Download, X } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useProjectStore } from '../store/useProjectStore';
 import type { PipelineEvent } from '../types';

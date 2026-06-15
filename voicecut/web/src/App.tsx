@@ -4,12 +4,13 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { WaveformTimeline } from './components/WaveformTimeline';
 import { TranscriptPanel } from './components/TranscriptPanel';
 import { ExportModal } from './components/ExportModal';
+import { ProjectList } from './components/ProjectList';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
-  const { project, setProject, isUploading } = useProjectStore();
+  const { project, setProject, isUploading, setIsUploading } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
   
@@ -58,6 +59,23 @@ function App() {
         setAnalysisStep('idle');
       }
     });
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploading(true);
+      const { project_id } = await apiClient.uploadVideo(file);
+      const newProject = await apiClient.getProject(project_id);
+      setProject(newProject);
+      window.history.pushState({}, '', `?project=${project_id}`);
+    } catch (err) {
+      console.error(err);
+      alert('Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleExportStart = async () => {
@@ -112,7 +130,16 @@ function App() {
       <TopBar onAnalyzeStart={handleAnalyzeStart} onExportStart={handleExportStart} />
 
       <div className="flex-1 flex overflow-hidden">
-        {isTranscodingState ? (
+        {!project && !isUploading ? (
+          <ProjectList 
+            onSelect={(id) => {
+              window.history.pushState({}, '', `?project=${id}`);
+              apiClient.getProject(id).then(setProject).catch(console.error);
+            }} 
+            onUpload={handleUpload}
+            isUploading={isUploading}
+          />
+        ) : isTranscodingState ? (
           <div className="flex-1 flex bg-zinc-950 overflow-hidden">
 
             {/* ── LEFT: progress panel ─────────────────────────────── */}

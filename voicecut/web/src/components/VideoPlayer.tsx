@@ -1,10 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useProjectStore } from '../store/useProjectStore';
 
 export const VideoPlayer: React.FC = () => {
   const { project, setCurrentTime, seekTo, clearSeekTo } = useProjectStore();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isReady, setIsReady] = useState(false);
 
   if (!project?.video_path) {
     return (
@@ -52,7 +51,6 @@ export const VideoPlayer: React.FC = () => {
         playsInline
         crossOrigin="anonymous"
         className="w-full h-full object-contain"
-        onCanPlay={() => setIsReady(true)}
         onTimeUpdate={handleTimeUpdate}
       />
     </div>
