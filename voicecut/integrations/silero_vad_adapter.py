@@ -79,7 +79,7 @@ class SileroVADAdapter:
         self._ensure_loaded()
 
         try:
-            from silero_vad import read_audio, get_speech_timestamps  # type: ignore
+            from silero_vad import get_speech_timestamps  # type: ignore
         except ImportError as e:
             raise RuntimeError("silero-vad not installed") from e
 
@@ -89,7 +89,20 @@ class SileroVADAdapter:
 
         logger.info(f"Running Silero VAD on: {audio_path}")
 
-        wav = read_audio(str(audio_path))
+        # torchaudio 2.8 ships with zero audio backends (soundfile/sox removed).
+        # Load WAV directly via soundfile → torch tensor to bypass read_audio().
+        try:
+            import soundfile as sf
+            import torch
+            data, sr = sf.read(str(audio_path), dtype="float32", always_2d=False)
+            wav = torch.from_numpy(data)
+            if sr != 16000:
+                # Resample if needed (should already be 16kHz from FFmpeg extraction)
+                import torchaudio.functional as F
+                wav = F.resample(wav, sr, 16000)
+        except Exception as e:
+            raise RuntimeError(f"Failed to load audio with soundfile: {e}") from e
+
         if self._device in ("mps", "cuda") and self._model is not None:
             try:
                 wav = wav.to(self._device)

@@ -9,3 +9,4 @@ python-multipart>=0.0.6
 -e ../whisperX
 # Auto-editor is used as a CLI binary, we'll install it globally or in the venv
 auto-editor>=23.44.1
+soundfile>=0.12.1
