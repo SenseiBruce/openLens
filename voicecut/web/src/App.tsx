@@ -3,6 +3,7 @@ import { TopBar } from './components/TopBar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { WaveformTimeline } from './components/WaveformTimeline';
 import { TranscriptPanel } from './components/TranscriptPanel';
+import { ExportModal } from './components/ExportModal';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
@@ -11,7 +12,6 @@ function App() {
   const { project, setProject, isUploading } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
-  const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
   
   // Track the active pipeline step for the stepper
   const [analysisStep, setAnalysisStep] = useState<'upload' | 'create' | 'processing' | 'transcribe' | 'complete' | 'idle'>('idle');
@@ -62,10 +62,7 @@ function App() {
 
   const handleExportStart = async () => {
     if (!project) return;
-    setShowExport(true);
-    setExportFiles(null);
-    setProgressMsg('Preparing render...');
-
+    // Sync decisions to backend first, then open modal
     const decisions = (project.user_decisions || []).map(d => ({
       cut_id: d.cut_id,
       status: d.action
@@ -75,19 +72,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(decisions)
     });
-
-    apiClient.exportProjectStream(project.id, (ev) => {
-      if (ev.message) setProgressMsg(ev.message);
-
-      if (ev.step === 'files' && ev.files) {
-        setExportFiles(ev.files);
-        setProgressMsg('');
-      }
-      if (ev.step === 'error') {
-        alert('Export error: ' + ev.message);
-        setShowExport(false);
-      }
-    });
+    setShowExport(true);
   };
 
   const isTranscodingState = isUploading || project?.status === 'analyzing';
@@ -219,42 +204,8 @@ function App() {
         )}
       </div>
 
-      {/* Export Modal Overlays */}
       {showExport && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-card border border-border rounded-xl p-8 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Exporting Video</h2>
-            
-            {!exportFiles ? (
-              <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-                <p className="text-sm text-muted-foreground text-center">{progressMsg}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-green-400 mb-4">Export completed successfully!</p>
-                <div className="space-y-2">
-                  {Object.entries(exportFiles).map(([format, path]) => (
-                    <a
-                      key={format}
-                      href={`/api/export/${project?.id}/download/${path.split('/').pop()}`}
-                      className="block w-full text-center py-2 bg-secondary hover:bg-secondary/80 rounded border border-border"
-                      download
-                    >
-                      Download {format.toUpperCase()}
-                    </a>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowExport(false)}
-                  className="w-full mt-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <ExportModal onClose={() => setShowExport(false)} />
       )}
     </div>
   );

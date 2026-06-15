@@ -46,8 +46,17 @@ export const apiClient = {
     return sse;
   },
 
-  exportProjectStream(projectId: string, onEvent: (ev: PipelineEvent) => void): EventSource {
-    const sse = new EventSource(`${API_BASE}/export/${projectId}`);
+  async getVideoInfo(projectId: string): Promise<{ width: number; height: number }> {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/video-info`);
+    if (!res.ok) throw new Error('Failed to get video info');
+    return res.json();
+  },
+
+  exportProjectStream(projectId: string, resolution: string | null, onEvent: (ev: PipelineEvent) => void): EventSource {
+    const url = resolution
+      ? `${API_BASE}/export/${projectId}?resolution=${resolution}`
+      : `${API_BASE}/export/${projectId}`;
+    const sse = new EventSource(url);
     
     sse.addEventListener('step', (e) => onEvent(JSON.parse((e as MessageEvent).data)));
     sse.addEventListener('progress', (e) => onEvent(JSON.parse((e as MessageEvent).data)));

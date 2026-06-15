@@ -258,7 +258,7 @@ class PipelineProcessor:
                 start=0.0,
                 end=audio_duration,
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             )]
 
         margin = settings.margin
@@ -283,7 +283,7 @@ class PipelineProcessor:
                 start=0.0,
                 end=first_start,
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
         # Gaps between speech segments
@@ -307,7 +307,7 @@ class PipelineProcessor:
                 start=round(gap_start, 3),
                 end=round(gap_end, 3),
                 reason=reason,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
         # Gap after last speech segment
@@ -318,7 +318,7 @@ class PipelineProcessor:
                 start=round(last_end, 3),
                 end=round(audio_duration, 3),
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
         logger.info(f"Gap detection: {len(cuts)} candidate cuts from {len(segs)} speech segments")

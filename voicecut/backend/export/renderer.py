@@ -32,11 +32,22 @@ class VideoRenderer:
     def __init__(self, exports_dir: Path):
         self.exports_dir = exports_dir
 
+    # Map resolution label → target height (width calculated to preserve AR)
+    RESOLUTION_MAP: dict[str, int] = {
+        "2160p": 2160,  # 4K
+        "1440p": 1440,  # 2K
+        "1080p": 1080,
+        "720p":  720,
+        "480p":  480,
+        "360p":  360,
+    }
+
     async def render(
         self,
         project: Project,
         formats: list[ExportFormat],
         on_event: Callable[[str, dict], None],
+        resolution: str | None = None,
     ) -> dict[str, str]:
         """
         Render final output files.
@@ -45,6 +56,8 @@ class VideoRenderer:
             project: Project with all segments and decisions.
             formats: List of ExportFormat to generate.
             on_event: Progress callback.
+            resolution: Optional target resolution label e.g. '1080p', '2160p'.
+                        None = lossless copy at original resolution.
 
         Returns:
             Dict mapping format name → output file path.
@@ -61,6 +74,9 @@ class VideoRenderer:
 
         on_event("progress", {"percent": 10, "message": f"Preparing {len(kept_segments)} segments..."})
 
+        # Resolve target height from resolution label
+        target_height: int | None = self.RESOLUTION_MAP.get(resolution or "", None)
+
         # MP4 export
         if ExportFormat.MP4 in formats:
             on_event("step", {"step": "rendering_video", "message": "Rendering final video...", "percent": 20})
@@ -69,6 +85,7 @@ class VideoRenderer:
                 kept_segments=kept_segments,
                 output_dir=output_dir,
                 on_event=on_event,
+                target_height=target_height,
             )
             results["mp4"] = str(mp4_path)
             project.output_path = str(mp4_path)
@@ -152,8 +169,14 @@ class VideoRenderer:
         kept_segments: list[tuple[float, float]],
         output_dir: Path,
         on_event: Callable[[str, dict], None],
+        target_height: int | None = None,
     ) -> Path:
-        """Render MP4 using FFmpeg concat demuxer (lossless copy mode)."""
+        """Render MP4 using FFmpeg concat demuxer.
+        
+        - target_height=None → lossless copy at original resolution.
+        - target_height set  → re-encode with scale filter (preserves AR).
+          Uses -2 for width so it's divisible by 2 (required by libx264).
+        """
         output_path = output_dir / "final_output.mp4"
         concat_list = output_dir / "concat_list.txt"
 
@@ -165,34 +188,42 @@ class VideoRenderer:
             lines.append(f"outpoint {end:.6f}")
         concat_list.write_text("\n".join(lines))
 
-        cmd = [
-            "ffmpeg", "-y",
-            "-f", "concat",
-            "-safe", "0",
-            "-i", str(concat_list),
-            "-c", "copy",              # lossless copy
-            "-movflags", "+faststart",  # web-optimized
-            str(output_path),
-        ]
-
         on_event("progress", {"percent": 40, "message": "Running FFmpeg..."})
 
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        _, stderr = await proc.communicate()
+        if target_height is None:
+            # --- Lossless copy (no re-encode) ---
+            cmd = [
+                "ffmpeg", "-y",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", str(concat_list),
+                "-c", "copy",
+                "-movflags", "+faststart",
+                str(output_path),
+            ]
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            _, stderr = await proc.communicate()
 
-        if proc.returncode != 0:
-            # Fallback: re-encode (handles stream incompatibilities)
-            logger.warning("Lossless copy failed, falling back to re-encode")
-            on_event("progress", {"percent": 50, "message": "Re-encoding video..."})
+            if proc.returncode != 0:
+                logger.warning("Lossless copy failed, falling back to re-encode at original resolution")
+                target_height = -1  # sentinel: re-encode without scale
+
+        if target_height is not None:
+            # --- Re-encode with optional scale ---
+            scale_filter = (
+                f"scale=-2:{target_height}" if target_height > 0 else "scale=iw:ih"
+            )
+            on_event("progress", {"percent": 50, "message": f"Re-encoding video{f' at {target_height}p' if target_height > 0 else ''}..."})
             cmd_reenc = [
                 "ffmpeg", "-y",
                 "-f", "concat",
                 "-safe", "0",
                 "-i", str(concat_list),
+                "-vf", scale_filter,
                 "-c:v", "libx264",
                 "-preset", "fast",
                 "-crf", "18",
