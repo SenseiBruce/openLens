@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useProjectStore } from '../store/useProjectStore';
 
 export const VideoPlayer: React.FC = () => {
-  const { project, setCurrentTime } = useProjectStore();
+  const { project, setCurrentTime, seekTo, clearSeekTo } = useProjectStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -46,6 +46,14 @@ export const VideoPlayer: React.FC = () => {
       }
     }
   }, [isReady]);
+
+  // Seek video when transcript/waveform word is clicked
+  useEffect(() => {
+    if (seekTo !== null && videoRef.current) {
+      videoRef.current.currentTime = seekTo;
+      clearSeekTo();
+    }
+  }, [seekTo]);
 
   return (
     <div className="flex-1 bg-black rounded-xl overflow-hidden border border-border flex flex-col relative group">

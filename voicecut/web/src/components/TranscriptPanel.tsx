@@ -3,7 +3,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import clsx from 'clsx';
 
 export const TranscriptPanel: React.FC = () => {
-  const { project, currentTime, setCurrentTime, updateCutStatus } = useProjectStore();
+  const { project, currentTime, setSeekTo, updateCutStatus } = useProjectStore();
 
   if (!project || (!project.transcript_segments.length && !project.words.length)) {
     return (
@@ -70,7 +70,7 @@ export const TranscriptPanel: React.FC = () => {
                       ? "bg-indigo-500/20 text-white font-medium border-b-2 border-indigo-500" 
                       : "text-foreground hover:bg-secondary"
                   )}
-                  onClick={() => setCurrentTime(item.start)}
+                  onClick={() => setSeekTo(item.start)}
                 >
                   {item.word}{' '}
                 </span>

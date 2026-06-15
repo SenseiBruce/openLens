@@ -7,6 +7,9 @@ interface ProjectState {
   updateCutStatus: (cutId: string, status: CutStatus) => void;
   currentTime: number;
   setCurrentTime: (time: number) => void;
+  seekTo: number | null;          // set by transcript/waveform clicks to seek video
+  setSeekTo: (time: number) => void;
+  clearSeekTo: () => void;
   isUploading: boolean;
   setIsUploading: (isUploading: boolean) => void;
 }
@@ -40,6 +43,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }),
   currentTime: 0,
   setCurrentTime: (time) => set({ currentTime: time }),
+  seekTo: null,
+  setSeekTo: (time) => set({ seekTo: time, currentTime: time }),
+  clearSeekTo: () => set({ seekTo: null }),
   isUploading: false,
   setIsUploading: (isUploading) => set({ isUploading }),
 }));
