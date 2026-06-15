@@ -8,8 +8,8 @@ export const VideoPlayer: React.FC = () => {
 
   if (!project?.video_path) {
     return (
-      <div className="flex-1 bg-black flex items-center justify-center rounded-xl border border-border">
-        <p className="text-muted-foreground">Upload a video to begin</p>
+      <div className="flex-1 bg-zinc-950 flex items-center justify-center">
+        <p className="text-zinc-600 text-sm">Upload a video to begin</p>
       </div>
     );
   }
@@ -21,7 +21,6 @@ export const VideoPlayer: React.FC = () => {
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
     const current = videoRef.current.currentTime;
-    // Update store
     setCurrentTime(current);
 
     const userDecisions = project?.user_decisions || [];
@@ -36,18 +35,7 @@ export const VideoPlayer: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (videoRef.current && isReady) {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(err => {
-          console.error('Autoplay failed', err);
-        });
-      }
-    }
-  }, [isReady]);
-
-  // Seek video when transcript/waveform word is clicked
+  // Seek video when transcript word / waveform is clicked
   useEffect(() => {
     if (seekTo !== null && videoRef.current) {
       videoRef.current.currentTime = seekTo;
@@ -56,15 +44,14 @@ export const VideoPlayer: React.FC = () => {
   }, [seekTo]);
 
   return (
-    <div className="flex-1 bg-black rounded-xl overflow-hidden border border-border flex flex-col relative group">
+    <div className="flex-1 bg-black overflow-hidden flex flex-col">
       <video
         ref={videoRef}
         src={videoUrl}
         controls
-        muted
         playsInline
         crossOrigin="anonymous"
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        className="w-full h-full object-contain"
         onCanPlay={() => setIsReady(true)}
         onTimeUpdate={handleTimeUpdate}
       />
