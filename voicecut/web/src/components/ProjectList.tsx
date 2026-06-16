@@ -111,6 +111,21 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
               </button>
             )}
 
+            {isSelectMode && (
+              <button
+                onClick={() => {
+                  if (selectedIds.size === projects.length) {
+                    setSelectedIds(new Set());
+                  } else {
+                    setSelectedIds(new Set(projects.map(p => p.id)));
+                  }
+                }}
+                className="text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 px-4 py-2.5 rounded-lg transition-colors"
+              >
+                {selectedIds.size === projects.length ? 'Deselect All' : 'Select All'}
+              </button>
+            )}
+
             {isSelectMode && selectedIds.size > 0 && (
               <button
                 onClick={handleMassDelete}
