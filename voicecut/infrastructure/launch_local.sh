@@ -1,16 +1,30 @@
 #!/bin/bash
 
 # launch_local.sh
-# Script to launch both the FastAPI backend and Vite frontend concurrently.
+# Script to launch both the FastAPI backend and Vite frontend concurrently, or via Docker.
 
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$DIR")"
 
-echo "🚀 Launching VoiceCut Local Environment..."
+echo "🚀 Launching VoiceCut Environment..."
 
 cd "$PROJECT_ROOT"
+
+# Check for --docker flag
+USE_DOCKER=false
+for arg in "$@"; do
+    if [ "$arg" == "--docker" ]; then
+        USE_DOCKER=true
+    fi
+done
+
+if [ "$USE_DOCKER" = true ]; then
+    echo "🐳 Launching via Docker Compose..."
+    docker-compose up --build
+    exit 0
+fi
 
 if [ ! -d ".venv" ]; then
     echo "❌ Error: Virtual environment not found. Please run setup.sh first."
@@ -21,8 +35,8 @@ fi
 cleanup() {
     echo ""
     echo "🛑 Shutting down services..."
-    kill $BACKEND_PID
-    kill $FRONTEND_PID
+    kill $BACKEND_PID 2>/dev/null || true
+    kill $FRONTEND_PID 2>/dev/null || true
     exit 0
 }
 trap cleanup SIGINT SIGTERM
@@ -54,4 +68,5 @@ echo "Press Ctrl+C to shut down both services gracefully."
 
 # Wait for background processes to finish (or until interrupted)
 wait $BACKEND_PID $FRONTEND_PID
+
 
