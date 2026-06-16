@@ -102,8 +102,18 @@ async def update_single_cut(project_id: str, cut_id: str, status: str):
 
 @router.delete("/projects/{project_id}")
 async def delete_project_route(project_id: str):
-    """Delete a project."""
+    """Delete a project and its files."""
+    import shutil
+    from pathlib import Path
+    
     success = delete_project(project_id)
     if not success:
         raise HTTPException(status_code=404, detail="Project not found")
+        
+    # Clean up physical files
+    BASE_DIR = Path(__file__).parent.parent.parent.parent
+    project_dir = BASE_DIR / "data" / "uploads" / project_id
+    if project_dir.exists() and project_dir.is_dir():
+        shutil.rmtree(project_dir, ignore_errors=True)
+        
     return {"message": "Project deleted"}
