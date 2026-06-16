@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Project, CutStatus } from '../types';
+import { apiClient } from '../api/client';
 
 interface ProjectState {
   project: Project | null;
@@ -20,6 +21,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
   updateCutStatus: (cutId, status) =>
     set((state) => {
       if (!state.project) return state;
+      
+      // Fire-and-forget API call to sync backend
+      apiClient.updateCutDecision(state.project.id, cutId, status).catch((err) => {
+        console.error("Failed to sync cut decision to backend:", err);
+      });
       
       const newCuts = state.project.candidate_cuts.map((cut) =>
         cut.id === cutId ? { ...cut, status } : cut
