@@ -9,20 +9,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy the local submodules and main app
+# Install PyTorch CPU first (largest dependency, rarely changes)
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Copy submodules and requirements.txt to cache the heavy pip install step
 COPY silero-vad/ /app/silero-vad/
 COPY whisperX/ /app/whisperX/
-COPY voicecut/ /app/voicecut/
+COPY voicecut/requirements.txt /app/voicecut/
 
-# Install the dependencies
 WORKDIR /app/voicecut
-
-# Install PyTorch CPU first to avoid heavy GPU layers if not available
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Upgrade pip and install the requirements
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+# Now copy the rest of the fast-changing voicecut code
+COPY voicecut/ /app/voicecut/
 
 # Install the voicecut package itself
 RUN pip install -e .
