@@ -14,7 +14,7 @@ export const TopBar: React.FC<{
   onAnalyzeStart: () => void;
   onExportStart: () => void;
 }> = ({ onAnalyzeStart, onExportStart }) => {
-  const { project, setProject, setIsUploading } = useProjectStore();
+  const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
 
   // Live kept-duration: total minus all effectively-cut segments
   const { totalDur, keptDur, removedDur } = useMemo(() => {
@@ -117,7 +117,21 @@ export const TopBar: React.FC<{
 
       {/* Actions (Only show if project exists) */}
       {project ? (
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-4 shrink-0">
+          <label className="flex items-center cursor-pointer gap-2 mr-2">
+            <span className="text-xs font-medium text-zinc-300">Skip Cuts</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={skipCuts}
+                onChange={(e) => setSkipCuts(e.target.checked)}
+              />
+              <div className={`block w-8 h-5 rounded-full transition-colors ${skipCuts ? 'bg-indigo-600' : 'bg-zinc-700'}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${skipCuts ? 'transform translate-x-3' : ''}`}></div>
+            </div>
+          </label>
+
           <label className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-3 py-1.5 transition-colors">
             <Upload className="w-3.5 h-3.5" />
             Import Video

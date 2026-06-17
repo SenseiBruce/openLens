@@ -13,6 +13,8 @@ interface ProjectState {
   clearSeekTo: () => void;
   isUploading: boolean;
   setIsUploading: (isUploading: boolean) => void;
+  skipCuts: boolean;
+  setSkipCuts: (skip: boolean) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -54,5 +56,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   clearSeekTo: () => set({ seekTo: null }),
   isUploading: false,
   setIsUploading: (isUploading) => set({ isUploading }),
+  skipCuts: true,
+  setSkipCuts: (skip) => set({ skipCuts: skip }),
 }));
 

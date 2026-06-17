@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useProjectStore } from '../store/useProjectStore';
 
 export const VideoPlayer: React.FC = () => {
-  const { project, setCurrentTime, seekTo, clearSeekTo } = useProjectStore();
+  const { project, setCurrentTime, seekTo, clearSeekTo, skipCuts } = useProjectStore();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!project?.video_path) {
@@ -29,7 +29,7 @@ export const VideoPlayer: React.FC = () => {
       const status = decision ? decision.action : cut.status;
       return status === 'cut' && current >= cut.start && current < cut.end;
     });
-    if (activeCut && videoRef.current) {
+    if (skipCuts && activeCut && videoRef.current) {
       videoRef.current.currentTime = activeCut.end;
     }
   };
@@ -38,6 +38,7 @@ export const VideoPlayer: React.FC = () => {
   useEffect(() => {
     if (seekTo !== null && videoRef.current) {
       videoRef.current.currentTime = seekTo;
+      videoRef.current.play().catch(() => {});
       clearSeekTo();
     }
   }, [seekTo]);
