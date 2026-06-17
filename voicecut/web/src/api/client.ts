@@ -42,8 +42,22 @@ export const apiClient = {
     if (!res.ok) throw new Error('Failed to update cut decision');
   },
 
-  analyzeProjectStream(projectId: string, onEvent: (ev: PipelineEvent) => void): EventSource {
-    const sse = new EventSource(`${API_BASE}/analyze/${projectId}`);
+  analyzeProjectStream(
+    projectId: string,
+    settings: { whisper_model?: string; min_gap_duration?: number; language?: string; initial_prompt?: string } | null,
+    onEvent: (ev: PipelineEvent) => void
+  ): EventSource {
+    let url = `${API_BASE}/analyze/${projectId}`;
+    if (settings) {
+      const params = new URLSearchParams();
+      if (settings.whisper_model) params.append('whisper_model', settings.whisper_model);
+      if (settings.min_gap_duration) params.append('min_gap_duration', settings.min_gap_duration.toString());
+      if (settings.language) params.append('language', settings.language);
+      if (settings.initial_prompt) params.append('initial_prompt', settings.initial_prompt);
+      url += `?${params.toString()}`;
+    }
+    
+    const sse = new EventSource(url);
     
     sse.addEventListener('step', (e) => onEvent(JSON.parse((e as MessageEvent).data)));
     sse.addEventListener('progress', (e) => onEvent(JSON.parse((e as MessageEvent).data)));

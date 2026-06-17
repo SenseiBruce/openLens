@@ -30,14 +30,14 @@ function App() {
     }
   }, [setProject]);
 
-  const handleAnalyzeStart = () => {
+  const handleAnalyzeStart = (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => {
     if (!project) return;
     
     setProject({ ...project, status: 'analyzing' });
     setProgressMsg('Starting analysis...');
     setAnalysisStep('processing');
     
-    apiClient.analyzeProjectStream(project.id, (ev) => {
+    apiClient.analyzeProjectStream(project.id, settings, (ev) => {
       if (ev.message) setProgressMsg(ev.message);
       
       if (ev.step === 'extracting_audio' || ev.step === 'running_vad' || ev.step === 'detecting_cuts') {
