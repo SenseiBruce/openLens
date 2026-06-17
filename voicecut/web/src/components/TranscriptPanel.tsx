@@ -65,6 +65,7 @@ export const TranscriptPanel: React.FC = () => {
             if (el.type === 'word') {
               const item = el.data;
               const isActive = currentTime >= item.start && currentTime <= item.end;
+              const isPast = currentTime > item.end;
               return (
                 <span
                   key={`w-${idx}`}
@@ -73,7 +74,9 @@ export const TranscriptPanel: React.FC = () => {
                     'cursor-pointer rounded px-0.5 transition-all duration-150',
                     isActive
                       ? 'bg-indigo-500/25 text-white font-medium'
-                      : 'hover:bg-zinc-800 text-zinc-300'
+                      : isPast
+                        ? 'text-zinc-300 hover:bg-zinc-800'
+                        : 'text-zinc-600 hover:bg-zinc-800'
                   )}
                   onClick={() => setSeekTo(item.start)}
                 >
