@@ -10,8 +10,8 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8000',
-      '/files': 'http://localhost:8000',
+      '/api': process.env.API_TARGET || 'http://localhost:8000',
+      '/files': process.env.API_TARGET || 'http://localhost:8000',
     }
   }
 })

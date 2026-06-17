@@ -32,5 +32,6 @@ services:
       - ./web/package.json:/app/package.json
     environment:
       - NODE_ENV=development
+      - API_TARGET=http://backend:8000
     depends_on:
       - backend
