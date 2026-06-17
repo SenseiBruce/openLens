@@ -213,7 +213,19 @@ class PipelineProcessor:
 
     def _run_transcription(self, audio_path: Path) -> dict:
         """Run WhisperX transcription (blocking, called in executor)."""
-        result = self._whisperx.transcribe(str(audio_path))
+        language = self.settings.language
+        initial_prompt = self.settings.initial_prompt
+        
+        if language == "hinglish":
+            language = "hi"  # explicitly force Hindi to prevent Whisper from outputting Urdu script
+            if not initial_prompt:
+                initial_prompt = "This audio contains a mix of English and Hindi. The speaker frequently switches between languages."
+                
+        result = self._whisperx.transcribe(
+            str(audio_path), 
+            language=language,
+            initial_prompt=initial_prompt
+        )
 
         segments = []
         for seg in result["transcript"]:

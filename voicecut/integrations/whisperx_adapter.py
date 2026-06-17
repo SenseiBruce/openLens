@@ -95,6 +95,7 @@ class WhisperXAdapter:
         language: Optional[str] = None,
         batch_size: int = 8,
         align_words: bool = True,
+        initial_prompt: Optional[str] = None,
     ) -> dict:
         """
         Transcribe audio file and return structured result.
@@ -128,7 +129,21 @@ class WhisperXAdapter:
         audio = whisperx.load_audio(str(audio_path))
 
         # Step 2: Transcribe
-        result = self._model.transcribe(audio, batch_size=batch_size, language=language)
+        transcribe_kwargs = {"batch_size": batch_size}
+        if language:
+            transcribe_kwargs["language"] = language
+            
+        # whisperX's FasterWhisperPipeline.transcribe() doesn't accept initial_prompt
+        # but the underlying model uses self._model.options which is a dataclass.
+        if hasattr(self._model, "options"):
+            import dataclasses
+            # Replace initial_prompt dynamically
+            self._model.options = dataclasses.replace(
+                self._model.options, 
+                initial_prompt=initial_prompt if initial_prompt else None
+            )
+
+        result = self._model.transcribe(audio, **transcribe_kwargs)
         detected_language = result.get("language", language or "en")
 
         logger.info(f"WhisperX: detected language='{detected_language}', "

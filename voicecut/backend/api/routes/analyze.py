@@ -25,7 +25,13 @@ EXPORTS_DIR = BASE_DIR / "data" / "exports"
 
 
 @router.get("/analyze/{project_id}")
-async def analyze_project(project_id: str, settings: ProjectSettings | None = None):
+async def analyze_project(
+    project_id: str,
+    whisper_model: str | None = None,
+    min_gap_duration: float | None = None,
+    language: str | None = None,
+    initial_prompt: str | None = None,
+):
     """
     Start the analysis pipeline for a project.
     
@@ -49,8 +55,14 @@ async def analyze_project(project_id: str, settings: ProjectSettings | None = No
         raise HTTPException(status_code=400, detail="Video file not found")
 
     # Apply custom settings if provided
-    if settings:
-        project.settings = settings
+    if whisper_model:
+        project.settings.whisper_model = whisper_model
+    if min_gap_duration is not None:
+        project.settings.min_gap_duration = min_gap_duration
+    if language:
+        project.settings.language = language
+    if initial_prompt:
+        project.settings.initial_prompt = initial_prompt
 
     # Event queue for SSE
     queue: asyncio.Queue = asyncio.Queue()

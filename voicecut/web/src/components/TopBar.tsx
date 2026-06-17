@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Upload, Play, Scissors, Download, Loader2, Clock } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
+import { AnalyzeModal } from './AnalyzeModal';
 
 /** Format seconds as m:ss */
 function fmt(s: number): string {
@@ -11,9 +12,10 @@ function fmt(s: number): string {
 }
 
 export const TopBar: React.FC<{
-  onAnalyzeStart: () => void;
+  onAnalyzeStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
   onExportStart: () => void;
 }> = ({ onAnalyzeStart, onExportStart }) => {
+  const [showAnalyzeModal, setShowAnalyzeModal] = React.useState(false);
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
 
   // Live kept-duration: total minus all effectively-cut segments
@@ -139,7 +141,7 @@ export const TopBar: React.FC<{
           </label>
 
           <button
-            onClick={onAnalyzeStart}
+            onClick={() => setShowAnalyzeModal(true)}
             disabled={project.status !== 'idle'}
             className="flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
           >
@@ -160,6 +162,16 @@ export const TopBar: React.FC<{
         </div>
       ) : (
         <div className="shrink-0 w-32" /> /* Placeholder to balance the layout */
+      )}
+
+      {showAnalyzeModal && (
+        <AnalyzeModal
+          onClose={() => setShowAnalyzeModal(false)}
+          onStart={(settings) => {
+            setShowAnalyzeModal(false);
+            onAnalyzeStart(settings);
+          }}
+        />
       )}
     </div>
   );

@@ -48,6 +48,8 @@ export interface ProjectSettings {
   min_gap_duration: number;
   margin: number;
   whisper_model: string;
+  language?: string;
+  initial_prompt?: string;
   device: string;
   export_formats: string[];
   min_speech_confidence: number;

@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+__pycache__/
+*.pyc
+
+# Ignore local environments and data
+voicecut/data/
+voicecut/.venv/
+voicecut/venv/
+voicecut/web/node_modules/
+voicecut/web/dist/

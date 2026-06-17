@@ -100,6 +100,8 @@ class ProjectSettings(BaseModel):
     min_gap_duration: float = Field(1.0, description="Minimum gap in seconds to create a candidate cut")
     margin: float = Field(0.15, description="Padding around speech segments in seconds")
     whisper_model: str = Field("small", description="WhisperX model name")
+    language: Optional[str] = Field("hinglish", description="Language code (e.g. en, hi, hinglish)")
+    initial_prompt: Optional[str] = Field(None, description="Initial prompt to guide Whisper")
     device: str = Field("mps", description="torch device: cpu, mps, cuda")
     export_formats: list[ExportFormat] = Field(
         default_factory=lambda: [ExportFormat.MP4],
