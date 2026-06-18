@@ -28,8 +28,8 @@ def test_gap_calculation():
     
     # So we expect 2 or 3 cuts.
     assert len(cuts) >= 2
-    from voicecut.shared.models import CutReason
+    from voicecut.shared.models import CutReason, CutStatus
     for cut in cuts:
         assert isinstance(cut.reason, CutReason)
-        assert cut.status == 'pending'
+        assert cut.status == CutStatus.CUT
 
