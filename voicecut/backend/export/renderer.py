@@ -116,51 +116,48 @@ class VideoRenderer:
         """
         Determine which time ranges to keep based on user decisions.
 
-        Logic:
-        - Start with full video duration.
-        - For each candidate cut marked as CUT, remove that range.
-        - Sort remaining ranges and return them.
+        Algorithm (linear sweep — O(n log n)):
+        1. Collect all CUT ranges, sort them, then merge overlapping cuts.
+        2. Walk the merged cuts to carve the [0, duration] timeline.
         """
         if not project.video_duration:
             raise ValueError("Project has no video_duration set")
 
+        duration = project.video_duration
+
         # Build set of cut ranges from decisions
+        decision_override: dict[str, CutStatus] = {d.cut_id: d.action for d in project.user_decisions}
         cut_ranges: list[tuple[float, float]] = []
-        cut_ids = {d.cut_id for d in project.user_decisions if d.action == CutStatus.CUT}
-
         for cut in project.candidate_cuts:
-            # Default status from the cut itself, or override from user decision
-            decision_action = None
-            for d in project.user_decisions:
-                if d.cut_id == cut.id:
-                    decision_action = d.action
-                    break
-
-            effective_status = decision_action or cut.status
-            if effective_status == CutStatus.CUT:
+            effective = decision_override.get(cut.id, cut.status)
+            if effective == CutStatus.CUT:
                 cut_ranges.append((cut.start, cut.end))
 
-        # Start with full timeline
-        kept: list[tuple[float, float]] = [(0.0, project.video_duration)]
+        if not cut_ranges:
+            return [(0.0, duration)]
 
-        # Subtract each cut range
-        for cut_start, cut_end in cut_ranges:
-            new_kept = []
-            for seg_start, seg_end in kept:
-                if cut_end <= seg_start or cut_start >= seg_end:
-                    # No overlap
-                    new_kept.append((seg_start, seg_end))
-                else:
-                    # Partial overlap — keep parts outside the cut
-                    if seg_start < cut_start:
-                        new_kept.append((seg_start, cut_start))
-                    if seg_end > cut_end:
-                        new_kept.append((cut_end, seg_end))
-            kept = new_kept
+        # Sort and merge overlapping/adjacent cut ranges
+        cut_ranges.sort()
+        merged_cuts: list[tuple[float, float]] = [cut_ranges[0]]
+        for cs, ce in cut_ranges[1:]:
+            ms, me = merged_cuts[-1]
+            if cs <= me:
+                merged_cuts[-1] = (ms, max(me, ce))
+            else:
+                merged_cuts.append((cs, ce))
+
+        # Carve kept segments from the full timeline
+        kept: list[tuple[float, float]] = []
+        cursor = 0.0
+        for cs, ce in merged_cuts:
+            if cursor < cs:
+                kept.append((cursor, cs))
+            cursor = max(cursor, ce)
+        if cursor < duration:
+            kept.append((cursor, duration))
 
         # Filter very short segments (< 0.1s)
         kept = [(s, e) for s, e in kept if e - s >= 0.1]
-        kept.sort(key=lambda x: x[0])
         return kept
 
     async def _render_mp4(

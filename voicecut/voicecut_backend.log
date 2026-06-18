@@ -1,28 +1,28 @@
-INFO:     Will watch for changes in these directories: ['/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut']
+INFO:     Will watch for changes in these directories: ['/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [8035] using StatReload
-INFO:     Started server process [8039]
+INFO:     Started reloader process [72973] using StatReload
+INFO:     Started server process [72978]
 INFO:     Waiting for application startup.
-2026-06-15 02:15:17,053 [INFO] voicecut.backend.api.main: Starting VoiceCut backend...
-2026-06-15 02:15:17,064 [INFO] voicecut.backend.db.database: Database initialized: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/voicecut.db
+2026-06-18 10:14:09,759 [INFO] voicecut.backend.api.main: Starting VoiceCut backend...
+2026-06-18 10:14:09,771 [INFO] voicecut.backend.db.database: Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db
 INFO:     Application startup complete.
-INFO:     127.0.0.1:53771 - "POST /api/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53774 - "GET /api/projects/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53776 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 304 Not Modified
-INFO:     127.0.0.1:53778 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:53789 - "GET /api/analyze/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
-2026-06-15 02:15:59,197 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
-2026-06-15 02:16:00,231 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
-2026-06-15 02:16:00,231 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/silero-vad/src/silero_vad/utils_vad.py:143: UserWarning: torchaudio.sox_effects.sox_effects.apply_effects_file has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release. 
-  wav, sr = torchaudio.sox_effects.apply_effects_file(path, effects=effects)
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
-  warnings.warn(
-2026-06-15 02:16:02,281 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 0 speech segments
-2026-06-15 02:16:02,283 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'small' on mps ...
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/pyannote/audio/core/io.py:47: UserWarning: 
+INFO:     127.0.0.1:61244 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61246 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61251 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61253 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61256 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61258 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61260 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:61262 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:61262 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:61262 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:61266 - "POST /api/analyze/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+2026-06-18 10:14:35,551 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav
+2026-06-18 10:14:37,449 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
+2026-06-18 10:14:37,449 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav
+2026-06-18 10:14:40,771 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 10 speech segments
+2026-06-18 10:14:40,773 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'medium' on mps ...
+/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/pyannote/audio/core/io.py:47: UserWarning: 
 torchcodec is not installed correctly so built-in audio decoding will fail. Solutions are:
 * use audio preloaded in-memory as a {'waveform': (channel, time) torch.Tensor, 'sample_rate': int} dictionary;
 * fix torchcodec installation. Error message was:
@@ -38,139 +38,140 @@ Could not load libtorchcodec. Likely causes:
         The following exceptions were raised as we tried to load libtorchcodec:
         
 [start of libtorchcodec loading traceback]
-FFmpeg version 7: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib, 0x0006): Library not loaded: @rpath/libavutil.59.dylib
-  Referenced from: <4EE009B0-9B70-3C86-BB0E-E3E97FD75307> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib
+FFmpeg version 7: dlopen(/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib, 0x0006): Library not loaded: @rpath/libavutil.59.dylib
+  Referenced from: <4EE009B0-9B70-3C86-BB0E-E3E97FD75307> /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib
   Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.59.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.59.dylib' (no such file)
-FFmpeg version 6: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib, 0x0006): Library not loaded: @rpath/libavutil.58.dylib
-  Referenced from: <429667FA-10BA-309D-B804-C6862E0D693C> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib
+FFmpeg version 6: dlopen(/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib, 0x0006): Library not loaded: @rpath/libavutil.58.dylib
+  Referenced from: <429667FA-10BA-309D-B804-C6862E0D693C> /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core6.dylib
   Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.58.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.58.dylib' (no such file)
-FFmpeg version 5: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib, 0x0006): Library not loaded: @rpath/libavutil.57.dylib
-  Referenced from: <AF044D12-BBEA-3FC3-9BF0-FE09393BCD48> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib
+FFmpeg version 5: dlopen(/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib, 0x0006): Library not loaded: @rpath/libavutil.57.dylib
+  Referenced from: <AF044D12-BBEA-3FC3-9BF0-FE09393BCD48> /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core5.dylib
   Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.57.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.57.dylib' (no such file)
-FFmpeg version 4: dlopen(/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib, 0x0006): Library not loaded: @rpath/libavutil.56.dylib
-  Referenced from: <F551E475-09B9-3CDC-9702-50798633AD8E> /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib
+FFmpeg version 4: dlopen(/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib, 0x0006): Library not loaded: @rpath/libavutil.56.dylib
+  Referenced from: <F551E475-09B9-3CDC-9702-50798633AD8E> /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/torchcodec/libtorchcodec_core4.dylib
   Reason: tried: '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.56.dylib' (no such file), '/Users/kinshuk.prasad/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/libavutil.56.dylib' (no such file)
 [end of libtorchcodec loading traceback].
   warnings.warn(
-2026-06-15 02:16:07,852 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
-2026-06-15 02:16:08 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
-2026-06-15 02:16:08 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
+2026-06-18 10:14:49,409 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
+2026-06-18 10:14:52 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
+2026-06-18 10:14:52 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
 INFO: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
-2026-06-15 02:16:08,763 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
-2026-06-15 02:16:08,772 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
-2026-06-15 02:16:08,772 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav
-2026-06-15 02:16:10 - whisperx.asr - WARNING - Audio is shorter than 30s, language detection may be inaccurate
-2026-06-15 02:16:11 - whisperx.asr - INFO - Detected language: ko (0.27) in first 30s of audio
-2026-06-15 02:16:12,262 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='ko', 1 segments
-2026-06-15 02:17:12 - whisperx.alignment - WARNING - Failed to align segment (" MBC 뉴스 이덕영입니다."): backtrack failed, resorting to original
-INFO:     127.0.0.1:54116 - "GET /api/projects/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54120 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54124 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54125 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/audio.wav HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54124 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54127 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54643 - "GET /files/uploads/7e5ec112-e1d5-485d-a5b7-0e60ff13cb08/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54676 - "POST /api/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54679 - "GET /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54681 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 304 Not Modified
-INFO:     127.0.0.1:54687 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:54694 - "GET /api/analyze/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
-2026-06-15 02:19:25,775 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
-2026-06-15 02:19:25,868 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
-2026-06-15 02:19:25,869 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/silero-vad/src/silero_vad/utils_vad.py:143: UserWarning: torchaudio.sox_effects.sox_effects.apply_effects_file has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release. 
-  wav, sr = torchaudio.sox_effects.apply_effects_file(path, effects=effects)
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+2026-06-18 10:14:53,241 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-18 10:14:53,258 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
+2026-06-18 10:14:53,258 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav
+2026-06-18 10:15:46,225 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='hi', 2 segments
+/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
   warnings.warn(
-2026-06-15 02:19:28,083 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 9 speech segments
-2026-06-15 02:19:28,083 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'small' on mps ...
-2026-06-15 02:19:28,313 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
-2026-06-15 02:19:29 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
-2026-06-15 02:19:29 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
+2026-06-18 10:15:57,510 [INFO] voicecut.backend.pipeline.processor: Gap detection: 8 candidate cuts from 10 speech segments
+INFO:     127.0.0.1:61387 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61390 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61392 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:61392 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:61486 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61488 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61490 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61492 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61494 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:61496 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61498 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:61833 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61832 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61836 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61837 - "GET /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61841 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61843 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:61843 - "GET /files/uploads/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:61859 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61862 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61865 - "DELETE /api/projects/237799a2-7e5b-4c2a-ac41-7eaa1bdc1d4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61868 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62188 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62192 - "GET /api/projects/9dfae37c-8440-44d5-acf7-b0ae44166269 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62194 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:62196 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:62196 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62196 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:62203 - "POST /api/analyze/9dfae37c-8440-44d5-acf7-b0ae44166269 HTTP/1.1" 200 OK
+2026-06-18 10:57:29,062 [INFO] voicecut.backend.pipeline.processor: Audio extracted: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/audio.wav
+2026-06-18 10:57:29,235 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD model loaded on mps
+2026-06-18 10:57:29,235 [INFO] voicecut.integrations.silero_vad_adapter: Running Silero VAD on: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/audio.wav
+2026-06-18 10:57:32,420 [INFO] voicecut.integrations.silero_vad_adapter: Silero VAD: found 10 speech segments
+2026-06-18 10:57:32,421 [INFO] voicecut.integrations.whisperx_adapter: Loading WhisperX model 'medium' on mps ...
+2026-06-18 10:57:33,410 [WARNING] voicecut.integrations.whisperx_adapter: Failed to load on mps: unsupported device mps. Falling back to CPU.
+2026-06-18 10:57:36 - whisperx.asr - INFO - No language specified, language will be detected for each audio file (increases inference time)
+2026-06-18 10:57:36 - whisperx.vads.pyannote - INFO - Performing voice activity detection using Pyannote...
 INFO: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
-2026-06-15 02:19:29,415 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
-2026-06-15 02:19:29,423 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
-2026-06-15 02:19:29,423 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav
-2026-06-15 02:19:31 - whisperx.asr - WARNING - Audio is shorter than 30s, language detection may be inaccurate
-2026-06-15 02:19:32 - whisperx.asr - INFO - Detected language: hi (0.76) in first 30s of audio
-2026-06-15 02:19:42,949 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='hi', 1 segments
-/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+2026-06-18 10:57:36,762 [INFO] lightning.pytorch.utilities.migration.utils: Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.6.5. To apply the upgrade to your files permanently, run `python -m lightning.pytorch.utilities.upgrade_checkpoint ../whisperX/whisperx/assets/pytorch_model.bin`
+2026-06-18 10:57:36,787 [INFO] voicecut.integrations.whisperx_adapter: WhisperX model loaded.
+2026-06-18 10:57:36,788 [INFO] voicecut.integrations.whisperx_adapter: WhisperX transcribing: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/audio.wav
+2026-06-18 10:58:19,535 [INFO] voicecut.integrations.whisperx_adapter: WhisperX: detected language='hi', 2 segments
+/Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/.venv/lib/python3.13/site-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
   warnings.warn(
-2026-06-15 02:19:53,394 [INFO] voicecut.backend.pipeline.processor: Gap detection: 4 candidate cuts from 9 speech segments
-INFO:     127.0.0.1:54810 - "GET /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54813 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54816 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/audio.wav HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54822 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 304 Not Modified
-INFO:     127.0.0.1:54822 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:55340 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:55506 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:55506 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:55671 - "GET /files/uploads/56e678c2-376e-4eab-a6af-8d890b2a0462/video.mp4 HTTP/1.1" 206 Partial Content
-INFO:     127.0.0.1:55719 - "PATCH /api/projects/56e678c2-376e-4eab-a6af-8d890b2a0462/decisions HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 415, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        self.scope, self.receive, self.send
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 62, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
-    await super().__call__(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 96, in __call__
-    await self.simple_response(scope, receive, send, request_headers=headers)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 154, in simple_response
-    await self.app(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-    await self.app(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
-    await route.handle(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
-    await self.app(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ...<3 lines>...
-    )
-    ^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
-    return await dependant.call(**values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/backend/api/routes/projects.py", line 39, in update_decisions
-    decision_map = {d.cut_id: d.action for d in decisions}
-                              ^^^^^^^^
-  File "/Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/.venv/lib/python3.13/site-packages/pydantic/main.py", line 1042, in __getattr__
-    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
-AttributeError: 'DecisionUpdate' object has no attribute 'action'
-INFO:     127.0.0.1:55723 - "GET /api/export/56e678c2-376e-4eab-a6af-8d890b2a0462 HTTP/1.1" 200 OK
-2026-06-15 02:23:30,935 [INFO] voicecut.backend.export.renderer: Final video: /Users/kinshuk.prasad/Documents/Project-X/OpenLens/voicecut/data/exports/56e678c2-376e-4eab-a6af-8d890b2a0462/final_output.mp4
-INFO:     127.0.0.1:55738 - "GET /api/export/56e678c2-376e-4eab-a6af-8d890b2a0462/download/final_output.mp4 HTTP/1.1" 200 OK
+2026-06-18 10:58:31,514 [INFO] voicecut.backend.pipeline.processor: Gap detection: 8 candidate cuts from 10 speech segments
+INFO:     127.0.0.1:62226 - "GET /api/projects/9dfae37c-8440-44d5-acf7-b0ae44166269 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62229 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/audio.wav HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62231 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62231 - "GET /files/uploads/9dfae37c-8440-44d5-acf7-b0ae44166269/video.mp4 HTTP/1.1" 206 Partial Content
+WARNING:  StatReload detected changes in 'backend/api/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-06-18 11:03:43,101 [INFO] voicecut.backend.api.main: VoiceCut backend shutting down.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72978]
+{"ts": "2026-06-18T05:33:43.961Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:33:43.972Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+WARNING:  StatReload detected changes in 'backend/api/routes/analyze.py'. Reloading...
+{"ts": "2026-06-18T05:34:03.875Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:04.286Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:04.294Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+WARNING:  StatReload detected changes in 'backend/api/routes/export_routes.py'. Reloading...
+{"ts": "2026-06-18T05:34:24.198Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:24.612Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:24.619Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+WARNING:  StatReload detected changes in 'backend/api/routes/upload.py'. Reloading...
+{"ts": "2026-06-18T05:34:52.608Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:53.030Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:34:53.038Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+WARNING:  StatReload detected changes in 'monitoring/local_monitor.py'. Reloading...
+{"ts": "2026-06-18T05:35:06.109Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:35:06.520Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:35:06.528Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+{"ts": "2026-06-18T05:35:29.260Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 8.5}
+{"ts": "2026-06-18T05:35:39.255Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 3.2}
+{"ts": "2026-06-18T05:35:45.319Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.1}
+{"ts": "2026-06-18T05:35:49.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.6}
+{"ts": "2026-06-18T05:35:59.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.3}
+WARNING:  StatReload detected changes in 'backend/api/main.py'. Reloading...
+{"ts": "2026-06-18T05:36:01.768Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:02.189Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:02.196Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:09.261Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 7.3}
+{"ts": "2026-06-18T05:36:10.775Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.2}
+{"ts": "2026-06-18T05:36:19.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.6}
+{"ts": "2026-06-18T05:36:29.251Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.2}
+WARNING:  StatReload detected changes in 'backend/api/main.py'. Reloading...
+{"ts": "2026-06-18T05:36:30.187Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "VoiceCut backend shutting down.", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:30.602Z", "level": "INFO", "logger": "voicecut.backend.api.main", "msg": "Starting VoiceCut backend...", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:30.609Z", "level": "INFO", "logger": "voicecut.backend.db.database", "msg": "Database initialized: /Users/kinshuk.prasad/Documents/Project-X/Fresh/openLens/voicecut/data/voicecut.db", "levelname": "INFO"}
+{"ts": "2026-06-18T05:36:39.264Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 9.9}
+{"ts": "2026-06-18T05:36:42.594Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.7}
+{"ts": "2026-06-18T05:36:49.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.8}
+{"ts": "2026-06-18T05:36:59.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.1}
+{"ts": "2026-06-18T05:37:09.256Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.4}
+{"ts": "2026-06-18T05:37:19.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.8}
+{"ts": "2026-06-18T05:37:29.255Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.4}
+{"ts": "2026-06-18T05:37:39.253Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.9}
+{"ts": "2026-06-18T05:37:49.256Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 4.6}
+{"ts": "2026-06-18T05:37:59.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.8}
+{"ts": "2026-06-18T05:38:09.270Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 10.6}
+{"ts": "2026-06-18T05:38:19.253Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.5}
+{"ts": "2026-06-18T05:38:29.259Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 4.0}
+{"ts": "2026-06-18T05:38:39.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.5}
+{"ts": "2026-06-18T05:38:49.252Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.9}
+{"ts": "2026-06-18T05:38:59.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.9}
+{"ts": "2026-06-18T05:39:09.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.2}
+{"ts": "2026-06-18T05:39:19.253Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.8}
+{"ts": "2026-06-18T05:39:28.419Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 1.9}
+{"ts": "2026-06-18T05:39:29.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.3}
+{"ts": "2026-06-18T05:39:39.265Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 7.7}
+{"ts": "2026-06-18T05:39:49.254Z", "level": "INFO", "logger": "voicecut.telemetry", "msg": "GET /health/detailed → 200", "levelname": "INFO", "http_method": "GET", "http_path": "/health/detailed", "http_status": 200, "duration_ms": 2.0}

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Upload, Play, Scissors, Download, Loader2, Clock } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
@@ -17,6 +17,27 @@ export const TopBar: React.FC<{
 }> = ({ onAnalyzeStart, onExportStart }) => {
   const [showAnalyzeModal, setShowAnalyzeModal] = React.useState(false);
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
+  const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
+
+  // Poll backend health
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/health/detailed');
+        if (!res.ok) {
+          setHealth('offline');
+          return;
+        }
+        const data = await res.json();
+        setHealth(data.status === 'healthy' ? 'live' : 'degraded');
+      } catch {
+        setHealth('offline');
+      }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Live kept-duration: total minus all effectively-cut segments
   const { totalDur, keptDur, removedDur } = useMemo(() => {
@@ -163,6 +184,19 @@ export const TopBar: React.FC<{
       ) : (
         <div className="shrink-0 w-32" /> /* Placeholder to balance the layout */
       )}
+
+      {/* Health Indicator */}
+      <div 
+        className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800"
+        title={`Backend Status: ${health.toUpperCase()}`}
+      >
+        <span className={`w-2 h-2 rounded-full ${
+          health === 'live' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+          health === 'degraded' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' :
+          'bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]'
+        }`} />
+        <span className="text-[10px] font-medium text-zinc-400 capitalize">{health}</span>
+      </div>
 
       {showAnalyzeModal && (
         <AnalyzeModal

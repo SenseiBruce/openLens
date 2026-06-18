@@ -1,20 +1,27 @@
 """
 Analyze route — POST /api/analyze/{project_id}
 Streams pipeline progress as Server-Sent Events (SSE).
+
+Changed from GET to POST so settings (including initial_prompt)
+are sent in the request body instead of URL query params.
+Frontend uses fetch() + ReadableStream instead of EventSource.
 """
 from __future__ import annotations
 import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
 from voicecut.shared.models import ProjectSettings, ProjectStatus
 from voicecut.backend.db.database import load_project, save_project
 from voicecut.backend.pipeline.processor import PipelineProcessor
+from voicecut.monitoring.metrics import metrics
+from voicecut.monitoring.logging_config import project_id_var
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -23,28 +30,41 @@ BASE_DIR = Path(__file__).parent.parent.parent.parent
 UPLOADS_DIR = BASE_DIR / "data" / "uploads"
 EXPORTS_DIR = BASE_DIR / "data" / "exports"
 
+# Semaphore: one analysis at a time (GPU memory constraint)
+_analyze_semaphore = asyncio.Semaphore(1)
 
-@router.get("/analyze/{project_id}")
+# ---------------------------------------------------------------------------
+# Request schema
+# ---------------------------------------------------------------------------
+
+class AnalyzeSettings(BaseModel):
+    whisper_model: Optional[str] = None
+    min_gap_duration: Optional[float] = None
+    language: Optional[str] = None
+    initial_prompt: Optional[str] = None  # stays in request body, never in URL
+
+
+@router.post("/analyze/{project_id}")
 async def analyze_project(
     project_id: str,
-    whisper_model: str | None = None,
-    min_gap_duration: float | None = None,
-    language: str | None = None,
-    initial_prompt: str | None = None,
+    settings: AnalyzeSettings = AnalyzeSettings(),
 ):
     """
     Start the analysis pipeline for a project.
-    
+
+    Accepts settings as a JSON POST body (initial_prompt is never logged in URLs).
     Returns a Server-Sent Events stream with pipeline progress.
-    Frontend should use EventSource or fetch with stream reading.
-    
+    Frontend should use fetch() with ReadableStream instead of EventSource.
+
     Events:
-      - { event: "step", data: { step, message, percent } }
+      - { event: "step",     data: { step, message, percent } }
       - { event: "progress", data: { percent, message } }
       - { event: "complete", data: { project_id, cuts_count, ... } }
-      - { event: "error", data: { message } }
+      - { event: "error",    data: { message } }
     """
-    project = load_project(project_id)
+    project_id_var.set(project_id)
+
+    project = await asyncio.to_thread(load_project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
@@ -55,29 +75,36 @@ async def analyze_project(
         raise HTTPException(status_code=400, detail="Video file not found")
 
     # Apply custom settings if provided
-    if whisper_model:
-        project.settings.whisper_model = whisper_model
-    if min_gap_duration is not None:
-        project.settings.min_gap_duration = min_gap_duration
-    if language:
-        project.settings.language = language
-    if initial_prompt:
-        project.settings.initial_prompt = initial_prompt
+    if settings.whisper_model:
+        project.settings.whisper_model = settings.whisper_model
+    if settings.min_gap_duration is not None:
+        project.settings.min_gap_duration = settings.min_gap_duration
+    if settings.language is not None:
+        project.settings.language = settings.language
+    if settings.initial_prompt is not None:
+        project.settings.initial_prompt = settings.initial_prompt
 
     # Event queue for SSE
     queue: asyncio.Queue = asyncio.Queue()
+    
+    metrics.pipeline_start(
+        project_id, 
+        project.settings.whisper_model or "small", 
+        project.settings.language
+    )
 
     def on_event(event_type: str, data: dict):
         queue.put_nowait({"event": event_type, "data": data})
 
     async def run_pipeline():
-        processor = PipelineProcessor(
-            uploads_dir=UPLOADS_DIR,
-            exports_dir=EXPORTS_DIR,
-            settings=project.settings,
-        )
-        updated = await processor.process(project, on_event)
-        save_project(updated)
+        async with _analyze_semaphore:
+            processor = PipelineProcessor(
+                uploads_dir=UPLOADS_DIR,
+                exports_dir=EXPORTS_DIR,
+                settings=project.settings,
+            )
+            updated = await processor.process(project, on_event)
+            await asyncio.to_thread(save_project, updated)
         queue.put_nowait(None)  # sentinel to stop streaming
 
     async def event_generator() -> AsyncGenerator[str, None]:
@@ -102,11 +129,19 @@ async def analyze_project(
                 data_str = json.dumps(item["data"])
                 yield f"event: {event_type}\ndata: {data_str}\n\n"
 
-                if event_type in ("complete", "error"):
+                if event_type == "complete":
+                    metrics.pipeline_complete(project_id, item["data"].get("cuts_count", 0), 0)
+                    break
+                elif event_type == "error":
+                    metrics.pipeline_error(project_id, item["data"].get("message", "Unknown error"))
                     break
         finally:
             if not task.done():
                 task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
 
     return StreamingResponse(
         event_generator(),

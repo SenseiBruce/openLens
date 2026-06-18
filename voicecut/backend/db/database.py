@@ -14,7 +14,6 @@ from sqlalchemy import (
     Column, String, Float, Text, Boolean, DateTime, JSON,
     create_engine, MetaData, Table, select, insert, update, delete
 )
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 logger = logging.getLogger(__name__)

@@ -1,9 +1,10 @@
 """Projects route — CRUD operations for projects and decisions."""
 from __future__ import annotations
+import asyncio
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
-from voicecut.shared.models import DecisionUpdate, CutStatus
+from voicecut.shared.models import DecisionUpdate, CutStatus, UserDecision
 from voicecut.backend.db.database import load_project, save_project, list_projects, delete_project
 
 router = APIRouter()
@@ -12,13 +13,13 @@ router = APIRouter()
 @router.get("/projects")
 async def get_projects():
     """List all projects."""
-    return list_projects()
+    return await asyncio.to_thread(list_projects)
 
 
 @router.get("/projects/{project_id}")
 async def get_project(project_id: str):
     """Get full project details."""
-    project = load_project(project_id)
+    project = await asyncio.to_thread(load_project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project.model_dump()
@@ -28,14 +29,14 @@ async def get_project(project_id: str):
 async def update_decisions(project_id: str, decisions: list[DecisionUpdate]):
     """
     Batch update user decisions for candidate cuts.
-    
-    Body: [{ "cut_id": str, "status": "cut" | "kept" | "pending" | "ignored" }]
+
+    Body: [{ "cut_id": str, "action": "cut" | "kept" | "pending" | "ignored" }]
     """
-    project = load_project(project_id)
+    project = await asyncio.to_thread(load_project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    # Update decisions
+    # Build O(n) lookup map from incoming decisions
     decision_map = {d.cut_id: d.action for d in decisions}
 
     # Update candidate cuts in-place
@@ -43,18 +44,13 @@ async def update_decisions(project_id: str, decisions: list[DecisionUpdate]):
         if cut.id in decision_map:
             cut.status = decision_map[cut.id]
 
-    # Update or add user_decisions
-    existing_ids = {d.cut_id for d in project.user_decisions}
+    # O(n) merge: build dict from existing decisions, overlay new ones
+    merged: dict[str, UserDecision] = {d.cut_id: d for d in project.user_decisions}
     for d in decisions:
-        if d.cut_id in existing_ids:
-            for existing in project.user_decisions:
-                if existing.cut_id == d.cut_id:
-                    existing.action = d.action
-                    break
-        else:
-            project.user_decisions.append(d)
+        merged[d.cut_id] = UserDecision(cut_id=d.cut_id, action=d.action)
+    project.user_decisions = list(merged.values())
 
-    save_project(project)
+    await asyncio.to_thread(save_project, project)
 
     return JSONResponse({
         "project_id": project_id,
@@ -66,7 +62,7 @@ async def update_decisions(project_id: str, decisions: list[DecisionUpdate]):
 @router.patch("/projects/{project_id}/cuts/{cut_id}")
 async def update_single_cut(project_id: str, cut_id: str, status: str):
     """Update a single candidate cut status."""
-    project = load_project(project_id)
+    project = await asyncio.to_thread(load_project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -85,18 +81,12 @@ async def update_single_cut(project_id: str, cut_id: str, status: str):
     if not found:
         raise HTTPException(status_code=404, detail=f"Cut {cut_id} not found")
 
-    # Update or add user decision
-    updated = False
-    for d in project.user_decisions:
-        if d.cut_id == cut_id:
-            d.action = new_status
-            updated = True
-            break
-    if not updated:
-        from voicecut.shared.models import UserDecision
-        project.user_decisions.append(UserDecision(cut_id=cut_id, action=new_status))
+    # O(n) update using dict merge
+    decisions_map: dict[str, UserDecision] = {d.cut_id: d for d in project.user_decisions}
+    decisions_map[cut_id] = UserDecision(cut_id=cut_id, action=new_status)
+    project.user_decisions = list(decisions_map.values())
 
-    save_project(project)
+    await asyncio.to_thread(save_project, project)
     return {"cut_id": cut_id, "status": new_status.value}
 
 
@@ -105,15 +95,16 @@ async def delete_project_route(project_id: str):
     """Delete a project and its files."""
     import shutil
     from pathlib import Path
-    
-    success = delete_project(project_id)
+
+    success = await asyncio.to_thread(delete_project, project_id)
     if not success:
         raise HTTPException(status_code=404, detail="Project not found")
-        
+
     # Clean up physical files
     BASE_DIR = Path(__file__).parent.parent.parent.parent
-    project_dir = BASE_DIR / "data" / "uploads" / project_id
-    if project_dir.exists() and project_dir.is_dir():
-        shutil.rmtree(project_dir, ignore_errors=True)
-        
+    for subdir in ("uploads", "exports"):
+        project_dir = BASE_DIR / "data" / subdir / project_id
+        if project_dir.exists() and project_dir.is_dir():
+            await asyncio.to_thread(shutil.rmtree, project_dir, True)
+
     return {"message": "Project deleted"}
