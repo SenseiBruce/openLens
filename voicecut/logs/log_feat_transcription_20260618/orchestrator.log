@@ -1,0 +1,59 @@
+[2026-06-18 00:57:00] - PHASE: Phase 0 (Feature Intake)
+ACTION: Initiated Project Orchestrator workflow for the "Improve Transcription Process" feature.
+REASONING: User requested to use the orchestrator for this specific feature branch.
+OUTPUT: Created log directory logs/log_feat_transcription_20260618
+NEXT: Clarify the exact scope of the transcription improvements with the user, as the model selection UI is already complete.
+---
+[2026-06-18 01:00:00] - PHASE: Phase 3 (Implementation)
+ACTION: User approved the implementation plan to add language selection (auto/en/hi).
+REASONING: Addressing mixed language accuracy and code-switching issues.
+OUTPUT: N/A yet.
+NEXT: Implementing language dropdown in UI and wiring to backend.
+---
+[2026-06-18 01:05:00] - PHASE: Phase 4 & 5 (Testing & Deployment)
+ACTION: Language selection fully implemented and built.
+REASONING: Addressing user requirement for code-switching and accuracy.
+OUTPUT: Updated UI, Backend API, and pipeline processors.
+NEXT: Wait for user validation on the UI functionality.
+---
+[2026-06-18 01:13:00] - PHASE: Phase 4 & 5 (Testing & Deployment)
+ACTION: Hinglish support and Custom Prompts fully implemented and built.
+REASONING: Addressing code-switching in the same video.
+OUTPUT: Updated UI (Custom Prompt box, Hinglish preset), updated backend Whisper pipeline.
+NEXT: Wait for user validation on Hinglish transcription.
+---
+[2026-06-18 02:45:00] - PHASE: Code Review & Security Audit
+ACTION: Completed full code review across all layers.
+REASONING: User requested code review, security hardening, and performance improvements.
+OUTPUT:
+  - Fixed: DecisionUpdate.status → .action (batch PATCH decisions was silently broken)
+  - Fixed: asyncio.get_event_loop() → get_running_loop() (Python 3.10+ deprecation)
+  - Fixed: ffprobe JSON parse now has proper error guard
+  - Fixed: SSE tasks now properly awaited on cancel (no more orphaned GPU pipelines)
+  - Fixed: Unused async SQLAlchemy imports removed
+  - Security: Path traversal guard now validates BEFORE .exists() check + explicit .. filter
+  - Security: initial_prompt moved from GET URL to POST body (never logged)
+  - Security: Added 1-concurrent-analysis semaphore (GPU memory safety)
+  - Security: 10MB request body limit middleware added
+  - Perf: All sync DB calls wrapped in asyncio.to_thread()
+  - Perf: O(n) decisions merge (was O(n²))
+  - Perf: O(n log n) linear sweep for kept-segments (was O(n²))
+  - Frontend: analyzeProjectStream switched from EventSource to fetch+ReadableStream
+NEXT: Monitor logs; user validation.
+---
+
+[2026-06-18] Phase 6 Complete: Monitoring & Observability
+- Added structured JSON logging via monitoring/logging_config.py.
+- Built zero-dependency in-process MetricsStore (counters, rolling history).
+- Implemented TelemetryMiddleware for auto-injected request_ids and timing logs.
+- Added /health/detailed endpoint showing DB status, disk usage, and pipeline state.
+- Updated TopBar.tsx in frontend with a live health indicator pill that polls the API.
+- All tasks verified and stable.
+
+[2026-06-18] Phase 5 Complete: Ship & Close Transcription Feature
+- Conducted final end-to-end verification of all subsystems.
+- Generated walkthrough.md summarizing all accomplishments across phases 1-6.
+- All code formatted, reviewed, and secured.
+- Preparing for Git Commit.
+
+FEATURE COMPLETION SIGN-OFF: SUCCESS.

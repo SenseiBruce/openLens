@@ -46,32 +46,81 @@ export const apiClient = {
     projectId: string,
     settings: { whisper_model?: string; min_gap_duration?: number; language?: string; initial_prompt?: string } | null,
     onEvent: (ev: PipelineEvent) => void
-  ): EventSource {
-    let url = `${API_BASE}/analyze/${projectId}`;
-    if (settings) {
-      const params = new URLSearchParams();
-      if (settings.whisper_model) params.append('whisper_model', settings.whisper_model);
-      if (settings.min_gap_duration) params.append('min_gap_duration', settings.min_gap_duration.toString());
-      if (settings.language) params.append('language', settings.language);
-      if (settings.initial_prompt) params.append('initial_prompt', settings.initial_prompt);
-      url += `?${params.toString()}`;
-    }
-    
-    const sse = new EventSource(url);
-    
-    sse.addEventListener('step', (e) => onEvent(JSON.parse((e as MessageEvent).data)));
-    sse.addEventListener('progress', (e) => onEvent(JSON.parse((e as MessageEvent).data)));
-    sse.addEventListener('complete', (e) => {
-      onEvent({ step: 'complete', ...JSON.parse((e as MessageEvent).data) });
-      sse.close();
-    });
-    sse.addEventListener('error', (e) => {
-      onEvent({ step: 'error', message: JSON.parse((e as MessageEvent).data).message });
-      sse.close();
-    });
-    
-    return sse;
+  ): () => void {
+    // POST body keeps initial_prompt out of URLs, server logs, and browser history
+    const body: Record<string, unknown> = {};
+    if (settings?.whisper_model)    body.whisper_model    = settings.whisper_model;
+    if (settings?.min_gap_duration) body.min_gap_duration = settings.min_gap_duration;
+    if (settings?.language != null) body.language         = settings.language;
+    if (settings?.initial_prompt)   body.initial_prompt   = settings.initial_prompt;
+
+    let aborted = false;
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/analyze/${projectId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        if (!res.ok || !res.body) {
+          onEvent({ step: 'error', message: `HTTP ${res.status}` });
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done || aborted) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          // Parse SSE lines from buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';  // keep incomplete last line
+
+          let eventType = '';
+          for (const line of lines) {
+            if (line.startsWith('event:')) {
+              eventType = line.slice(6).trim();
+            } else if (line.startsWith('data:')) {
+              const dataStr = line.slice(5).trim();
+              if (!dataStr || dataStr === '{}') continue;
+              try {
+                const data = JSON.parse(dataStr);
+                if (eventType === 'complete') {
+                  onEvent({ step: 'complete', ...data });
+                  return;
+                } else if (eventType === 'error') {
+                  onEvent({ step: 'error', message: data.message });
+                  return;
+                } else {
+                  onEvent(data);
+                }
+              } catch { /* malformed data line, skip */ }
+            } else if (line === '') {
+              eventType = '';  // reset between events
+            }
+          }
+        }
+      } catch (err: unknown) {
+        if (!aborted) {
+          onEvent({ step: 'error', message: String(err) });
+        }
+      }
+    })();
+
+    // Return a cancel function (mirrors EventSource .close())
+    return () => {
+      aborted = true;
+      controller.abort();
+    };
   },
+
 
   async getVideoInfo(projectId: string): Promise<{ width: number; height: number }> {
     const res = await fetch(`${API_BASE}/projects/${projectId}/video-info`);

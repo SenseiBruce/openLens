@@ -88,7 +88,7 @@ class PipelineProcessor:
 
             # Step 2: Silero VAD
             on_event("step", {"step": "running_vad", "message": "Detecting speech regions...", "percent": 20})
-            speech_segments = await asyncio.get_event_loop().run_in_executor(
+            speech_segments = await asyncio.get_running_loop().run_in_executor(
                 None,
                 self._run_vad,
                 audio_path,
@@ -101,7 +101,7 @@ class PipelineProcessor:
 
             # Step 3: WhisperX transcription
             on_event("step", {"step": "transcribing", "message": "Transcribing audio...", "percent": 50})
-            transcript_result = await asyncio.get_event_loop().run_in_executor(
+            transcript_result = await asyncio.get_running_loop().run_in_executor(
                 None,
                 self._run_transcription,
                 audio_path,
@@ -197,8 +197,14 @@ class PipelineProcessor:
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, _ = await proc.communicate()
-        data = json.loads(stdout)
-        return float(data["format"]["duration"])
+        try:
+            data = json.loads(stdout)
+            return float(data["format"]["duration"])
+        except (json.JSONDecodeError, KeyError, ValueError) as exc:
+            raise RuntimeError(
+                f"ffprobe returned invalid output for {audio_path}. "
+                f"The file may be corrupt or unsupported.\nRaw: {stdout[:200]}"
+            ) from exc
 
     def _run_vad(self, audio_path: Path) -> list[SpeechSegment]:
         """Run Silero VAD (blocking, called in executor)."""

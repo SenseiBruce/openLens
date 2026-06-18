@@ -1,5 +1,6 @@
 """Upload route — POST /api/upload"""
 from __future__ import annotations
+import asyncio
 import shutil
 import uuid
 from datetime import datetime
@@ -10,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from voicecut.shared.models import Project, ProjectSettings, ProjectStatus
 from voicecut.backend.db.database import save_project
+from voicecut.monitoring.metrics import metrics
 
 router = APIRouter()
 
@@ -72,7 +74,8 @@ async def upload_video(file: UploadFile = File(...)):
         created_at=now,
         updated_at=now,
     )
-    save_project(project)
+    await asyncio.to_thread(save_project, project)
+    metrics.record_upload()
 
     return JSONResponse({
         "project_id": project_id,
@@ -80,3 +83,4 @@ async def upload_video(file: UploadFile = File(...)):
         "size_bytes": size,
         "video_path": str(dest_path),
     })
+

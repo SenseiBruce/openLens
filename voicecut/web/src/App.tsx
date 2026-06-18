@@ -37,6 +37,7 @@ function App() {
     setProgressMsg('Starting analysis...');
     setAnalysisStep('processing');
     
+    // analyzeProjectStream now returns a cancel() fn; settings go in POST body (not URL)
     apiClient.analyzeProjectStream(project.id, settings, (ev) => {
       if (ev.message) setProgressMsg(ev.message);
       
@@ -53,13 +54,14 @@ function App() {
         setAnalysisStep('complete');
       }
       if (ev.step === 'error') {
-        alert('Analysis error: ' + ev.message);
+        console.error('Analysis error:', ev.message);
         setProject({ ...project, status: 'error' });
-        setProgressMsg('');
+        setProgressMsg(`Error: ${ev.message}`);
         setAnalysisStep('idle');
       }
     });
   };
+
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

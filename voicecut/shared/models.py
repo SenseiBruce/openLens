@@ -142,7 +142,7 @@ class AnalyzeRequest(BaseModel):
 
 class DecisionUpdate(BaseModel):
     cut_id: str
-    status: CutStatus
+    action: CutStatus  # renamed from 'status' to match UserDecision.action
 
 
 class ExportRequest(BaseModel):
