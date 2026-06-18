@@ -22,6 +22,7 @@ from voicecut.backend.db.database import load_project, save_project
 from voicecut.backend.pipeline.processor import PipelineProcessor
 from voicecut.monitoring.metrics import metrics
 from voicecut.monitoring.logging_config import project_id_var
+from voicecut.integrations.llm_adapter import LLMAdapter
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -152,3 +153,25 @@ async def analyze_project(
             "Connection": "keep-alive",
         },
     )
+
+class ChapterRequest(BaseModel):
+    model_name: str = "gemini/gemini-2.5-flash"
+    api_key: Optional[str] = None
+
+@router.post("/analyze/{project_id}/chapters/generate")
+async def generate_chapters(project_id: str, request: ChapterRequest = ChapterRequest()):
+    project_id_var.set(project_id)
+    project = await asyncio.to_thread(load_project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+    if not project.transcript_segments:
+        raise HTTPException(status_code=400, detail="No transcript available to generate chapters.")
+
+    adapter = LLMAdapter(model_name=request.model_name, api_key=request.api_key)
+    chapters = await asyncio.to_thread(adapter.generate_chapters, project.transcript_segments)
+    
+    project.chapters = chapters
+    await asyncio.to_thread(save_project, project)
+    
+    return {"chapters": [c.model_dump() for c in chapters]}

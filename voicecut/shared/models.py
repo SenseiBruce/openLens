@@ -75,6 +75,17 @@ class TranscriptSegment(BaseModel):
     def duration(self) -> float:
         return self.end - self.start
 
+class Chapter(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    start: float
+    end: float
+    title: str
+    summary: Optional[str] = None
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
 
 class CandidateCut(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -123,6 +134,7 @@ class Project(BaseModel):
     words: list[WordTimestamp] = Field(default_factory=list)
     candidate_cuts: list[CandidateCut] = Field(default_factory=list)
     user_decisions: list[UserDecision] = Field(default_factory=list)
+    chapters: list[Chapter] = Field(default_factory=list)
     srt_path: Optional[str] = None
     vtt_path: Optional[str] = None
     output_path: Optional[str] = None

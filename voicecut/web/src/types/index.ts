@@ -24,6 +24,14 @@ export interface TranscriptSegment {
   speaker?: string;
 }
 
+export interface Chapter {
+  id: string;
+  start: number;
+  end: number;
+  title: string;
+  summary?: string;
+}
+
 export interface CandidateCut {
   id: string;
   start: number;
@@ -68,6 +76,7 @@ export interface Project {
   words: WordTimestamp[];
   candidate_cuts: CandidateCut[];
   user_decisions: UserDecision[];
+  chapters?: Chapter[];
   srt_path?: string;
   vtt_path?: string;
   output_path?: string;

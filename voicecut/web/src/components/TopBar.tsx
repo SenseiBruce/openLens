@@ -3,6 +3,8 @@ import { Upload, Play, Scissors, Download, Loader2, Clock } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { AnalyzeModal } from './AnalyzeModal';
+import { ChaptersModal } from './ChaptersModal';
+import { List } from 'lucide-react';
 
 /** Format seconds as m:ss */
 function fmt(s: number): string {
@@ -16,6 +18,7 @@ export const TopBar: React.FC<{
   onExportStart: () => void;
 }> = ({ onAnalyzeStart, onExportStart }) => {
   const [showAnalyzeModal, setShowAnalyzeModal] = React.useState(false);
+  const [showChaptersModal, setShowChaptersModal] = React.useState(false);
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
   const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
 
@@ -173,6 +176,15 @@ export const TopBar: React.FC<{
           </button>
 
           <button
+            onClick={() => setShowChaptersModal(true)}
+            disabled={project.status === 'analyzing'}
+            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-700 rounded-md px-3 py-1.5 transition-colors"
+          >
+            <List className="w-3.5 h-3.5" />
+            Chapters
+          </button>
+
+          <button
             onClick={onExportStart}
             disabled={project.status !== 'ready'}
             className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 bg-white hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-md px-3 py-1.5 transition-colors"
@@ -206,6 +218,10 @@ export const TopBar: React.FC<{
             onAnalyzeStart(settings);
           }}
         />
+      )}
+
+      {showChaptersModal && (
+        <ChaptersModal onClose={() => setShowChaptersModal(false)} />
       )}
     </div>
   );
