@@ -128,6 +128,19 @@ export const apiClient = {
     return res.json();
   },
 
+  async generateChapters(projectId: string, modelName: string = "gemini/gemini-2.5-flash", apiKey?: string): Promise<{ chapters: any[] }> {
+    const body: Record<string, any> = { model_name: modelName };
+    if (apiKey) body.api_key = apiKey;
+    
+    const res = await fetch(`${API_BASE}/analyze/${projectId}/chapters/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('Failed to generate chapters');
+    return res.json();
+  },
+
   exportProjectStream(projectId: string, resolution: string | null, onEvent: (ev: PipelineEvent) => void): EventSource {
     const url = resolution
       ? `${API_BASE}/export/${projectId}?resolution=${resolution}`
