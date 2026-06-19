@@ -26,7 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from voicecut.backend.db.database import init_db
-from voicecut.backend.api.routes import upload, analyze, projects, export_routes
+from voicecut.backend.api.routes import upload, analyze, projects, export_routes, viral_clips
 from voicecut.monitoring.logging_config import setup_logging
 from voicecut.monitoring.metrics import metrics
 from voicecut.monitoring.middleware import TelemetryMiddleware
@@ -111,6 +111,7 @@ app.include_router(upload.router, prefix="/api", tags=["upload"])
 app.include_router(analyze.router, prefix="/api", tags=["analyze"])
 app.include_router(projects.router, prefix="/api", tags=["projects"])
 app.include_router(export_routes.router, prefix="/api", tags=["export"])
+app.include_router(viral_clips.router, prefix="/api", tags=["viral_clips"])
 
 # Serve exported files
 if EXPORTS_DIR.exists():

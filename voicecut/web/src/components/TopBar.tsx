@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { Upload, Play, Scissors, Download, Loader2, Clock } from 'lucide-react';
+import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { AnalyzeModal } from './AnalyzeModal';
@@ -16,7 +16,8 @@ function fmt(s: number): string {
 export const TopBar: React.FC<{
   onAnalyzeStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
   onExportStart: () => void;
-}> = ({ onAnalyzeStart, onExportStart }) => {
+  onViralClipsStart: () => void;
+}> = ({ onAnalyzeStart, onExportStart, onViralClipsStart }) => {
   const [showAnalyzeModal, setShowAnalyzeModal] = React.useState(false);
   const [showChaptersModal, setShowChaptersModal] = React.useState(false);
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
@@ -182,6 +183,15 @@ export const TopBar: React.FC<{
           >
             <List className="w-3.5 h-3.5" />
             Chapters
+          </button>
+
+          <button
+            onClick={onViralClipsStart}
+            disabled={project.status === 'analyzing'}
+            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-700 rounded-md px-3 py-1.5 transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            Viral Clips
           </button>
 
           <button

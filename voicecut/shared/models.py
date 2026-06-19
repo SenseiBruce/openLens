@@ -188,3 +188,29 @@ class BaselineCutResult(BaseModel):
     """Output from auto-editor CLI adapter (fallback mode)."""
     auto_cuts: list[dict]
     source: str = "auto-editor"
+
+
+class ViralClip(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    start: float
+    end: float
+    title: str
+    explanation: Optional[str] = None
+    score: float = Field(0.0, description="Viral potential score (0 to 10)")
+    rendered_path: Optional[str] = None
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
+
+class ViralClipRequest(BaseModel):
+    project_id: str
+    target_length_seconds: int = Field(30, description="Target clip length in seconds")
+    openrouter_key: str = Field(..., description="OpenRouter API key to be passed from frontend")
+
+
+class ViralClipResponse(BaseModel):
+    project_id: str
+    clips: list[ViralClip]
+

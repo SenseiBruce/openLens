@@ -141,6 +141,23 @@ export const apiClient = {
     return res.json();
   },
 
+  async generateViralClips(projectId: string, targetLength: number, openRouterKey: string): Promise<{ clips: any[] }> {
+    const res = await fetch(`${API_BASE}/viral-clips/${projectId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        project_id: projectId,
+        target_length_seconds: targetLength,
+        openrouter_key: openRouterKey 
+      }),
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Failed to generate viral clips: ${errorText}`);
+    }
+    return res.json();
+  },
+
   exportProjectStream(projectId: string, resolution: string | null, onEvent: (ev: PipelineEvent) => void): EventSource {
     const url = resolution
       ? `${API_BASE}/export/${projectId}?resolution=${resolution}`

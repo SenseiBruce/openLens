@@ -5,6 +5,7 @@ import { WaveformTimeline } from './components/WaveformTimeline';
 import { TranscriptPanel } from './components/TranscriptPanel';
 import { ExportModal } from './components/ExportModal';
 import { ProjectList } from './components/ProjectList';
+import { ViralClipsModal } from './components/ViralClipsModal';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
@@ -13,6 +14,7 @@ function App() {
   const { project, setProject, isUploading, setIsUploading } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
+  const [showViralClips, setShowViralClips] = useState(false);
   
   // Track the active pipeline step for the stepper
   const [analysisStep, setAnalysisStep] = useState<'upload' | 'create' | 'processing' | 'transcribe' | 'complete' | 'idle'>('idle');
@@ -129,7 +131,11 @@ function App() {
 
   return (
     <div className="h-screen w-screen bg-background flex flex-col text-foreground overflow-hidden">
-      <TopBar onAnalyzeStart={handleAnalyzeStart} onExportStart={handleExportStart} />
+      <TopBar 
+        onAnalyzeStart={handleAnalyzeStart} 
+        onExportStart={handleExportStart} 
+        onViralClipsStart={() => setShowViralClips(true)}
+      />
 
       <div className="flex-1 flex overflow-hidden">
         {!project && !isUploading ? (
@@ -289,6 +295,10 @@ function App() {
 
       {showExport && (
         <ExportModal onClose={() => setShowExport(false)} />
+      )}
+
+      {showViralClips && (
+        <ViralClipsModal onClose={() => setShowViralClips(false)} />
       )}
     </div>
   );

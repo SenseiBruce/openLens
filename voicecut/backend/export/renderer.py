@@ -268,3 +268,39 @@ class VideoRenderer:
                 for d in project.user_decisions
             ],
         }
+
+    async def render_viral_clip(self, project: Project, clip: ViralClip) -> Path:
+        """Render a single standalone viral clip without re-encoding (if possible)."""
+        output_dir = self.exports_dir / project.id / "viral_clips"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Sanitize title for filename
+        import re
+        safe_title = re.sub(r'[^a-zA-Z0-9_\-]', '_', clip.title.lower())
+        output_path = output_dir / f"{safe_title}_{clip.id}.mp4"
+        
+        # Fast extraction using copy
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(project.video_path),
+            "-ss", str(clip.start),
+            "-to", str(clip.end),
+            "-c:v", "copy",
+            "-c:a", "copy",
+            "-movflags", "+faststart",
+            str(output_path),
+        ]
+        
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await proc.communicate()
+        
+        if proc.returncode != 0:
+            logger.error(f"Failed to render viral clip: {stderr.decode()}")
+            raise RuntimeError("Failed to render viral clip")
+            
+        return output_path
+
