@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from sqlalchemy import select
 from voicecut.shared.models import Project, ViralClipRequest, ViralClipResponse, ViralClip
-from voicecut.backend.db.database import get_session, ProjectRecord
+from voicecut.backend.db.database import load_project
 from voicecut.backend.integrations.openrouter_client import OpenRouterClient
 from voicecut.backend.export.renderer import VideoRenderer
 
@@ -20,11 +20,9 @@ async def generate_viral_clips(project_id: str, request: ViralClipRequest):
     if project_id != request.project_id:
         raise HTTPException(status_code=400, detail="Path project_id does not match body project_id")
 
-    with get_session() as session:
-        record = session.scalar(select(ProjectRecord).where(ProjectRecord.id == project_id))
-        if not record:
-            raise HTTPException(status_code=404, detail="Project not found")
-        project = Project.model_validate_json(record.data)
+    project = load_project(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
 
     if not project.transcript_segments:
         raise HTTPException(status_code=400, detail="Project has no transcript. Run analysis first.")
