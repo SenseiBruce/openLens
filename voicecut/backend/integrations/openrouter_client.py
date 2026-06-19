@@ -9,6 +9,11 @@ class OpenRouterClient:
         self.client = AsyncOpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=api_key,
+            default_headers={
+                "Authorization": f"Bearer {api_key}",
+                "HTTP-Referer": "http://localhost:5173",
+                "X-Title": "VoiceCut"
+            }
         )
 
     async def extract_viral_clips(self, transcript_text: str, target_length_seconds: int) -> list[dict]:
