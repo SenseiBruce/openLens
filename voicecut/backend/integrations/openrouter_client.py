@@ -35,8 +35,8 @@ Transcript:
 {transcript_text}
 """
         
-        # Using a reliable free model with a large context window
-        model = "google/gemini-2.5-flash-free"
+        # Using a reliable free model
+        model = "google/gemma-4-31b-it:free"
         
         try:
             response = await self.client.chat.completions.create(
@@ -70,5 +70,6 @@ Transcript:
             else:
                 return []
         except Exception as e:
-            logger.error(f"Failed to extract viral clips via OpenRouter: {e}")
-            raise
+            err_msg = str(e).encode('ascii', 'ignore').decode('ascii')
+            logger.error(f"Failed to extract viral clips via OpenRouter: {err_msg}")
+            raise Exception(err_msg)
