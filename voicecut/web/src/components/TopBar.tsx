@@ -187,7 +187,7 @@ export const TopBar: React.FC<{
 
           <button
             onClick={onViralClipsStart}
-            disabled={project.status === 'analyzing'}
+            disabled={project.status !== 'ready'}
             className="flex items-center gap-1.5 text-xs font-semibold text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-700 rounded-md px-3 py-1.5 transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />

@@ -152,8 +152,14 @@ export const apiClient = {
       }),
     });
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to generate viral clips: ${errorText}`);
+      let errorMsg = 'Unknown error';
+      try {
+        const errJson = await res.json();
+        errorMsg = errJson.detail || JSON.stringify(errJson);
+      } catch {
+        errorMsg = await res.text();
+      }
+      throw new Error(errorMsg);
     }
     return res.json();
   },
