@@ -14,6 +14,8 @@ __pycache__/
 .coverage
 htmlcov/
 .ruff_cache/
+.pip-tools-cache/
 voicecut/web/node_modules/
 voicecut/web/dist/
+voicecut/web/coverage/
 *.egg-info/
