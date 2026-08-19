@@ -15,6 +15,7 @@ vi.mock('../../api/client', () => ({
     uploadVideo: vi.fn(),
     deleteProject: vi.fn(),
     analyzeProjectStream: vi.fn(),
+    saveDecisions: vi.fn().mockResolvedValue(undefined),
   },
 }))
 
@@ -161,5 +162,24 @@ describe('App', () => {
     await waitFor(() => {
       expect(reportError).toHaveBeenCalledWith('analysis', 'vad failed')
     })
+  })
+
+  it('handleExportStart saves decisions through apiClient', async () => {
+    const user = userEvent.setup()
+    const project = makeProject({
+      user_decisions: [{ cut_id: 'c1', action: 'cut' }],
+    })
+    useProjectStore.setState({ project })
+    vi.mocked(apiClient.saveDecisions).mockResolvedValue(undefined)
+
+    render(<App />)
+    await user.click(screen.getByText('start-export'))
+
+    await waitFor(() => {
+      expect(apiClient.saveDecisions).toHaveBeenCalledWith('p1', [
+        { cut_id: 'c1', status: 'cut' },
+      ])
+    })
+    expect(screen.getByText('export-modal')).toBeInTheDocument()
   })
 })

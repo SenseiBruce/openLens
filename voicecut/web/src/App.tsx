@@ -90,14 +90,7 @@ function App() {
       status: d.action
     }));
     try {
-      const res = await fetch(`/api/projects/${project.id}/decisions`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(decisions)
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to save decisions (${res.status})`);
-      }
+      await apiClient.saveDecisions(project.id, decisions);
       setShowExport(true);
     } catch (err) {
       reportError('export', err);

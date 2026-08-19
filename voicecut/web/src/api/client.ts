@@ -122,6 +122,26 @@ export const apiClient = {
   },
 
 
+  async saveDecisions(
+    projectId: string,
+    decisions: { cut_id: string; status: string }[],
+  ): Promise<void> {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/decisions`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(decisions),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to save decisions (${res.status})`);
+    }
+  },
+
+  async getDetailedHealth(): Promise<{ status: string }> {
+    const res = await fetch(`${API_BASE}/health/detailed`);
+    if (!res.ok) throw new Error(`Health check failed (${res.status})`);
+    return res.json();
+  },
+
   async getVideoInfo(projectId: string): Promise<{ width: number; height: number }> {
     const res = await fetch(`${API_BASE}/projects/${projectId}/video-info`);
     if (!res.ok) throw new Error('Failed to get video info');
