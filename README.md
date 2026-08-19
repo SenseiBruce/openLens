@@ -69,7 +69,8 @@ cd openLens
 ### 2. Environment file
 
 ```bash
-cp voicecut/.env.example voicecut/.env
+cp .env.example voicecut/.env
+# equivalent: cp voicecut/.env.example voicecut/.env
 ```
 
 Fill in LLM keys only if you want chapter / viral-clip generation. Analysis and export work without them.
@@ -189,7 +190,7 @@ tail -f voicecut/voicecut_frontend.log
 
 ## Environment Variables
 
-Copy `voicecut/.env.example` to `voicecut/.env`. Referenced variables:
+Copy `.env.example` (repo root) or `voicecut/.env.example` to `voicecut/.env`. Referenced variables:
 
 ```env
 DATABASE_URL=sqlite:///./data/voicecut.db
@@ -261,10 +262,12 @@ git submodule update --remote --merge
 
 ## Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feat/your-feature`
 3. Commit your changes with tests in the same commit: `git commit -m "feat: your feature"`
-4. Push and open a Pull Request — CI runs pytest, ruff, eslint, and the frontend build on every PR
+4. Push and open a Pull Request — CI runs pytest, ruff, eslint, typecheck, and dependency audits on every PR
 
 ---
 
