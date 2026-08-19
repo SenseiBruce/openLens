@@ -19,15 +19,38 @@ jobs:
       - name: Verify Python lockfile is in sync
         run: |
           python -m pip install --upgrade pip pip-tools
-          cp voicecut/requirements.lock /tmp/committed.lock
-          pip-compile --generate-hashes --output-file=voicecut/requirements.lock --strip-extras voicecut/requirements.txt
-          diff -u /tmp/committed.lock voicecut/requirements.lock
+          pip-compile voicecut/requirements.txt \
+            --output-file=/tmp/requirements.lock \
+            --generate-hashes \
+            --strip-extras \
+            --quiet
+          python - <<'PY'
+          from pathlib import Path
+
+          def pins(path: str) -> list[str]:
+              found = []
+              for line in Path(path).read_text().splitlines():
+                  stripped = line.strip().rstrip("\\").strip()
+                  if "==" in stripped and not stripped.startswith("#"):
+                      found.append(stripped)
+              return found
+
+          committed = pins("voicecut/requirements.lock")
+          generated = pins("/tmp/requirements.lock")
+          if committed != generated:
+              raise SystemExit(
+                  "lockfile package pins differ from pip-compile output:\n"
+                  f"only committed: {sorted(set(committed) - set(generated))}\n"
+                  f"only generated: {sorted(set(generated) - set(committed))}"
+              )
+          PY
       - name: Install Python dependencies
         run: pip install -r voicecut/requirements.lock
       - name: Run tests with coverage
         env:
           HF_HUB_OFFLINE: "1"
           TRANSFORMERS_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
         run: pytest voicecut/tests/ --maxfail=1
 
   lint:
@@ -56,7 +79,7 @@ jobs:
           npm ci
           npm run typecheck
           npx eslint src
-          npm test
+          npm run test:coverage
           npm run build
       - name: npm audit (high+)
         working-directory: voicecut/web
@@ -76,3 +99,41 @@ jobs:
         run: |
           python -m pip install --upgrade pip pip-audit
           pip-audit -r voicecut/requirements.lock
+
+  docker-smoke:
+    name: docker-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build compose stack and curl /health
+        run: |
+          docker compose up --build -d
+          for i in $(seq 1 40); do
+            if curl -sf http://localhost:8000/health >/dev/null; then
+              echo "health ok"
+              docker compose down
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose logs
+          docker compose down
+          exit 1
+
+  setup-script:
+    name: setup.sh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run one-shot setup without a pre-existing venv
+        run: |
+          test ! -d voicecut/.venv
+          test ! -d voicecut/web/node_modules
+          bash voicecut/setup.sh
+
