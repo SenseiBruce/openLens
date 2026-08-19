@@ -2,11 +2,12 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
+import { computeKeptDuration } from '../lib/keptDuration';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 import { List } from 'lucide-react';
 
-/** Format seconds as m:ss */
 function fmt(s: number): string {
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
@@ -44,24 +45,10 @@ export const TopBar: React.FC<{
   }, []);
 
   // Live kept-duration: total minus all effectively-cut segments
-  const { totalDur, keptDur, removedDur } = useMemo(() => {
-    const total = project?.video_duration ?? 0;
-    if (!project || !total) return { totalDur: 0, keptDur: 0, removedDur: 0 };
-
-    const decisionsMap = new Map(
-      (project.user_decisions || []).map(d => [d.cut_id, d.action])
-    );
-    const cutDur = project.candidate_cuts.reduce((acc, cut) => {
-      const status = decisionsMap.get(cut.id) ?? cut.status;
-      return status === 'cut' ? acc + (cut.end - cut.start) : acc;
-    }, 0);
-
-    return {
-      totalDur: total,
-      keptDur: Math.max(0, total - cutDur),
-      removedDur: cutDur,
-    };
-  }, [project?.user_decisions, project?.candidate_cuts, project?.video_duration]);
+  const { totalDur, keptDur, removedDur } = useMemo(
+    () => computeKeptDuration(project),
+    [project],
+  );
 
   const handleHome = () => {
     setProject(null);
@@ -77,8 +64,7 @@ export const TopBar: React.FC<{
       const newProject = await apiClient.getProject(project_id);
       setProject(newProject);
     } catch (err) {
-      console.error(err);
-      alert('Upload failed');
+      reportError('upload', err);
     } finally {
       setIsUploading(false);
     }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Loader2, Download, Sparkles } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
 
 export function ViralClipsModal({ onClose }: { onClose: () => void }) {
   const { project } = useProjectStore();
@@ -24,9 +25,9 @@ export function ViralClipsModal({ onClose }: { onClose: () => void }) {
     try {
       const response = await apiClient.generateViralClips(project.id, targetLength, apiKey.trim());
       setClips(response.clips || []);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Failed to generate viral clips');
+    } catch (err: unknown) {
+      reportError('viral_clips', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate viral clips');
     } finally {
       setIsGenerating(false);
     }

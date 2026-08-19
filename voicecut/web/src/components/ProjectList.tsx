@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Scissors, Upload, Clock, Loader2, Trash2, Video } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
 import type { ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -26,7 +27,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
       const data = await apiClient.getProjects();
       setProjects(data);
     } catch (err) {
-      console.error('Failed to load projects', err);
+      reportError('load_projects', err);
     } finally {
       setLoading(false);
     }
@@ -48,8 +49,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
         return next;
       });
     } catch (err) {
-      console.error(err);
-      alert('Failed to delete');
+      reportError('project_delete', err);
     }
   };
 
@@ -64,8 +64,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
       setIsSelectMode(false);
       fetchProjects();
     } catch (err) {
-      console.error(err);
-      alert('Failed to delete some projects');
+      reportError('project_mass_delete', err);
     }
   };
 

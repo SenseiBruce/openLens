@@ -8,6 +8,8 @@ import { ProjectList } from './components/ProjectList';
 import { ViralClipsModal } from './components/ViralClipsModal';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
+import { reportError } from './lib/errorReporter';
+import { ErrorBanner } from './components/ErrorBanner';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
@@ -27,8 +29,8 @@ function App() {
     }
     if (projectId) {
       apiClient.getProject(projectId)
-        .then(setProject)
-        .catch(err => console.error("Failed to load project:", err));
+        .then((loaded) => setProject(loaded))
+        .catch(err => reportError('load_project', err));
     }
   }, [setProject]);
 
@@ -56,7 +58,7 @@ function App() {
         setAnalysisStep('complete');
       }
       if (ev.step === 'error') {
-        console.error('Analysis error:', ev.message);
+        reportError('analysis', ev.message);
         setProject({ ...project, status: 'error' });
         setProgressMsg(`Error: ${ev.message}`);
         setAnalysisStep('idle');
@@ -75,8 +77,7 @@ function App() {
       setProject(newProject);
       window.history.pushState({}, '', `?project=${project_id}`);
     } catch (err) {
-      console.error(err);
-      alert('Upload failed');
+      reportError('upload', err);
     } finally {
       setIsUploading(false);
     }
@@ -84,17 +85,23 @@ function App() {
 
   const handleExportStart = async () => {
     if (!project) return;
-    // Sync decisions to backend first, then open modal
     const decisions = (project.user_decisions || []).map(d => ({
       cut_id: d.cut_id,
       status: d.action
     }));
-    await fetch(`/api/projects/${project.id}/decisions`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(decisions)
-    });
-    setShowExport(true);
+    try {
+      const res = await fetch(`/api/projects/${project.id}/decisions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(decisions)
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to save decisions (${res.status})`);
+      }
+      setShowExport(true);
+    } catch (err) {
+      reportError('export', err);
+    }
   };
 
   const isTranscodingState = isUploading || project?.status === 'analyzing';
@@ -131,6 +138,7 @@ function App() {
 
   return (
     <div className="h-screen w-screen bg-background flex flex-col text-foreground overflow-hidden">
+      <ErrorBanner />
       <TopBar 
         onAnalyzeStart={handleAnalyzeStart} 
         onExportStart={handleExportStart} 
@@ -142,7 +150,7 @@ function App() {
           <ProjectList 
             onSelect={(id) => {
               window.history.pushState({}, '', `?project=${id}`);
-              apiClient.getProject(id).then(setProject).catch(console.error);
+              apiClient.getProject(id).then(setProject).catch((err) => reportError('load_project', err));
             }} 
             onUpload={handleUpload}
             isUploading={isUploading}
