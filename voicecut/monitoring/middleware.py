@@ -14,6 +14,7 @@ Usage (in main.py):
     app.add_middleware(TelemetryMiddleware)
 """
 from __future__ import annotations
+
 import logging
 import time
 import uuid
@@ -21,7 +22,6 @@ import uuid
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
-
 from voicecut.monitoring.logging_config import request_id_var
 
 logger = logging.getLogger("voicecut.telemetry")

@@ -1,11 +1,13 @@
 """Projects route — CRUD operations for projects and decisions."""
 from __future__ import annotations
+
 import asyncio
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
-from voicecut.shared.models import DecisionUpdate, CutStatus, UserDecision
-from voicecut.backend.db.database import load_project, save_project, list_projects, delete_project
+from voicecut.backend.db.database import delete_project, list_projects, load_project, save_project
+from voicecut.shared.models import CutStatus, DecisionUpdate, UserDecision
 
 router = APIRouter()
 
@@ -69,7 +71,7 @@ async def update_single_cut(project_id: str, cut_id: str, status: str):
     try:
         new_status = CutStatus(status)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
+        raise HTTPException(status_code=400, detail=f"Invalid status: {status}") from None
 
     found = False
     for cut in project.candidate_cuts:

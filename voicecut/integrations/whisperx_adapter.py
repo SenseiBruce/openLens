@@ -12,10 +12,9 @@ M1 Mac note: device="mps" is supported; falls back to CPU if MPS unavailable.
 No speaker diarization — kept simple (no HuggingFace token needed).
 """
 from __future__ import annotations
+
 import logging
-import json
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -92,10 +91,10 @@ class WhisperXAdapter:
     def transcribe(
         self,
         audio_path: str | Path,
-        language: Optional[str] = None,
+        language: str | None = None,
         batch_size: int = 8,
         align_words: bool = True,
-        initial_prompt: Optional[str] = None,
+        initial_prompt: str | None = None,
     ) -> dict:
         """
         Transcribe audio file and return structured result.

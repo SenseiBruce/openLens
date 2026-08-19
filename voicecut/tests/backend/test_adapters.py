@@ -15,6 +15,7 @@ sys.modules.setdefault('torchaudio.functional', MagicMock())
 
 from voicecut.integrations.silero_vad_adapter import SileroVADAdapter
 
+
 def test_silero_adapter_mocked():
     # Test instantiation and lazy loading behavior
     adapter = SileroVADAdapter()
@@ -34,6 +35,7 @@ def test_silero_adapter_mocked():
 
 from voicecut.integrations.llm_adapter import LLMAdapter
 from voicecut.shared.models import TranscriptSegment
+
 
 def test_llm_adapter_no_api_key():
     adapter = LLMAdapter(api_key="")

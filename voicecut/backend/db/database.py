@@ -4,17 +4,19 @@ Uses SQLAlchemy Core with aiosqlite for async support.
 Stores projects, segments, cuts, and decisions.
 """
 from __future__ import annotations
+
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
+import structlog
 from sqlalchemy import (
-    Column, String, Float, Text, Boolean, DateTime, JSON,
-    create_engine, MetaData, Table, select, insert, update, delete
+    Float,
+    String,
+    Text,
+    create_engine,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
-import structlog
 
 from voicecut.backend.config import get_settings
 
@@ -47,22 +49,22 @@ class ProjectRecord(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     name: Mapped[str] = mapped_column(String, default="Untitled Project")
-    video_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    audio_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    video_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    audio_path: Mapped[str | None] = mapped_column(String, nullable=True)
     status: Mapped[str] = mapped_column(String, default="idle")
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    settings_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    speech_segments_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    transcript_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    words_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    candidate_cuts_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    user_decisions_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    srt_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    vtt_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    output_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    video_duration: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    created_at: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    updated_at: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    settings_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    speech_segments_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    transcript_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    words_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    candidate_cuts_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    user_decisions_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    srt_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    vtt_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    output_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    video_duration: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[str | None] = mapped_column(String, nullable=True)
+    updated_at: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 def get_engine(db_path: Path = DB_PATH):
@@ -98,7 +100,7 @@ def get_session():
 # Repository functions
 # ---------------------------------------------------------------------------
 
-def _serialize(obj) -> Optional[str]:
+def _serialize(obj) -> str | None:
     if obj is None:
         return None
     if isinstance(obj, list):
@@ -109,7 +111,7 @@ def _serialize(obj) -> Optional[str]:
     return json.dumps(obj.model_dump() if hasattr(obj, 'model_dump') else obj)
 
 
-def _deserialize_list(json_str: Optional[str], model_class=None) -> list:
+def _deserialize_list(json_str: str | None, model_class=None) -> list:
     if not json_str:
         return []
     items = json.loads(json_str)
@@ -120,7 +122,6 @@ def _deserialize_list(json_str: Optional[str], model_class=None) -> list:
 
 def save_project(project) -> None:
     """Save or update a project in the database."""
-    from voicecut.shared.models import Project
 
     with get_session() as session:
         now = datetime.utcnow().isoformat()
@@ -160,8 +161,14 @@ def save_project(project) -> None:
 def load_project(project_id: str):
     """Load a project from the database. Returns Project or None."""
     from voicecut.shared.models import (
-        Project, ProjectSettings, SpeechSegment, TranscriptSegment,
-        WordTimestamp, CandidateCut, UserDecision, ProjectStatus
+        CandidateCut,
+        Project,
+        ProjectSettings,
+        ProjectStatus,
+        SpeechSegment,
+        TranscriptSegment,
+        UserDecision,
+        WordTimestamp,
     )
 
     with get_session() as session:

@@ -1,5 +1,4 @@
 from pydantic import ValidationError
-
 from voicecut.backend.config import Settings
 
 

@@ -1,5 +1,6 @@
 import json
 import logging
+
 from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
@@ -77,4 +78,4 @@ Transcript:
         except Exception as e:
             err_msg = str(e).encode('ascii', 'ignore').decode('ascii')
             logger.error(f"Failed to extract viral clips via OpenRouter: {err_msg}")
-            raise Exception(err_msg)
+            raise Exception(err_msg) from e

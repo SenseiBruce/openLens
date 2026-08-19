@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 
-from sqlalchemy import select
-from voicecut.shared.models import Project, ViralClipRequest, ViralClipResponse, ViralClip
 from voicecut.backend.db.database import load_project
-from voicecut.backend.integrations.openrouter_client import OpenRouterClient
 from voicecut.backend.export.renderer import VideoRenderer
+from voicecut.backend.integrations.openrouter_client import OpenRouterClient
+from voicecut.shared.models import ViralClip, ViralClipRequest, ViralClipResponse
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ async def generate_viral_clips(project_id: str, request: ViralClipRequest):
     try:
         raw_clips = await client.extract_viral_clips(transcript_text, request.target_length_seconds)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to extract clips from OpenRouter: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to extract clips from OpenRouter: {e}") from e
 
     if not raw_clips:
         raise HTTPException(status_code=500, detail="OpenRouter returned an empty or invalid response.")

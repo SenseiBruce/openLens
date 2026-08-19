@@ -1,9 +1,10 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock, AsyncMock
 from voicecut.backend.api.main import app
-from voicecut.backend.db.database import get_session, init_db, ProjectRecord
 from voicecut.backend.api.routes.viral_clips import EXPORTS_DIR
+from voicecut.backend.db.database import ProjectRecord, get_session, init_db
 
 client = TestClient(app)
 

@@ -18,13 +18,13 @@ The adapter calls: auto-editor <video> --export json
 and parses the resulting JSON timeline to extract cut segments.
 """
 from __future__ import annotations
+
 import json
 import logging
-import subprocess
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class AutoEditorAdapter:
     This is strictly a fallback/comparison tool — primary detection is Silero VAD.
     """
 
-    def __init__(self, binary_path: Optional[str] = None):
+    def __init__(self, binary_path: str | None = None):
         """
         Args:
             binary_path: Optional path to auto-editor binary.
@@ -116,8 +116,8 @@ class AutoEditorAdapter:
                     cwd=tmpdir,
                     timeout=300,
                 )
-            except subprocess.TimeoutExpired:
-                raise RuntimeError("auto-editor timed out after 5 minutes")
+            except subprocess.TimeoutExpired as exc:
+                raise RuntimeError("auto-editor timed out after 5 minutes") from exc
 
             if result.returncode != 0:
                 raise RuntimeError(

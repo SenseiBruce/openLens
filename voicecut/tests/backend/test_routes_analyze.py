@@ -1,9 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 from voicecut.backend.api.main import app
+from voicecut.backend.db.database import ProjectRecord, get_session, init_db
 from voicecut.shared.models import Chapter
-from voicecut.backend.db.database import get_session, init_db, ProjectRecord
 
 client = TestClient(app)
 

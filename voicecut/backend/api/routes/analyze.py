@@ -7,22 +7,23 @@ are sent in the request body instead of URL query params.
 Frontend uses fetch() + ReadableStream instead of EventSource.
 """
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from voicecut.shared.models import ProjectSettings, ProjectStatus
 from voicecut.backend.db.database import load_project, save_project
 from voicecut.backend.pipeline.processor import PipelineProcessor
-from voicecut.monitoring.metrics import metrics
-from voicecut.monitoring.logging_config import project_id_var
 from voicecut.integrations.llm_adapter import LLMAdapter
+from voicecut.monitoring.logging_config import project_id_var
+from voicecut.monitoring.metrics import metrics
+from voicecut.shared.models import ProjectStatus
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -39,10 +40,10 @@ _analyze_semaphore = asyncio.Semaphore(1)
 # ---------------------------------------------------------------------------
 
 class AnalyzeSettings(BaseModel):
-    whisper_model: Optional[str] = None
-    min_gap_duration: Optional[float] = None
-    language: Optional[str] = None
-    initial_prompt: Optional[str] = None  # stays in request body, never in URL
+    whisper_model: str | None = None
+    min_gap_duration: float | None = None
+    language: str | None = None
+    initial_prompt: str | None = None  # stays in request body, never in URL
 
 
 @router.post("/analyze/{project_id}")
@@ -156,7 +157,7 @@ async def analyze_project(
 
 class ChapterRequest(BaseModel):
     model_name: str = "gemini/gemini-2.5-flash"
-    api_key: Optional[str] = None
+    api_key: str | None = None
 
 @router.post("/analyze/{project_id}/chapters/generate")
 async def generate_chapters(project_id: str, request: ChapterRequest = ChapterRequest()):

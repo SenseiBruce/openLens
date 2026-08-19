@@ -4,8 +4,8 @@
 Requires a real audio file and model weights. Run from the repo after
 `pip install -r voicecut/requirements-ml.txt`.
 """
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from voicecut.integrations.whisperx_adapter import WhisperXAdapter
 

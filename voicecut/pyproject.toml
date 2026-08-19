@@ -31,3 +31,15 @@ include = ["voicecut*"]
 testpaths = ["tests"]
 pythonpath = [".."]
 addopts = "--cov=voicecut --cov-fail-under=70 --cov-report=term-missing"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+extend-exclude = [
+    "web",
+    "monitoring/local_monitor.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008", "B011", "E402"]

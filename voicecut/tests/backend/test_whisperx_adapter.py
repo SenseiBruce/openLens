@@ -117,3 +117,14 @@ def test_transcribe_skips_alignment_when_disabled(monkeypatch, tmp_path):
     result = adapter.transcribe(audio, align_words=False)
     fake.align.assert_not_called()
     assert result["transcript"][0]["text"] == "hi"
+
+
+def test_ensure_model_loaded_is_idempotent(monkeypatch):
+    fake = _install_fake_whisperx(monkeypatch, {"language": "en", "segments": []})
+    from voicecut.integrations.whisperx_adapter import WhisperXAdapter
+
+    adapter = WhisperXAdapter(device="cpu")
+    adapter._ensure_model_loaded()
+    adapter._ensure_model_loaded()
+    assert fake.load_model.call_count == 1
+

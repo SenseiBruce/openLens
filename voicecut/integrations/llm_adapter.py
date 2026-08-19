@@ -1,15 +1,15 @@
-import os
 import json
 import logging
+import os
+
 from litellm import completion
-from pydantic import BaseModel
-from typing import List, Optional
+
 from voicecut.shared.models import Chapter, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 
 class LLMAdapter:
-    def __init__(self, model_name: str = "gemini/gemini-2.5-flash", api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "gemini/gemini-2.5-flash", api_key: str | None = None):
         self.model_name = model_name
         # Fallback to general API key environment variable or GEMINI_API_KEY
         if api_key:
@@ -26,7 +26,7 @@ class LLMAdapter:
                 or os.environ.get("OPENAI_API_KEY")
             )
 
-    def generate_chapters(self, transcript_segments: List[TranscriptSegment]) -> List[Chapter]:
+    def generate_chapters(self, transcript_segments: list[TranscriptSegment]) -> list[Chapter]:
         if not self.api_key:
             logger.warning("API key is not set. Cannot generate chapters.")
             return []

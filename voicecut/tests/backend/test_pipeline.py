@@ -1,6 +1,7 @@
-import pytest
+
 from voicecut.backend.pipeline.processor import PipelineProcessor
 from voicecut.shared.models import ProjectSettings, SpeechSegment
+
 
 def test_gap_calculation():
     # Test _detect_candidate_cuts isolated from external processes

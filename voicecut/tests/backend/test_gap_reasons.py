@@ -1,5 +1,5 @@
 from voicecut.backend.pipeline.processor import PipelineProcessor, _classify_gap_reason
-from voicecut.shared.models import CutReason, CutStatus, ProjectSettings, SpeechSegment
+from voicecut.shared.models import CutReason, ProjectSettings, SpeechSegment
 
 
 def test_no_speech_marks_entire_duration_as_cut():

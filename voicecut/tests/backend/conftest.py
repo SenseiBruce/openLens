@@ -1,10 +1,11 @@
-import pytest
 import tempfile
-import os
+
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from voicecut.backend.db.database import Base
 from voicecut.shared.models import ProjectSettings
+
 
 @pytest.fixture
 def temp_workspace():

@@ -8,17 +8,16 @@ Uses FFmpeg concat demuxer for lossless segment stitching when possible.
 Falls back to re-encode (libx264/aac) if streams are not compatible.
 """
 from __future__ import annotations
+
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import structlog
 
 from voicecut.backend.export.edl import build_edl, compute_kept_segments
-from voicecut.shared.models import (
-    Project, ExportFormat, ViralClip
-)
+from voicecut.shared.models import ExportFormat, Project, ViralClip
 
 logger = structlog.get_logger(__name__)
 

@@ -13,19 +13,27 @@ Orchestrates the full speech-aware video analysis pipeline:
 Each step emits progress events (for SSE streaming to the frontend).
 """
 from __future__ import annotations
+
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 import structlog
 
-from voicecut.shared.models import (
-    Project, SpeechSegment, TranscriptSegment, WordTimestamp,
-    CandidateCut, CutReason, CutStatus, ProjectSettings, ProjectStatus
-)
 from voicecut.backend.pipeline.audio_utils import extract_wav_16k_mono, probe_duration
 from voicecut.integrations.silero_vad_adapter import SileroVADAdapter
 from voicecut.integrations.whisperx_adapter import WhisperXAdapter
+from voicecut.shared.models import (
+    CandidateCut,
+    CutReason,
+    CutStatus,
+    Project,
+    ProjectSettings,
+    ProjectStatus,
+    SpeechSegment,
+    TranscriptSegment,
+    WordTimestamp,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -46,7 +54,7 @@ class PipelineProcessor:
         self,
         uploads_dir: Path,
         exports_dir: Path,
-        settings: Optional[ProjectSettings] = None,
+        settings: ProjectSettings | None = None,
     ):
         self.uploads_dir = uploads_dir
         self.exports_dir = exports_dir

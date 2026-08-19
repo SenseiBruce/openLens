@@ -1,9 +1,8 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-
 from voicecut.backend.api.main import app
-from voicecut.shared.models import CandidateCut, CutStatus, Project, UserDecision
+from voicecut.shared.models import CandidateCut, CutStatus, Project
 
 client = TestClient(app)
 

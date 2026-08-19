@@ -14,20 +14,20 @@ Serves:
 import asyncio
 import json
 import shutil
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
+from voicecut.backend.api.routes import analyze, export_routes, projects, upload, viral_clips
 from voicecut.backend.config import get_settings
 from voicecut.backend.db.database import init_db
-from voicecut.backend.api.routes import upload, analyze, projects, export_routes, viral_clips
 from voicecut.monitoring.logging_config import setup_logging
 from voicecut.monitoring.metrics import metrics
 from voicecut.monitoring.middleware import TelemetryMiddleware
@@ -141,10 +141,11 @@ async def health_detailed():
     # DB check
     db_status = "ok"
     try:
-        from voicecut.backend.db.database import get_session, ProjectRecord
         from sqlalchemy import select
+
+        from voicecut.backend.db.database import ProjectRecord, get_session
         with get_session() as session:
-            count = session.scalar(select(ProjectRecord.id))
+            session.scalar(select(ProjectRecord.id))
     except Exception:
         db_status = "error"
 

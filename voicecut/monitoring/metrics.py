@@ -13,12 +13,11 @@ Thread-safe via threading.Lock.
 No external library required.
 """
 from __future__ import annotations
+
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Optional
-
+from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
 # Data classes
@@ -28,16 +27,16 @@ from typing import Optional
 class PipelineRun:
     project_id: str
     model: str
-    language: Optional[str]
+    language: str | None
     started_at: float          # time.monotonic()
-    ended_at: Optional[float] = None
+    ended_at: float | None = None
     status: str = "running"    # "running" | "complete" | "error"
-    error: Optional[str] = None
+    error: str | None = None
     cuts_count: int = 0
     segments_count: int = 0
 
     @property
-    def duration_s(self) -> Optional[float]:
+    def duration_s(self) -> float | None:
         if self.ended_at is None:
             return None
         return round(self.ended_at - self.started_at, 2)
@@ -47,14 +46,14 @@ class PipelineRun:
 class ExportRun:
     project_id: str
     formats: list[str]
-    resolution: Optional[str]
+    resolution: str | None
     started_at: float
-    ended_at: Optional[float] = None
+    ended_at: float | None = None
     status: str = "running"
-    error: Optional[str] = None
+    error: str | None = None
 
     @property
-    def duration_s(self) -> Optional[float]:
+    def duration_s(self) -> float | None:
         if self.ended_at is None:
             return None
         return round(self.ended_at - self.started_at, 2)
@@ -103,7 +102,7 @@ class MetricsStore:
     # Pipeline (analysis) tracking
     # ------------------------------------------------------------------
 
-    def pipeline_start(self, project_id: str, model: str, language: Optional[str]) -> PipelineRun:
+    def pipeline_start(self, project_id: str, model: str, language: str | None) -> PipelineRun:
         run = PipelineRun(
             project_id=project_id,
             model=model,
@@ -138,7 +137,7 @@ class MetricsStore:
     # Export tracking
     # ------------------------------------------------------------------
 
-    def export_start(self, project_id: str, formats: list[str], resolution: Optional[str]) -> ExportRun:
+    def export_start(self, project_id: str, formats: list[str], resolution: str | None) -> ExportRun:
         run = ExportRun(
             project_id=project_id,
             formats=formats,

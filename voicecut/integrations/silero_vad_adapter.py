@@ -9,6 +9,7 @@ Install: pip install -e ../silero-vad
 License: MIT
 """
 from __future__ import annotations
+
 import logging
 from pathlib import Path
 
@@ -44,7 +45,6 @@ class SileroVADAdapter:
             # Move to device if possible (MPS on M1, CUDA on NVIDIA)
             if self._device in ("mps", "cuda"):
                 try:
-                    import torch
                     self._model = self._model.to(self._device)
                 except Exception as e:
                     logger.warning(f"Could not move silero model to {self._device}: {e}. Using CPU.")
@@ -134,7 +134,8 @@ class SileroVADAdapter:
             return info.num_frames / info.sample_rate
         except Exception:
             # Fallback via ffprobe
-            import subprocess, json
+            import json
+            import subprocess
             result = subprocess.run(
                 ["ffprobe", "-v", "quiet", "-print_format", "json",
                  "-show_format", str(audio_path)],

@@ -1,17 +1,17 @@
 """Upload route — POST /api/upload"""
 from __future__ import annotations
+
 import asyncio
-import shutil
 import uuid
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
-from voicecut.shared.models import Project, ProjectSettings, ProjectStatus
 from voicecut.backend.db.database import save_project
 from voicecut.monitoring.metrics import metrics
+from voicecut.shared.models import Project, ProjectSettings, ProjectStatus
 
 router = APIRouter()
 
@@ -61,7 +61,7 @@ async def upload_video(file: UploadFile = File(...)):
         raise
     except Exception as e:
         dest_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}") from e
 
     # Create project
     now = datetime.utcnow().isoformat()

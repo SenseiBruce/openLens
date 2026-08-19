@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from voicecut.backend.export.renderer import VideoRenderer
 from voicecut.shared.models import CandidateCut, CutStatus, Project, UserDecision
 

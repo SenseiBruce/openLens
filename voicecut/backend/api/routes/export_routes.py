@@ -1,20 +1,21 @@
 """Export route — GET /api/export/{project_id}"""
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
 import subprocess
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
-from voicecut.shared.models import ExportRequest, ExportFormat, ProjectStatus
 from voicecut.backend.db.database import load_project, save_project
 from voicecut.backend.export.renderer import VideoRenderer
-from voicecut.monitoring.metrics import metrics
 from voicecut.monitoring.logging_config import project_id_var
+from voicecut.monitoring.metrics import metrics
+from voicecut.shared.models import ExportFormat, ExportRequest, ProjectStatus
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ async def get_video_info(project_id: str):
 @router.get("/export/{project_id}")
 async def export_project(
     project_id: str,
-    resolution: Optional[str] = Query(None, description="Output resolution: e.g. '2160p','1080p','720p','480p'. Defaults to original."),
+    resolution: str | None = Query(None, description="Output resolution: e.g. '2160p','1080p','720p','480p'. Defaults to original."),
     request: ExportRequest | None = None,
 ):
     """
@@ -164,7 +165,7 @@ async def download_file(project_id: str, filename: str):
     try:
         file_path.resolve().relative_to(EXPORTS_DIR.resolve())
     except ValueError:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=403, detail="Access denied") from None
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")

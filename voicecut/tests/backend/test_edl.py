@@ -1,7 +1,6 @@
 """Direct tests for merge/carve EDL helpers."""
 
 import pytest
-
 from voicecut.backend.export.edl import build_edl, compute_kept_segments
 from voicecut.shared.models import CandidateCut, CutReason, CutStatus, Project, UserDecision
 
