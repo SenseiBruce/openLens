@@ -98,6 +98,14 @@ pip install -e voicecut
 cd voicecut/web && npm ci && cd ../..
 ```
 
+`voicecut/requirements.lock` is the install source of truth (fully pinned hashes). It is generated from the version-pinned `voicecut/requirements.txt`:
+
+```bash
+pip-compile voicecut/requirements.txt --generate-hashes --output-file=voicecut/requirements.lock --strip-extras
+```
+
+Regenerate the lockfile whenever direct dependencies change. CI fails if the lockfile pins drift.
+
 ---
 
 ## Docker (one command)
