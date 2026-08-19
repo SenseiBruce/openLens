@@ -50,10 +50,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r voicecut/requirements.lock
           ruff check voicecut/
-      - name: Lint and build frontend
+      - name: Frontend install, typecheck, lint, test, build
         working-directory: voicecut/web
         run: |
           npm ci
-          npm run build
+          npm run typecheck
           npx eslint src
           npm test
+          npm run build
