@@ -14,11 +14,10 @@ Each step emits progress events (for SSE streaming to the frontend).
 """
 from __future__ import annotations
 import asyncio
-import logging
-import subprocess
-import uuid
 from pathlib import Path
-from typing import AsyncGenerator, Callable, Optional
+from typing import Callable, Optional
+
+import structlog
 
 from voicecut.shared.models import (
     Project, SpeechSegment, TranscriptSegment, WordTimestamp,
@@ -27,7 +26,7 @@ from voicecut.shared.models import (
 from voicecut.integrations.silero_vad_adapter import SileroVADAdapter
 from voicecut.integrations.whisperx_adapter import WhisperXAdapter
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class PipelineProcessor:
@@ -73,6 +72,7 @@ class PipelineProcessor:
         Returns:
             Updated Project with all segments, transcript, and candidate cuts.
         """
+        structlog.contextvars.bind_contextvars(project_id=project.id)
         try:
             project.status = ProjectStatus.ANALYZING
 
@@ -84,6 +84,7 @@ class PipelineProcessor:
             # Get duration
             duration = await self._get_duration(audio_path)
             project.video_duration = duration
+            logger.info("audio_extracted", project_id=project.id, duration=duration)
             on_event("progress", {"percent": 15, "message": f"Audio extracted ({duration:.1f}s)"})
 
             # Step 2: Silero VAD
@@ -143,10 +144,12 @@ class PipelineProcessor:
             })
 
         except Exception as e:
-            logger.exception(f"Pipeline error for project {project.id}")
+            logger.exception("pipeline_error", project_id=project.id)
             project.status = ProjectStatus.ERROR
             project.error_message = str(e)
             on_event("error", {"message": str(e)})
+        finally:
+            structlog.contextvars.unbind_contextvars("project_id")
 
         return project
 
@@ -182,7 +185,7 @@ class PipelineProcessor:
         if proc.returncode != 0:
             raise RuntimeError(f"FFmpeg audio extraction failed:\n{stderr.decode()}")
 
-        logger.info(f"Audio extracted: {audio_path}")
+        logger.info("audio_file_written", path=str(audio_path))
         return audio_path
 
     async def _get_duration(self, audio_path: Path) -> float:
@@ -339,7 +342,7 @@ class PipelineProcessor:
                 status=CutStatus.CUT,
             ))
 
-        logger.info(f"Gap detection: {len(cuts)} candidate cuts from {len(segs)} speech segments")
+        logger.info("gap_detection_complete", cuts=len(cuts), speech_segments=len(segs))
         return cuts
 
 

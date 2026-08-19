@@ -12,7 +12,19 @@ class LLMAdapter:
     def __init__(self, model_name: str = "gemini/gemini-2.5-flash", api_key: Optional[str] = None):
         self.model_name = model_name
         # Fallback to general API key environment variable or GEMINI_API_KEY
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if api_key:
+            self.api_key = api_key
+        else:
+            from voicecut.backend.config import get_settings
+            cfg = get_settings()
+            self.api_key = (
+                cfg.openrouter_api_key
+                or cfg.gemini_api_key
+                or cfg.openai_api_key
+                or os.environ.get("OPENROUTER_API_KEY")
+                or os.environ.get("GEMINI_API_KEY")
+                or os.environ.get("OPENAI_API_KEY")
+            )
 
     def generate_chapters(self, transcript_segments: List[TranscriptSegment]) -> List[Chapter]:
         if not self.api_key:

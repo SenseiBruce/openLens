@@ -10,15 +10,16 @@ Falls back to re-encode (libx264/aac) if streams are not compatible.
 from __future__ import annotations
 import asyncio
 import json
-import logging
 from pathlib import Path
 from typing import Callable
 
+import structlog
+
 from voicecut.shared.models import (
-    Project, CandidateCut, CutStatus, ExportFormat
+    Project, CutStatus, ExportFormat, ViralClip
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class VideoRenderer:
@@ -65,52 +66,56 @@ class VideoRenderer:
         output_dir = self.exports_dir / project.id
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        results = {}
+        structlog.contextvars.bind_contextvars(project_id=project.id)
+        try:
+            results = {}
 
-        # Compute kept time ranges
-        kept_segments = self._compute_kept_segments(project)
-        if not kept_segments:
-            raise ValueError("No segments to keep — all cuts are marked as 'cut'")
+            # Compute kept time ranges
+            kept_segments = self._compute_kept_segments(project)
+            if not kept_segments:
+                raise ValueError("No segments to keep — all cuts are marked as 'cut'")
 
-        on_event("progress", {"percent": 10, "message": f"Preparing {len(kept_segments)} segments..."})
+            on_event("progress", {"percent": 10, "message": f"Preparing {len(kept_segments)} segments..."})
 
-        # Resolve target height from resolution label
-        target_height: int | None = self.RESOLUTION_MAP.get(resolution or "", None)
+            # Resolve target height from resolution label
+            target_height: int | None = self.RESOLUTION_MAP.get(resolution or "", None)
 
-        # MP4 export
-        if ExportFormat.MP4 in formats:
-            on_event("step", {"step": "rendering_video", "message": "Rendering final video...", "percent": 20})
-            mp4_path = await self._render_mp4(
-                video_path=Path(project.video_path),
-                kept_segments=kept_segments,
-                output_dir=output_dir,
-                on_event=on_event,
-                target_height=target_height,
-            )
-            results["mp4"] = str(mp4_path)
-            project.output_path = str(mp4_path)
+            # MP4 export
+            if ExportFormat.MP4 in formats:
+                on_event("step", {"step": "rendering_video", "message": "Rendering final video...", "percent": 20})
+                mp4_path = await self._render_mp4(
+                    video_path=Path(project.video_path),
+                    kept_segments=kept_segments,
+                    output_dir=output_dir,
+                    on_event=on_event,
+                    target_height=target_height,
+                )
+                results["mp4"] = str(mp4_path)
+                project.output_path = str(mp4_path)
 
-        # SRT export
-        if ExportFormat.SRT in formats and project.srt_path:
-            srt_out = output_dir / "final_subtitles.srt"
-            srt_out.write_text(Path(project.srt_path).read_text())
-            results["srt"] = str(srt_out)
+            # SRT export
+            if ExportFormat.SRT in formats and project.srt_path:
+                srt_out = output_dir / "final_subtitles.srt"
+                srt_out.write_text(Path(project.srt_path).read_text())
+                results["srt"] = str(srt_out)
 
-        # VTT export
-        if ExportFormat.VTT in formats and project.vtt_path:
-            vtt_out = output_dir / "final_subtitles.vtt"
-            vtt_out.write_text(Path(project.vtt_path).read_text())
-            results["vtt"] = str(vtt_out)
+            # VTT export
+            if ExportFormat.VTT in formats and project.vtt_path:
+                vtt_out = output_dir / "final_subtitles.vtt"
+                vtt_out.write_text(Path(project.vtt_path).read_text())
+                results["vtt"] = str(vtt_out)
 
-        # JSON EDL export
-        if ExportFormat.JSON_EDL in formats:
-            edl_path = output_dir / "edit_decision_list.json"
-            edl = self._build_edl(project, kept_segments)
-            edl_path.write_text(json.dumps(edl, indent=2))
-            results["json_edl"] = str(edl_path)
+            # JSON EDL export
+            if ExportFormat.JSON_EDL in formats:
+                edl_path = output_dir / "edit_decision_list.json"
+                edl = self._build_edl(project, kept_segments)
+                edl_path.write_text(json.dumps(edl, indent=2))
+                results["json_edl"] = str(edl_path)
 
-        on_event("complete", {"percent": 100, "message": "Export complete!", "files": results})
-        return results
+            on_event("complete", {"percent": 100, "message": "Export complete!", "files": results})
+            return results
+        finally:
+            structlog.contextvars.unbind_contextvars("project_id")
 
     def _compute_kept_segments(self, project: Project) -> list[tuple[float, float]]:
         """
@@ -206,7 +211,7 @@ class VideoRenderer:
             _, stderr = await proc.communicate()
 
             if proc.returncode != 0:
-                logger.warning("Lossless copy failed, falling back to re-encode at original resolution")
+                logger.warning("lossless_copy_failed", fallback="re-encode")
                 target_height = -1  # sentinel: re-encode without scale
 
         if target_height is not None:
@@ -239,7 +244,7 @@ class VideoRenderer:
                 raise RuntimeError(f"FFmpeg re-encode failed:\n{stderr2.decode()}")
 
         on_event("progress", {"percent": 90, "message": "Video rendered successfully"})
-        logger.info(f"Final video: {output_path}")
+        logger.info("video_rendered", path=str(output_path))
         return output_path
 
     def _build_edl(self, project: Project, kept_segments: list[tuple[float, float]]) -> dict:
@@ -299,7 +304,7 @@ class VideoRenderer:
         _, stderr = await proc.communicate()
         
         if proc.returncode != 0:
-            logger.error(f"Failed to render viral clip: {stderr.decode()}")
+            logger.error("viral_clip_render_failed", error=stderr.decode())
             raise RuntimeError("Failed to render viral clip")
             
         return output_path

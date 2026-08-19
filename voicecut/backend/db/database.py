@@ -5,7 +5,6 @@ Stores projects, segments, cuts, and decisions.
 """
 from __future__ import annotations
 import json
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -15,10 +14,28 @@ from sqlalchemy import (
     create_engine, MetaData, Table, select, insert, update, delete
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+import structlog
 
-logger = logging.getLogger(__name__)
+from voicecut.backend.config import get_settings
 
-DB_PATH = Path(__file__).parent.parent.parent / "data" / "voicecut.db"
+logger = structlog.get_logger(__name__)
+
+_BASE_DIR = Path(__file__).parent.parent.parent
+
+
+def _default_db_path() -> Path:
+    url = get_settings().database_url
+    prefix = "sqlite:///"
+    if url.startswith(prefix):
+        raw = url[len(prefix):]
+        path = Path(raw)
+        if not path.is_absolute():
+            return _BASE_DIR / path
+        return path
+    return _BASE_DIR / "data" / "voicecut.db"
+
+
+DB_PATH = _default_db_path()
 
 
 class Base(DeclarativeBase):
@@ -68,7 +85,7 @@ def init_db(db_path: Path = DB_PATH):
     global _engine, _Session
     _engine = get_engine(db_path)
     _Session = get_session_factory(_engine)
-    logger.info(f"Database initialized: {db_path}")
+    logger.info("database_initialized", path=str(db_path))
 
 
 def get_session():

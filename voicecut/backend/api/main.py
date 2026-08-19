@@ -13,18 +13,19 @@ Serves:
 """
 import asyncio
 import json
-import logging
-import os
 import shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
 
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import ValidationError
 
+from voicecut.backend.config import get_settings
 from voicecut.backend.db.database import init_db
 from voicecut.backend.api.routes import upload, analyze, projects, export_routes, viral_clips
 from voicecut.monitoring.logging_config import setup_logging
@@ -32,15 +33,24 @@ from voicecut.monitoring.metrics import metrics
 from voicecut.monitoring.middleware import TelemetryMiddleware
 
 setup_logging("INFO", json_output=True)
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # ---------------------------------------------------------------------------
-# Directory setup
+# Directory setup (validated Settings fail fast on blank required keys)
 # ---------------------------------------------------------------------------
+
+try:
+    settings = get_settings()
+except ValidationError as exc:
+    raise RuntimeError(
+        "Invalid VoiceCut configuration. Copy voicecut/.env.example to "
+        "voicecut/.env and set DATABASE_URL, UPLOAD_DIR, and EXPORT_DIR.\n"
+        f"{exc}"
+    ) from exc
 
 BASE_DIR = Path(__file__).parent.parent.parent
-UPLOADS_DIR = BASE_DIR / "data" / "uploads"
-EXPORTS_DIR = BASE_DIR / "data" / "exports"
+UPLOADS_DIR = settings.resolve_path(settings.upload_dir, BASE_DIR)
+EXPORTS_DIR = settings.resolve_path(settings.export_dir, BASE_DIR)
 
 for d in [UPLOADS_DIR, EXPORTS_DIR]:
     d.mkdir(parents=True, exist_ok=True)
@@ -52,10 +62,10 @@ for d in [UPLOADS_DIR, EXPORTS_DIR]:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting VoiceCut backend...")
+    logger.info("backend_starting", service="voicecut-api")
     init_db()
     yield
-    logger.info("VoiceCut backend shutting down.")
+    logger.info("backend_stopping", service="voicecut-api")
 
 
 # ---------------------------------------------------------------------------

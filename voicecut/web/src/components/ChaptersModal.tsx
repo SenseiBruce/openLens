@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Loader2, Sparkles, Settings2 } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
@@ -13,23 +13,6 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   const [provider, setProvider] = useState<'google' | 'openrouter' | 'custom'>('google');
   const [modelName, setModelName] = useState('gemini/gemini-2.5-flash');
   const [apiKey, setApiKey] = useState('');
-
-  // Load saved settings
-  useEffect(() => {
-    const savedProvider = localStorage.getItem('llm_provider') as any;
-    const savedModel = localStorage.getItem('llm_model');
-    const savedKey = localStorage.getItem('llm_api_key');
-    if (savedProvider) setProvider(savedProvider);
-    if (savedModel) setModelName(savedModel);
-    if (savedKey) setApiKey(savedKey);
-  }, []);
-
-  // Save settings on change
-  useEffect(() => {
-    localStorage.setItem('llm_provider', provider);
-    localStorage.setItem('llm_model', modelName);
-    localStorage.setItem('llm_api_key', apiKey);
-  }, [provider, modelName, apiKey]);
 
   // Handle provider preset changes
   const handleProviderChange = (newProvider: 'google' | 'openrouter' | 'custom') => {
@@ -130,7 +113,7 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                     placeholder="sk-..."
                     className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-mono"
                   />
-                  <p className="text-[10px] text-zinc-500 mt-1">Stored securely in your browser's localStorage.</p>
+                  <p className="text-[10px] text-zinc-500 mt-1">Kept in memory for this session only — never written to localStorage.</p>
                 </div>
               </div>
             </div>

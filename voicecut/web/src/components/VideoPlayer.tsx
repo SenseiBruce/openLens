@@ -5,6 +5,14 @@ export const VideoPlayer: React.FC = () => {
   const { project, setCurrentTime, seekTo, clearSeekTo, skipCuts } = useProjectStore();
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  useEffect(() => {
+    if (seekTo !== null && videoRef.current) {
+      videoRef.current.currentTime = seekTo;
+      videoRef.current.play().catch(() => {});
+      clearSeekTo();
+    }
+  }, [seekTo, clearSeekTo]);
+
   if (!project?.video_path) {
     return (
       <div className="flex-1 bg-zinc-950 flex items-center justify-center">
@@ -13,7 +21,7 @@ export const VideoPlayer: React.FC = () => {
     );
   }
 
-  const videoFilename = project.video_path.split(/[\\\/]/).pop() ?? 'video.mp4';
+  const videoFilename = project.video_path.split(/[\\/]/).pop() ?? 'video.mp4';
   const videoUrl = `http://localhost:8000/files/uploads/${project.id}/${videoFilename}`;
 
   // Skip over segments marked as cuts
@@ -33,15 +41,6 @@ export const VideoPlayer: React.FC = () => {
       videoRef.current.currentTime = activeCut.end;
     }
   };
-
-  // Seek video when transcript word / waveform is clicked
-  useEffect(() => {
-    if (seekTo !== null && videoRef.current) {
-      videoRef.current.currentTime = seekTo;
-      videoRef.current.play().catch(() => {});
-      clearSeekTo();
-    }
-  }, [seekTo]);
 
   return (
     <div className="flex-1 bg-black overflow-hidden flex flex-col">

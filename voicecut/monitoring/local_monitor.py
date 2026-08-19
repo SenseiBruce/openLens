@@ -37,7 +37,6 @@ def monitor_resources(interval_seconds=10):
     
     while True:
         try:
-        try:
             # Monitor FastAPI Backend (Process level)
             api_found, api_cpu, api_mem = get_process_stats("uvicorn voicecut.backend.api.main:app")
             

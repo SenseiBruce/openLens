@@ -152,7 +152,7 @@ export const apiClient = {
       }),
     });
     if (!res.ok) {
-      let errorMsg = 'Unknown error';
+      let errorMsg: string
       try {
         const errJson = await res.json();
         errorMsg = errJson.detail || JSON.stringify(errJson);
