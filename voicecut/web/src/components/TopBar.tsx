@@ -28,12 +28,7 @@ export const TopBar: React.FC<{
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:8000/health/detailed');
-        if (!res.ok) {
-          setHealth('offline');
-          return;
-        }
-        const data = await res.json();
+        const data = await apiClient.getDetailedHealth();
         setHealth(data.status === 'healthy' ? 'live' : 'degraded');
       } catch {
         setHealth('offline');
