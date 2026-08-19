@@ -15,6 +15,7 @@ export default defineConfig({
         'src/components/TopBar.tsx',
         'src/components/ProjectList.tsx',
         'src/components/ErrorBanner.tsx',
+        'src/components/ExportModal.tsx',
         'src/lib/**/*.{ts,tsx}',
       ],
       exclude: ['src/**/*.test.*', 'src/test/**', 'src/components/__tests__/**'],

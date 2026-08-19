@@ -3,19 +3,11 @@ import { Loader2, Download, X } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useProjectStore } from '../store/useProjectStore';
 import type { PipelineEvent } from '../types';
+import { resolutionsAtOrBelow } from '../lib/exportResolutions';
 
 interface ExportModalProps {
   onClose: () => void;
 }
-
-const RESOLUTION_OPTIONS = [
-  { label: '4K (2160p)', value: '2160p', height: 2160 },
-  { label: '2K (1440p)', value: '1440p', height: 1440 },
-  { label: '1080p Full HD', value: '1080p', height: 1080 },
-  { label: '720p HD', value: '720p', height: 720 },
-  { label: '480p SD', value: '480p', height: 480 },
-  { label: '360p', value: '360p', height: 360 },
-];
 
 type Phase = 'picking' | 'exporting' | 'done' | 'error';
 
@@ -39,7 +31,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   }, [project?.id]);
 
   // Valid options: only those <= original height
-  const validOptions = RESOLUTION_OPTIONS.filter(o => o.height <= originalHeight);
+  const validOptions = resolutionsAtOrBelow(originalHeight);
 
   const handleExport = () => {
     if (!project?.id) return;
