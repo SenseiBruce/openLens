@@ -1,7 +1,7 @@
 [tool.pytest.ini_options]
 testpaths = ["voicecut/tests"]
 pythonpath = ["."]
-addopts = "--cov=voicecut --cov-fail-under=50 --cov-report=term-missing"
+addopts = "--cov=voicecut --cov-fail-under=70 --cov-report=term-missing"
 
 [tool.coverage.run]
 source = ["voicecut"]

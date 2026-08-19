@@ -30,4 +30,4 @@ include = ["voicecut*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = [".."]
-addopts = "--cov=voicecut --cov-fail-under=50 --cov-report=term-missing"
+addopts = "--cov=voicecut --cov-fail-under=70 --cov-report=term-missing"

@@ -19,7 +19,8 @@ export default defineConfig({
       ],
       exclude: ['src/**/*.test.*', 'src/test/**', 'src/components/__tests__/**'],
       thresholds: {
-        lines: 60,
+        lines: 70,
+        statements: 70,
       },
     },
   },
