@@ -23,6 +23,7 @@ from voicecut.shared.models import (
     Project, SpeechSegment, TranscriptSegment, WordTimestamp,
     CandidateCut, CutReason, CutStatus, ProjectSettings, ProjectStatus
 )
+from voicecut.backend.pipeline.audio_utils import extract_wav_16k_mono, probe_duration
 from voicecut.integrations.silero_vad_adapter import SileroVADAdapter
 from voicecut.integrations.whisperx_adapter import WhisperXAdapter
 
@@ -155,59 +156,13 @@ class PipelineProcessor:
 
     async def _extract_audio(self, project: Project) -> Path:
         """Extract 16kHz mono WAV from video using FFmpeg."""
-        import shutil
         video_path = Path(project.video_path)
-        audio_dir = self.uploads_dir / project.id
-        audio_dir.mkdir(parents=True, exist_ok=True)
-        audio_path = audio_dir / "audio.wav"
-
-        if audio_path.exists():
-            return audio_path
-
-        ffmpeg_bin = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
-        cmd = [
-            ffmpeg_bin, "-y",
-            "-i", str(video_path),
-            "-vn",                         # no video
-            "-acodec", "pcm_s16le",        # 16-bit PCM
-            "-ar", "16000",                # 16kHz (required by Silero VAD)
-            "-ac", "1",                    # mono
-            str(audio_path),
-        ]
-
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        _, stderr = await proc.communicate()
-
-        if proc.returncode != 0:
-            raise RuntimeError(f"FFmpeg audio extraction failed:\n{stderr.decode()}")
-
-        logger.info("audio_file_written", path=str(audio_path))
-        return audio_path
+        audio_path = Path(self.uploads_dir) / project.id / "audio.wav"
+        return await extract_wav_16k_mono(video_path, audio_path)
 
     async def _get_duration(self, audio_path: Path) -> float:
         """Get audio duration via ffprobe."""
-        import json
-        import shutil
-        ffprobe_bin = shutil.which("ffprobe") or "/opt/homebrew/bin/ffprobe"
-        proc = await asyncio.create_subprocess_exec(
-            ffprobe_bin, "-v", "quiet", "-print_format", "json",
-            "-show_format", str(audio_path),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, _ = await proc.communicate()
-        try:
-            data = json.loads(stdout)
-            return float(data["format"]["duration"])
-        except (json.JSONDecodeError, KeyError, ValueError) as exc:
-            raise RuntimeError(
-                f"ffprobe returned invalid output for {audio_path}. "
-                f"The file may be corrupt or unsupported.\nRaw: {stdout[:200]}"
-            ) from exc
+        return await probe_duration(audio_path)
 
     def _run_vad(self, audio_path: Path) -> list[SpeechSegment]:
         """Run Silero VAD (blocking, called in executor)."""
