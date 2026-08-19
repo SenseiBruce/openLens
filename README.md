@@ -102,6 +102,8 @@ cd voicecut/web && npm ci && cd ../..
 
 ## Docker (one command)
 
+Images are `voicecut/Dockerfile` (FastAPI) and `voicecut/web/Dockerfile` (nginx + Vite build). Root `docker-compose.yml` builds both.
+
 From the **repo root**:
 
 ```bash
@@ -200,7 +202,16 @@ GEMINI_API_KEY=your-gemini-api-key
 OPENAI_API_KEY=your-openai-api-key
 OPENROUTER_API_KEY=your-openrouter-api-key
 API_TARGET=http://localhost:8000
+HF_DATASETS_OFFLINE=1
+HF_HUB_OFFLINE=1
+TRANSFORMERS_OFFLINE=1
 ```
+
+| Variable | Purpose |
+|----------|---------|
+| `HF_HUB_OFFLINE` | Block Hugging Face Hub downloads during tests/CI |
+| `TRANSFORMERS_OFFLINE` | Block Transformers weight fetches |
+| `HF_DATASETS_OFFLINE` | Block Hugging Face Datasets network access |
 
 > The `data/uploads/` and `data/exports/` directories are created automatically at runtime and are excluded from version control. Blank `DATABASE_URL` / `UPLOAD_DIR` / `EXPORT_DIR` fail startup with a validation error.
 
@@ -216,14 +227,15 @@ pip install -r voicecut/requirements.lock
 pytest voicecut/tests/ --maxfail=1
 ```
 
-Coverage is enforced at 50% (`--cov=voicecut --cov-fail-under=50`). Tests mock WhisperX/Silero and set `HF_HUB_OFFLINE=1` so they run without GPU, torch cache, or internet.
+Coverage is enforced at 70% (`--cov=voicecut --cov-fail-under=70`). Tests mock WhisperX/Silero and set `HF_HUB_OFFLINE=1` so they run without GPU, torch cache, or internet.
 
 Frontend:
 
 ```bash
 cd voicecut/web
 npm ci
-npm test          # vitest
+npm test              # vitest
+npm run test:coverage # vitest with 70% line/statement floor
 npm run build
 npx eslint src
 ```

@@ -11,4 +11,4 @@ pytest voicecut/tests/ --maxfail=1
 cd voicecut/web && npm run typecheck && npm test && npx eslint src
 ```
 
-6. Open a pull request. CI runs pytest, ruff, eslint, typecheck, and dependency audits on every PR.
+6. Open a pull request. CI runs pytest, ruff, eslint, typecheck, docker-smoke, and dependency audits on every PR.
