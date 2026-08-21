@@ -3,4 +3,4 @@
 -e ../silero-vad
 -e ../whisperX
 auto-editor>=23.44.1
-google-generativeai>=0.8.3
+google-generativeai>=0.8.6
