@@ -195,13 +195,10 @@ git submodule update --remote --merge
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/your-feature`
-3. Commit your changes: `git commit -m "feat: your feature"`
-4. Push and open a Pull Request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, tests, and pull request guidelines.
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
