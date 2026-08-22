@@ -9,47 +9,50 @@ export const WaveformTimeline: React.FC = () => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const wsRegionsRef = useRef<any>(null);
-  const { project, currentTime, setCurrentTime, updateCutStatus } = useProjectStore();
+  const { project, currentTime, setCurrentTime, setSeekTo, updateCutStatus } = useProjectStore();
 
   useEffect(() => {
     if (!containerRef.current || !timelineRef.current || !project?.audio_path) return;
 
-    // We can fetch the audio file from the backend
     const audioUrl = `/files/uploads/${project.id}/audio.wav`;
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: '#3f3f46', // tailwind zinc-700
-      progressColor: '#6366f1', // tailwind indigo-500
-      cursorColor: '#818cf8',
+      waveColor: '#3f3f46',       // zinc-700
+      progressColor: '#6366f1',   // indigo-500
+      cursorColor: '#a5b4fc',     // indigo-300
+      cursorWidth: 1,
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
-      height: 80,
+      height: 56,
       plugins: [
-        TimelinePlugin.create({ container: timelineRef.current }),
+        TimelinePlugin.create({
+          container: timelineRef.current,
+          timeInterval: 5,
+          primaryLabelInterval: 10,
+          style: { fontSize: '9px', color: '#52525b' },
+        }),
         RegionsPlugin.create(),
       ],
     });
 
     wsRef.current = ws;
     wsRegionsRef.current = ws.getActivePlugins()[1];
-
     ws.load(audioUrl);
 
     ws.on('timeupdate', (time) => {
-      // Avoid infinite loops with react-player by only setting if diff > 0.1
-      if (Math.abs(currentTime - time) > 0.1) {
-        setCurrentTime(time);
-      }
+      if (Math.abs(currentTime - time) > 0.1) setCurrentTime(time);
     });
 
-    return () => {
-      ws.destroy();
-    };
+    ws.on('interaction', (time) => {
+      setSeekTo(time);
+    });
+
+    return () => { ws.destroy(); };
   }, [project?.audio_path]);
 
-  // Sync external time changes (from VideoPlayer or Transcript)
+  // Sync external seeks
   useEffect(() => {
     if (wsRef.current && wsRef.current.getDuration() > 0) {
       if (Math.abs(wsRef.current.getCurrentTime() - currentTime) > 0.1) {
@@ -58,57 +61,62 @@ export const WaveformTimeline: React.FC = () => {
     }
   }, [currentTime]);
 
-  // Draw regions when cuts change
+  // Draw regions
   useEffect(() => {
     if (!wsRegionsRef.current || !project) return;
-    const regionsPlugin = wsRegionsRef.current;
-    
-    // Clear existing
-    regionsPlugin.clearRegions();
+    const reg = wsRegionsRef.current;
+    reg.clearRegions();
 
-    // Draw speech segments (Greenish)
     project.speech_segments.forEach((seg) => {
-      regionsPlugin.addRegion({
+      reg.addRegion({
         start: seg.start,
         end: seg.end,
-        color: 'rgba(34, 197, 94, 0.2)', // green-500 with opacity
+        color: 'rgba(99, 102, 241, 0.12)',   // indigo tint for speech
         drag: false,
         resize: false,
       });
     });
 
-    // Draw candidate cuts (Grayish or Reddish if cut)
     project.candidate_cuts.forEach((cut) => {
-      // Check user decision override
-      const userDecision = (project.user_decisions || []).find((d) => d.cut_id === cut.id);
+      const userDecision = (project.user_decisions || []).find(d => d.cut_id === cut.id);
       const activeStatus = userDecision ? userDecision.action : cut.status;
 
-      let color = 'rgba(161, 161, 170, 0.4)'; // Default gray (pending)
-      if (activeStatus === 'cut') color = 'rgba(239, 68, 68, 0.4)'; // Red
-      if (activeStatus === 'kept') color = 'rgba(59, 130, 246, 0.4)'; // Blue
+      const color =
+        activeStatus === 'cut'  ? 'rgba(239, 68, 68, 0.25)' :   // red
+        activeStatus === 'kept' ? 'rgba(34, 197, 94, 0.20)'  :   // green
+                                  'rgba(161,161,170, 0.15)';      // gray pending
 
-      const region = regionsPlugin.addRegion({
+      const region = reg.addRegion({
         id: cut.id,
         start: cut.start,
         end: cut.end,
-        color: color,
+        color,
         drag: false,
         resize: false,
       });
 
-      // Context menu event (could be standard click for simplicity)
       region.on('click', (e: Event) => {
         e.stopPropagation();
-        const nextStatus = activeStatus === 'cut' ? 'kept' : 'cut';
-        updateCutStatus(cut.id, nextStatus);
+        updateCutStatus(cut.id, activeStatus === 'cut' ? 'kept' : 'cut');
       });
     });
   }, [project?.candidate_cuts, project?.user_decisions, project?.speech_segments]);
 
   return (
-    <div className="h-32 bg-card border-t border-border p-4 shrink-0 flex flex-col">
-      <div ref={timelineRef} className="h-6 text-xs text-muted-foreground" />
-      <div ref={containerRef} className="flex-1 w-full" />
+    <div className="shrink-0 bg-zinc-950 border-t border-zinc-800">
+      {/* Track label row */}
+      <div className="flex items-center gap-3 px-4 pt-2 pb-1">
+        <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest">Subtitle</span>
+        <div className="flex items-center gap-3 ml-auto text-[10px] text-zinc-600">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-indigo-500/40 inline-block"/>Speech</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red-500/50 inline-block"/>Cut</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500/40 inline-block"/>Kept</span>
+        </div>
+      </div>
+      {/* Timeline ticks */}
+      <div ref={timelineRef} className="px-4 h-4" />
+      {/* Waveform */}
+      <div ref={containerRef} className="w-full px-4 pb-3" />
     </div>
   );
 };

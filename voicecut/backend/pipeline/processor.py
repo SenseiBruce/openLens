@@ -13,21 +13,29 @@ Orchestrates the full speech-aware video analysis pipeline:
 Each step emits progress events (for SSE streaming to the frontend).
 """
 from __future__ import annotations
-import asyncio
-import logging
-import subprocess
-import uuid
-from pathlib import Path
-from typing import AsyncGenerator, Callable, Optional
 
-from voicecut.shared.models import (
-    Project, SpeechSegment, TranscriptSegment, WordTimestamp,
-    CandidateCut, CutReason, CutStatus, ProjectSettings, ProjectStatus
-)
+import asyncio
+from collections.abc import Callable
+from pathlib import Path
+
+import structlog
+
+from voicecut.backend.pipeline.audio_utils import extract_wav_16k_mono, probe_duration
 from voicecut.integrations.silero_vad_adapter import SileroVADAdapter
 from voicecut.integrations.whisperx_adapter import WhisperXAdapter
+from voicecut.shared.models import (
+    CandidateCut,
+    CutReason,
+    CutStatus,
+    Project,
+    ProjectSettings,
+    ProjectStatus,
+    SpeechSegment,
+    TranscriptSegment,
+    WordTimestamp,
+)
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class PipelineProcessor:
@@ -46,7 +54,7 @@ class PipelineProcessor:
         self,
         uploads_dir: Path,
         exports_dir: Path,
-        settings: Optional[ProjectSettings] = None,
+        settings: ProjectSettings | None = None,
     ):
         self.uploads_dir = uploads_dir
         self.exports_dir = exports_dir
@@ -73,6 +81,7 @@ class PipelineProcessor:
         Returns:
             Updated Project with all segments, transcript, and candidate cuts.
         """
+        structlog.contextvars.bind_contextvars(project_id=project.id)
         try:
             project.status = ProjectStatus.ANALYZING
 
@@ -84,11 +93,12 @@ class PipelineProcessor:
             # Get duration
             duration = await self._get_duration(audio_path)
             project.video_duration = duration
+            logger.info("audio_extracted", project_id=project.id, duration=duration)
             on_event("progress", {"percent": 15, "message": f"Audio extracted ({duration:.1f}s)"})
 
             # Step 2: Silero VAD
             on_event("step", {"step": "running_vad", "message": "Detecting speech regions...", "percent": 20})
-            speech_segments = await asyncio.get_event_loop().run_in_executor(
+            speech_segments = await asyncio.get_running_loop().run_in_executor(
                 None,
                 self._run_vad,
                 audio_path,
@@ -101,7 +111,7 @@ class PipelineProcessor:
 
             # Step 3: WhisperX transcription
             on_event("step", {"step": "transcribing", "message": "Transcribing audio...", "percent": 50})
-            transcript_result = await asyncio.get_event_loop().run_in_executor(
+            transcript_result = await asyncio.get_running_loop().run_in_executor(
                 None,
                 self._run_transcription,
                 audio_path,
@@ -143,62 +153,24 @@ class PipelineProcessor:
             })
 
         except Exception as e:
-            logger.exception(f"Pipeline error for project {project.id}")
+            logger.exception("pipeline_error", project_id=project.id)
             project.status = ProjectStatus.ERROR
             project.error_message = str(e)
             on_event("error", {"message": str(e)})
+        finally:
+            structlog.contextvars.unbind_contextvars("project_id")
 
         return project
 
     async def _extract_audio(self, project: Project) -> Path:
         """Extract 16kHz mono WAV from video using FFmpeg."""
-        import shutil
         video_path = Path(project.video_path)
-        audio_dir = self.uploads_dir / project.id
-        audio_dir.mkdir(parents=True, exist_ok=True)
-        audio_path = audio_dir / "audio.wav"
-
-        if audio_path.exists():
-            return audio_path
-
-        ffmpeg_bin = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
-        cmd = [
-            ffmpeg_bin, "-y",
-            "-i", str(video_path),
-            "-vn",                         # no video
-            "-acodec", "pcm_s16le",        # 16-bit PCM
-            "-ar", "16000",                # 16kHz (required by Silero VAD)
-            "-ac", "1",                    # mono
-            str(audio_path),
-        ]
-
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        _, stderr = await proc.communicate()
-
-        if proc.returncode != 0:
-            raise RuntimeError(f"FFmpeg audio extraction failed:\n{stderr.decode()}")
-
-        logger.info(f"Audio extracted: {audio_path}")
-        return audio_path
+        audio_path = Path(self.uploads_dir) / project.id / "audio.wav"
+        return await extract_wav_16k_mono(video_path, audio_path)
 
     async def _get_duration(self, audio_path: Path) -> float:
         """Get audio duration via ffprobe."""
-        import json
-        import shutil
-        ffprobe_bin = shutil.which("ffprobe") or "/opt/homebrew/bin/ffprobe"
-        proc = await asyncio.create_subprocess_exec(
-            ffprobe_bin, "-v", "quiet", "-print_format", "json",
-            "-show_format", str(audio_path),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, _ = await proc.communicate()
-        data = json.loads(stdout)
-        return float(data["format"]["duration"])
+        return await probe_duration(audio_path)
 
     def _run_vad(self, audio_path: Path) -> list[SpeechSegment]:
         """Run Silero VAD (blocking, called in executor)."""
@@ -213,7 +185,19 @@ class PipelineProcessor:
 
     def _run_transcription(self, audio_path: Path) -> dict:
         """Run WhisperX transcription (blocking, called in executor)."""
-        result = self._whisperx.transcribe(str(audio_path))
+        language = self.settings.language
+        initial_prompt = self.settings.initial_prompt
+        
+        if language == "hinglish":
+            language = "hi"  # explicitly force Hindi to prevent Whisper from outputting Urdu script
+            if not initial_prompt:
+                initial_prompt = "This audio contains a mix of English and Hindi. The speaker frequently switches between languages."
+                
+        result = self._whisperx.transcribe(
+            str(audio_path), 
+            language=language,
+            initial_prompt=initial_prompt
+        )
 
         segments = []
         for seg in result["transcript"]:
@@ -258,7 +242,7 @@ class PipelineProcessor:
                 start=0.0,
                 end=audio_duration,
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             )]
 
         margin = settings.margin
@@ -283,7 +267,7 @@ class PipelineProcessor:
                 start=0.0,
                 end=first_start,
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
         # Gaps between speech segments
@@ -307,7 +291,7 @@ class PipelineProcessor:
                 start=round(gap_start, 3),
                 end=round(gap_end, 3),
                 reason=reason,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
         # Gap after last speech segment
@@ -318,10 +302,10 @@ class PipelineProcessor:
                 start=round(last_end, 3),
                 end=round(audio_duration, 3),
                 reason=CutReason.NO_DIALOGUE,
-                status=CutStatus.PENDING,
+                status=CutStatus.CUT,
             ))
 
-        logger.info(f"Gap detection: {len(cuts)} candidate cuts from {len(segs)} speech segments")
+        logger.info("gap_detection_complete", cuts=len(cuts), speech_segments=len(segs))
         return cuts
 
 

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import type { Project, CutStatus } from '../types';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
 
 interface ProjectState {
   project: Project | null;
@@ -7,8 +9,13 @@ interface ProjectState {
   updateCutStatus: (cutId: string, status: CutStatus) => void;
   currentTime: number;
   setCurrentTime: (time: number) => void;
+  seekTo: number | null;          // set by transcript/waveform clicks to seek video
+  setSeekTo: (time: number) => void;
+  clearSeekTo: () => void;
   isUploading: boolean;
   setIsUploading: (isUploading: boolean) => void;
+  skipCuts: boolean;
+  setSkipCuts: (skip: boolean) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -17,6 +24,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
   updateCutStatus: (cutId, status) =>
     set((state) => {
       if (!state.project) return state;
+      
+      // Fire-and-forget API call to sync backend
+      apiClient.updateCutDecision(state.project.id, cutId, status).catch((err) => {
+        reportError('cut_decision_sync', err);
+      });
       
       const newCuts = state.project.candidate_cuts.map((cut) =>
         cut.id === cutId ? { ...cut, status } : cut
@@ -40,7 +52,12 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }),
   currentTime: 0,
   setCurrentTime: (time) => set({ currentTime: time }),
+  seekTo: null,
+  setSeekTo: (time) => set({ seekTo: time, currentTime: time }),
+  clearSeekTo: () => set({ seekTo: null }),
   isUploading: false,
   setIsUploading: (isUploading) => set({ isUploading }),
+  skipCuts: true,
+  setSkipCuts: (skip) => set({ skipCuts: skip }),
 }));
 

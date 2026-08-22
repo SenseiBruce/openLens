@@ -1,6 +1,8 @@
+import json
+import logging
 import psutil
 import time
-import logging
+import urllib.request
 from datetime import datetime
 
 # Setup logging
@@ -35,15 +37,33 @@ def monitor_resources(interval_seconds=10):
     
     while True:
         try:
-            # Monitor FastAPI Backend
+            # Monitor FastAPI Backend (Process level)
             api_found, api_cpu, api_mem = get_process_stats("uvicorn voicecut.backend.api.main:app")
             
             # Monitor Vite Frontend
             web_found, web_cpu, web_mem = get_process_stats("vite")
 
+            # Try to fetch rich health metrics from the API
+            api_metrics_str = ""
+            if api_found:
+                try:
+                    req = urllib.request.Request("http://localhost:8000/health/detailed")
+                    with urllib.request.urlopen(req, timeout=2) as response:
+                        health_data = json.loads(response.read().decode())
+                        
+                    status = health_data.get("status", "unknown")
+                    db = health_data.get("checks", {}).get("database", {}).get("status", "?")
+                    pipe_runs = health_data.get("metrics", {}).get("pipeline", {}).get("active_count", 0)
+                    analyses = health_data.get("metrics", {}).get("counters", {}).get("analyses", 0)
+                    
+                    api_metrics_str = f" | API Health: {status.upper()} (DB:{db}) | Active Pipes: {pipe_runs} | Total Analyses: {analyses}"
+                except Exception as e:
+                    api_metrics_str = f" | API Health: OFFLINE ({e})"
+
             log_entry = (
                 f"API: [CPU: {api_cpu:.1f}%, Mem: {api_mem:.1f}MB, Running: {api_found}] | "
                 f"Web: [CPU: {web_cpu:.1f}%, Mem: {web_mem:.1f}MB, Running: {web_found}]"
+                f"{api_metrics_str}"
             )
             
             logging.info(log_entry)

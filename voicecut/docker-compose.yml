@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: voicecut/backend.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/voicecut/data
+      # Mount the code for live-reloading backend
+      - ./backend:/app/voicecut/backend
+      - ./shared:/app/voicecut/shared
+      - ./integrations:/app/voicecut/integrations
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Uvicorn will auto-reload with the mounted volumes
+    command: ["uvicorn", "voicecut.backend.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: frontend.Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web/src:/app/src
+      - ./web/public:/app/public
+      - ./web/index.html:/app/index.html
+      - ./web/vite.config.ts:/app/vite.config.ts
+      - ./web/package.json:/app/package.json
+    environment:
+      - NODE_ENV=development
+      - API_TARGET=http://backend:8000
+    depends_on:
+      - backend

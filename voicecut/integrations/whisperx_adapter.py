@@ -12,10 +12,9 @@ M1 Mac note: device="mps" is supported; falls back to CPU if MPS unavailable.
 No speaker diarization — kept simple (no HuggingFace token needed).
 """
 from __future__ import annotations
+
 import logging
-import json
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +91,10 @@ class WhisperXAdapter:
     def transcribe(
         self,
         audio_path: str | Path,
-        language: Optional[str] = None,
+        language: str | None = None,
         batch_size: int = 8,
         align_words: bool = True,
+        initial_prompt: str | None = None,
     ) -> dict:
         """
         Transcribe audio file and return structured result.
@@ -128,7 +128,21 @@ class WhisperXAdapter:
         audio = whisperx.load_audio(str(audio_path))
 
         # Step 2: Transcribe
-        result = self._model.transcribe(audio, batch_size=batch_size, language=language)
+        transcribe_kwargs = {"batch_size": batch_size}
+        if language:
+            transcribe_kwargs["language"] = language
+            
+        # whisperX's FasterWhisperPipeline.transcribe() doesn't accept initial_prompt
+        # but the underlying model uses self._model.options which is a dataclass.
+        if hasattr(self._model, "options"):
+            import dataclasses
+            # Replace initial_prompt dynamically
+            self._model.options = dataclasses.replace(
+                self._model.options, 
+                initial_prompt=initial_prompt if initial_prompt else None
+            )
+
+        result = self._model.transcribe(audio, **transcribe_kwargs)
         detected_language = result.get("language", language or "en")
 
         logger.info(f"WhisperX: detected language='{detected_language}', "

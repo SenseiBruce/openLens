@@ -1,32 +1,21 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Node
-node_modules/
-dist/
-*.tsbuildinfo
-
-# App data & logs
+voicecut/data/**/*.mp4
+voicecut/.venv/
+voicecut/venv/
 voicecut/data/uploads/
 voicecut/data/exports/
-voicecut/data/**/*.mp4
-voicecut/*.log
-*.log
-
-# IDE & OS
-.idea/
-.vscode/
+voicecut/data/*.db
+voicecut/.env
+.env
 .DS_Store
 **/.DS_Store
-
-# Env & secrets
-.env
-.env.*
-!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.pip-tools-cache/
+voicecut/web/node_modules/
+voicecut/web/dist/
+voicecut/web/coverage/
+*.egg-info/

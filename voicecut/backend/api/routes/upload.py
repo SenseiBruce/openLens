@@ -1,15 +1,17 @@
 """Upload route — POST /api/upload"""
 from __future__ import annotations
-import shutil
+
+import asyncio
 import uuid
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
-from voicecut.shared.models import Project, ProjectSettings, ProjectStatus
 from voicecut.backend.db.database import save_project
+from voicecut.monitoring.metrics import metrics
+from voicecut.shared.models import Project, ProjectSettings, ProjectStatus
 
 router = APIRouter()
 
@@ -18,7 +20,7 @@ UPLOADS_DIR = BASE_DIR / "data" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".flv"}
-MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024 * 1024  # 4GB
+MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024 * 1024  # 8GB
 
 
 @router.post("/upload")
@@ -53,13 +55,13 @@ async def upload_video(file: UploadFile = File(...)):
                 size += len(chunk)
                 if size > MAX_FILE_SIZE_BYTES:
                     dest_path.unlink(missing_ok=True)
-                    raise HTTPException(status_code=413, detail="File too large (max 4GB)")
+                    raise HTTPException(status_code=413, detail="File too large (max 8GB)")
                 f.write(chunk)
     except HTTPException:
         raise
     except Exception as e:
         dest_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}") from e
 
     # Create project
     now = datetime.utcnow().isoformat()
@@ -72,7 +74,8 @@ async def upload_video(file: UploadFile = File(...)):
         created_at=now,
         updated_at=now,
     )
-    save_project(project)
+    await asyncio.to_thread(save_project, project)
+    metrics.record_upload()
 
     return JSONResponse({
         "project_id": project_id,
@@ -80,3 +83,4 @@ async def upload_video(file: UploadFile = File(...)):
         "size_bytes": size,
         "video_path": str(dest_path),
     })
+

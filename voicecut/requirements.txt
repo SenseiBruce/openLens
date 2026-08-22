@@ -1,11 +1,17 @@
-fastapi>=0.100.0
-uvicorn>=0.23.0
-pydantic>=2.0.0
-sqlalchemy>=2.0.0
-aiosqlite>=0.19.0
-python-multipart>=0.0.6
-# Local editable installations of cloned repos:
--e ../silero-vad
--e ../whisperX
-# Auto-editor is used as a CLI binary, we'll install it globally or in the venv
-auto-editor>=23.44.1
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.4
+pydantic-settings==2.15.0
+sqlalchemy==2.0.52
+aiosqlite==0.22.1
+python-multipart==0.0.32
+litellm==1.97.0
+openai==2.54.0
+soundfile==0.14.0
+numpy==2.5.2
+structlog==26.1.0
+httpx==0.28.1
+pytest==9.1.1
+pytest-cov==7.1.0
+ruff==0.16.3
+pip-tools==7.6.1

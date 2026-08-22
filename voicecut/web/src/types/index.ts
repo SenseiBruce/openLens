@@ -24,6 +24,14 @@ export interface TranscriptSegment {
   speaker?: string;
 }
 
+export interface Chapter {
+  id: string;
+  start: number;
+  end: number;
+  title: string;
+  summary?: string;
+}
+
 export interface CandidateCut {
   id: string;
   start: number;
@@ -48,6 +56,8 @@ export interface ProjectSettings {
   min_gap_duration: number;
   margin: number;
   whisper_model: string;
+  language?: string;
+  initial_prompt?: string;
   device: string;
   export_formats: string[];
   min_speech_confidence: number;
@@ -66,6 +76,7 @@ export interface Project {
   words: WordTimestamp[];
   candidate_cuts: CandidateCut[];
   user_decisions: UserDecision[];
+  chapters?: Chapter[];
   srt_path?: string;
   vtt_path?: string;
   output_path?: string;
@@ -81,4 +92,13 @@ export interface PipelineEvent {
   project_id?: string;
   cuts_count?: number;
   files?: Record<string, string>;
+}
+
+export interface ProjectSummary {
+  id: string;
+  name: string;
+  status: ProjectStatus;
+  video_duration?: number;
+  created_at?: string;
+  updated_at?: string;
 }

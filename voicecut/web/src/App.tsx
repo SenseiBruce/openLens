@@ -3,15 +3,20 @@ import { TopBar } from './components/TopBar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { WaveformTimeline } from './components/WaveformTimeline';
 import { TranscriptPanel } from './components/TranscriptPanel';
+import { ExportModal } from './components/ExportModal';
+import { ProjectList } from './components/ProjectList';
+import { ViralClipsModal } from './components/ViralClipsModal';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
+import { reportError } from './lib/errorReporter';
+import { ErrorBanner } from './components/ErrorBanner';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
-  const { project, setProject, isUploading } = useProjectStore();
+  const { project, setProject, isUploading, setIsUploading } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
-  const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
+  const [showViralClips, setShowViralClips] = useState(false);
   
   // Track the active pipeline step for the stepper
   const [analysisStep, setAnalysisStep] = useState<'upload' | 'create' | 'processing' | 'transcribe' | 'complete' | 'idle'>('idle');
@@ -24,19 +29,20 @@ function App() {
     }
     if (projectId) {
       apiClient.getProject(projectId)
-        .then(setProject)
-        .catch(err => console.error("Failed to load project:", err));
+        .then((loaded) => setProject(loaded))
+        .catch(err => reportError('load_project', err));
     }
   }, [setProject]);
 
-  const handleAnalyzeStart = () => {
+  const handleAnalyzeStart = (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => {
     if (!project) return;
     
     setProject({ ...project, status: 'analyzing' });
     setProgressMsg('Starting analysis...');
     setAnalysisStep('processing');
     
-    apiClient.analyzeProjectStream(project.id, (ev) => {
+    // analyzeProjectStream now returns a cancel() fn; settings go in POST body (not URL)
+    apiClient.analyzeProjectStream(project.id, settings, (ev) => {
       if (ev.message) setProgressMsg(ev.message);
       
       if (ev.step === 'extracting_audio' || ev.step === 'running_vad' || ev.step === 'detecting_cuts') {
@@ -52,42 +58,43 @@ function App() {
         setAnalysisStep('complete');
       }
       if (ev.step === 'error') {
-        alert('Analysis error: ' + ev.message);
+        reportError('analysis', ev.message);
         setProject({ ...project, status: 'error' });
-        setProgressMsg('');
+        setProgressMsg(`Error: ${ev.message}`);
         setAnalysisStep('idle');
       }
     });
   };
 
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploading(true);
+      const { project_id } = await apiClient.uploadVideo(file);
+      const newProject = await apiClient.getProject(project_id);
+      setProject(newProject);
+      window.history.pushState({}, '', `?project=${project_id}`);
+    } catch (err) {
+      reportError('upload', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleExportStart = async () => {
     if (!project) return;
-    setShowExport(true);
-    setExportFiles(null);
-    setProgressMsg('Preparing render...');
-
     const decisions = (project.user_decisions || []).map(d => ({
       cut_id: d.cut_id,
       status: d.action
     }));
-    await fetch(`/api/projects/${project.id}/decisions`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(decisions)
-    });
-
-    apiClient.exportProjectStream(project.id, (ev) => {
-      if (ev.message) setProgressMsg(ev.message);
-
-      if (ev.step === 'files' && ev.files) {
-        setExportFiles(ev.files);
-        setProgressMsg('');
-      }
-      if (ev.step === 'error') {
-        alert('Export error: ' + ev.message);
-        setShowExport(false);
-      }
-    });
+    try {
+      await apiClient.saveDecisions(project.id, decisions);
+      setShowExport(true);
+    } catch (err) {
+      reportError('export', err);
+    }
   };
 
   const isTranscodingState = isUploading || project?.status === 'analyzing';
@@ -124,137 +131,175 @@ function App() {
 
   return (
     <div className="h-screen w-screen bg-background flex flex-col text-foreground overflow-hidden">
-      <TopBar onAnalyzeStart={handleAnalyzeStart} onExportStart={handleExportStart} />
+      <ErrorBanner />
+      <TopBar 
+        onAnalyzeStart={handleAnalyzeStart} 
+        onExportStart={handleExportStart} 
+        onViralClipsStart={() => setShowViralClips(true)}
+      />
 
       <div className="flex-1 flex overflow-hidden">
-        {isTranscodingState ? (
-          <div className="flex-1 flex bg-zinc-950 items-center justify-center p-8 overflow-y-auto">
-            <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-              
-              {/* Stepper details */}
-              <div className="md:col-span-7 space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tight text-white">Transcoding your video for editing</h1>
-                  <p className="text-sm text-zinc-400">Please stay on the page. We are processing your media files.</p>
-                </div>
+        {!project && !isUploading ? (
+          <ProjectList 
+            onSelect={(id) => {
+              window.history.pushState({}, '', `?project=${id}`);
+              apiClient.getProject(id).then(setProject).catch((err) => reportError('load_project', err));
+            }} 
+            onUpload={handleUpload}
+            isUploading={isUploading}
+          />
+        ) : isTranscodingState ? (
+          <div className="flex-1 flex bg-zinc-950 overflow-hidden">
 
-                <div className="space-y-4 pt-4">
-                  <div className="flex items-center space-x-3">
-                    {renderStepIcon(getStepStatus('upload'))}
-                    <span className={`text-sm ${getStepStatus('upload') === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>Upload</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {renderStepIcon(getStepStatus('create'))}
-                    <span className={`text-sm ${getStepStatus('create') === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>Create project</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {renderStepIcon(getStepStatus('processing'))}
-                    <span className={`text-sm ${getStepStatus('processing') === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>Processing video</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {renderStepIcon(getStepStatus('transcribe'))}
-                    <span className={`text-sm ${getStepStatus('transcribe') === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>Transcribe</span>
-                  </div>
-                </div>
-
-                {progressMsg && (
-                  <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-mono text-zinc-400 max-w-md">
-                    {progressMsg}
-                  </div>
-                )}
+            {/* ── LEFT: progress panel ─────────────────────────────── */}
+            <div className="w-80 shrink-0 flex flex-col justify-center px-10 py-12 border-r border-zinc-800 space-y-8">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400">Processing</p>
+                <h1 className="text-2xl font-bold text-white leading-snug">Preparing your video for editing</h1>
+                <p className="text-xs text-zinc-500 pt-1">Stay on this page — we're doing the heavy lifting.</p>
               </div>
 
-              {/* Tutorial panel */}
-              <div className="md:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-6 shadow-2xl">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Tutorial</span>
-                  <span className="text-xs text-zinc-500">2/6</span>
-                </div>
-
-                <div className="space-y-2">
-                  <h2 className="text-xl font-bold text-white">Clip with your own prompt</h2>
-                  <p className="text-xs text-zinc-400">
-                    Our VAD and transcription model lets you clip any moment from ANY video using audio boundaries and text highlights. Just highlight the text or toggle silence clips to edit the video.
-                  </p>
-                </div>
-
-                {/* Mockup card */}
-                <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 space-y-3 relative overflow-hidden aspect-video flex flex-col justify-between">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2 text-[10px] text-zinc-500">
-                    <span>Project-Preview.mp4</span>
-                    <span className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded">1080p</span>
-                  </div>
-                  <div className="flex-1 flex items-center justify-center text-xs text-zinc-600 italic">
-                    [Video Preview Mockup]
-                  </div>
-                  <div className="h-6 bg-indigo-500/20 border-t border-indigo-500/30 rounded flex items-center px-2 text-[8px] text-indigo-300">
-                    [3.8s] Speech text starts here... [1.6s]
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <button className="text-xs text-zinc-500 hover:text-zinc-300 font-medium">Previous</button>
-                  <div className="flex space-x-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
-                  </div>
-                  <button className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">Next</button>
-                </div>
+              {/* Stepper */}
+              <div className="space-y-5">
+                {[
+                  { key: 'upload' as const,     label: 'Upload',          sub: 'Receiving file' },
+                  { key: 'create' as const,     label: 'Create project',  sub: 'Initialising workspace' },
+                  { key: 'processing' as const, label: 'Detect speech',   sub: 'Running VAD & audio analysis' },
+                  { key: 'transcribe' as const, label: 'Transcribe',      sub: 'WhisperX word-level timestamps' },
+                ].map(({ key, label, sub }) => {
+                  const status = getStepStatus(key);
+                  return (
+                    <div key={key} className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        {renderStepIcon(status)}
+                      </div>
+                      <div>
+                        <p className={`text-sm font-medium ${status === 'pending' ? 'text-zinc-500' : 'text-zinc-100'}`}>{label}</p>
+                        <p className={`text-xs ${status === 'pending' ? 'text-zinc-700' : 'text-zinc-500'}`}>{sub}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
+              {progressMsg && (
+                <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-[11px] font-mono text-zinc-400 leading-relaxed">
+                  {progressMsg}
+                </div>
+              )}
             </div>
+
+            {/* ── RIGHT: editor skeleton preview ───────────────────── */}
+            <div className="flex-1 flex flex-col overflow-hidden opacity-40 pointer-events-none select-none">
+
+              {/* Skeleton transcript + video layout */}
+              <div className="flex flex-1 overflow-hidden">
+
+                {/* Fake transcript rail */}
+                <div className="w-72 shrink-0 border-r border-zinc-800 p-5 space-y-3 overflow-hidden">
+                  <div className="flex gap-2 mb-4">
+                    <div className="flex-1 h-7 bg-zinc-800 rounded-md animate-pulse" />
+                    <div className="w-7 h-7 bg-zinc-800 rounded-md animate-pulse" />
+                    <div className="w-7 h-7 bg-zinc-800 rounded-md animate-pulse" />
+                  </div>
+                  {/* Fake transcript words */}
+                  {[
+                    ['दोस्तों वापस सेफ्टर में', '[1.9s]', 'का टाइम स्टार्ट'],
+                    ['हो चुका है', '[3.6s]', 'पता नहीं कैसा'],
+                    ['ब. बना ब्लॉग इस बार', '[3.3s]', 'छोटी-छोटी चीज़'],
+                    ['दिखाई मैंने', '[1.2s]', 'कितना नंबक छोटा'],
+                  ].map((row, i) => (
+                    <div key={i} className="flex flex-wrap gap-1 text-[11px] leading-relaxed">
+                      <span className="text-zinc-400">{row[0]}</span>
+                      <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-mono text-[10px]">{row[1]}</span>
+                      <span className="text-zinc-400">{row[2]}</span>
+                    </div>
+                  ))}
+                  <div className="h-3 bg-zinc-800/60 rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-zinc-800/60 rounded animate-pulse w-1/2" />
+                </div>
+
+                {/* Fake video + right sidebar */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Fake video frame */}
+                  <div className="flex-1 bg-black flex items-center justify-center m-4 rounded-xl border border-zinc-800">
+                    <div className="w-full h-full rounded-xl bg-zinc-900 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <div className="w-0 h-0 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent border-l-[20px] border-l-zinc-600 ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Fake ratio/controls bar */}
+                  <div className="h-8 mx-4 mb-2 flex items-center gap-4 text-[10px] text-zinc-600">
+                    <span>□ Ratio (16:9)</span>
+                    <span>● Background</span>
+                    <span>⊞ Layouts</span>
+                  </div>
+                </div>
+
+                {/* Fake right tool sidebar */}
+                <div className="w-16 shrink-0 border-l border-zinc-800 flex flex-col items-center py-4 gap-5">
+                  {['AI', 'Gen', 'Kit', 'Sub', 'Up', 'Aud', 'B-r', 'Tr', 'Txt'].map((t, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 bg-zinc-800 rounded-lg animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                      <span className="text-[8px] text-zinc-700">{t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fake timeline / waveform at bottom */}
+              <div className="h-28 border-t border-zinc-800 px-4 pt-3 pb-2 space-y-2">
+                {/* Fake timecode bar */}
+                <div className="flex items-center gap-3 text-[9px] text-zinc-700 font-mono">
+                  <span>00:00.0</span>
+                  <div className="flex-1 h-px bg-zinc-800" />
+                  <span>▶</span>
+                  <div className="flex-1 h-px bg-zinc-800" />
+                  <span>00:29.6</span>
+                  <span className="ml-2">1x</span>
+                </div>
+                {/* Subtitle track label */}
+                <div className="text-[9px] text-indigo-400 font-medium pl-1">Subtitle</div>
+                {/* Fake waveform bars */}
+                <div className="h-10 flex items-center gap-px overflow-hidden">
+                  {Array.from({ length: 120 }).map((_, i) => {
+                    const h = Math.sin(i * 0.35) * 40 + Math.sin(i * 0.13) * 25 + 20;
+                    return (
+                      <div
+                        key={i}
+                        className="w-1 shrink-0 bg-indigo-500/40 rounded-sm"
+                        style={{ height: `${Math.max(6, Math.min(100, h))}%` }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
           </div>
         ) : (
-          <>
-            {/* Main Editor Area */}
-            <div className="flex-1 flex flex-col p-4 space-y-4">
-              <VideoPlayer />
-              {project?.status === 'ready' && <WaveformTimeline />}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Transcript left + video center */}
+            <div className="flex-1 flex overflow-hidden">
+              <TranscriptPanel />
+              <div className="flex-1 flex flex-col bg-zinc-950 overflow-hidden">
+                <VideoPlayer />
+              </div>
             </div>
-
-            {/* Right Sidebar */}
-            <TranscriptPanel />
-          </>
+            {/* Full-width waveform at bottom */}
+            {project?.status === 'ready' && <WaveformTimeline />}
+          </div>
         )}
       </div>
 
-      {/* Export Modal Overlays */}
+
       {showExport && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-card border border-border rounded-xl p-8 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Exporting Video</h2>
-            
-            {!exportFiles ? (
-              <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-                <p className="text-sm text-muted-foreground text-center">{progressMsg}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-green-400 mb-4">Export completed successfully!</p>
-                <div className="space-y-2">
-                  {Object.entries(exportFiles).map(([format, path]) => (
-                    <a
-                      key={format}
-                      href={`/api/export/${project?.id}/download/${path.split('/').pop()}`}
-                      className="block w-full text-center py-2 bg-secondary hover:bg-secondary/80 rounded border border-border"
-                      download
-                    >
-                      Download {format.toUpperCase()}
-                    </a>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowExport(false)}
-                  className="w-full mt-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <ExportModal onClose={() => setShowExport(false)} />
+      )}
+
+      {showViralClips && (
+        <ViralClipsModal onClose={() => setShowViralClips(false)} />
       )}
     </div>
   );

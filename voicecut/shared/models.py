@@ -3,11 +3,11 @@ VoiceCut — Shared Pydantic Data Models
 Used by adapters, services, API routes, and the export engine.
 """
 from __future__ import annotations
-from enum import Enum
-from typing import Optional
-from pydantic import BaseModel, Field
-import uuid
 
+import uuid
+from enum import Enum
+
+from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -49,7 +49,7 @@ class ExportFormat(str, Enum):
 class SpeechSegment(BaseModel):
     start: float = Field(..., description="Start time in seconds")
     end: float = Field(..., description="End time in seconds")
-    confidence: Optional[float] = None
+    confidence: float | None = None
 
     @property
     def duration(self) -> float:
@@ -60,7 +60,7 @@ class WordTimestamp(BaseModel):
     word: str
     start: float
     end: float
-    score: Optional[float] = None
+    score: float | None = None
 
 
 class TranscriptSegment(BaseModel):
@@ -69,7 +69,18 @@ class TranscriptSegment(BaseModel):
     end: float
     text: str
     words: list[WordTimestamp] = Field(default_factory=list)
-    speaker: Optional[str] = None
+    speaker: str | None = None
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
+class Chapter(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    start: float
+    end: float
+    title: str
+    summary: str | None = None
 
     @property
     def duration(self) -> float:
@@ -93,13 +104,15 @@ class CandidateCut(BaseModel):
 class UserDecision(BaseModel):
     cut_id: str
     action: CutStatus
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
 
 
 class ProjectSettings(BaseModel):
     min_gap_duration: float = Field(1.0, description="Minimum gap in seconds to create a candidate cut")
     margin: float = Field(0.15, description="Padding around speech segments in seconds")
     whisper_model: str = Field("small", description="WhisperX model name")
+    language: str | None = Field("hinglish", description="Language code (e.g. en, hi, hinglish)")
+    initial_prompt: str | None = Field(None, description="Initial prompt to guide Whisper")
     device: str = Field("mps", description="torch device: cpu, mps, cuda")
     export_formats: list[ExportFormat] = Field(
         default_factory=lambda: [ExportFormat.MP4],
@@ -111,22 +124,23 @@ class ProjectSettings(BaseModel):
 class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = "Untitled Project"
-    video_path: Optional[str] = None
-    audio_path: Optional[str] = None
+    video_path: str | None = None
+    audio_path: str | None = None
     status: ProjectStatus = ProjectStatus.IDLE
-    error_message: Optional[str] = None
+    error_message: str | None = None
     settings: ProjectSettings = Field(default_factory=ProjectSettings)
     speech_segments: list[SpeechSegment] = Field(default_factory=list)
     transcript_segments: list[TranscriptSegment] = Field(default_factory=list)
     words: list[WordTimestamp] = Field(default_factory=list)
     candidate_cuts: list[CandidateCut] = Field(default_factory=list)
     user_decisions: list[UserDecision] = Field(default_factory=list)
-    srt_path: Optional[str] = None
-    vtt_path: Optional[str] = None
-    output_path: Optional[str] = None
-    video_duration: Optional[float] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    chapters: list[Chapter] = Field(default_factory=list)
+    srt_path: str | None = None
+    vtt_path: str | None = None
+    output_path: str | None = None
+    video_duration: float | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -135,12 +149,12 @@ class Project(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     project_id: str
-    settings: Optional[ProjectSettings] = None
+    settings: ProjectSettings | None = None
 
 
 class DecisionUpdate(BaseModel):
     cut_id: str
-    status: CutStatus
+    action: CutStatus  # renamed from 'status' to match UserDecision.action
 
 
 class ExportRequest(BaseModel):
@@ -165,12 +179,38 @@ class VADResult(BaseModel):
 class TranscriptResult(BaseModel):
     transcript: list[TranscriptSegment]
     words: list[WordTimestamp]
-    language: Optional[str] = None
-    srt_content: Optional[str] = None
-    vtt_content: Optional[str] = None
+    language: str | None = None
+    srt_content: str | None = None
+    vtt_content: str | None = None
 
 
 class BaselineCutResult(BaseModel):
     """Output from auto-editor CLI adapter (fallback mode)."""
     auto_cuts: list[dict]
     source: str = "auto-editor"
+
+
+class ViralClip(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    start: float
+    end: float
+    title: str
+    explanation: str | None = None
+    score: float = Field(0.0, description="Viral potential score (0 to 10)")
+    rendered_path: str | None = None
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
+
+class ViralClipRequest(BaseModel):
+    project_id: str
+    target_length_seconds: int = Field(30, description="Target clip length in seconds")
+    openrouter_key: str = Field(..., description="OpenRouter API key to be passed from frontend")
+
+
+class ViralClipResponse(BaseModel):
+    project_id: str
+    clips: list[ViralClip]
+
