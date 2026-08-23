@@ -23,6 +23,7 @@ jobs:
             --output-file=/tmp/requirements.lock \
             --generate-hashes \
             --strip-extras \
+            --allow-unsafe \
             --quiet
           python - <<'PY'
           from pathlib import Path
