@@ -9,6 +9,7 @@ import {
   saveExportResolution,
   type StoredExportResolution,
 } from '../lib/exportResolutionStorage';
+import { formatExportFiles } from '../lib/exportFilesClipboard';
 
 interface ExportModalProps {
   onClose: () => void;
@@ -24,6 +25,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const [progressMsg, setProgressMsg] = useState('');
   const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [copiedFiles, setCopiedFiles] = useState(false);
 
   // Fetch original resolution on mount
   useEffect(() => {
@@ -164,6 +166,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                 </a>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(formatExportFiles(exportFiles));
+                  setCopiedFiles(true);
+                  window.setTimeout(() => setCopiedFiles(false), 2000);
+                } catch {
+                  setCopiedFiles(false);
+                }
+              }}
+              className="w-full mt-3 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium transition-colors text-sm"
+            >
+              {copiedFiles ? 'Copied paths' : 'Copy paths'}
+            </button>
             <button
               onClick={onClose}
               className="w-full mt-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"

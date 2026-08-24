@@ -78,5 +78,6 @@ describe('ExportModal', () => {
       )
     })
     expect(await screen.findByText('Export Complete')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy paths/i })).toBeInTheDocument()
   })
 })
