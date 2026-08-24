@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Project, CutStatus } from '../types';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
+import { loadSkipCuts, saveSkipCuts } from '../lib/skipCutsStorage';
 
 export type CutUndoEntry = {
   cutId: string;
@@ -86,6 +87,9 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   clearSeekTo: () => set({ seekTo: null }),
   isUploading: false,
   setIsUploading: (isUploading) => set({ isUploading }),
-  skipCuts: true,
-  setSkipCuts: (skip) => set({ skipCuts: skip }),
+  skipCuts: loadSkipCuts(),
+  setSkipCuts: (skip) => {
+    saveSkipCuts(skip);
+    set({ skipCuts: skip });
+  },
 }));
