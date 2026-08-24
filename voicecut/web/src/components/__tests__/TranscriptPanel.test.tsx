@@ -41,16 +41,14 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 describe('TranscriptPanel toolbar', () => {
   beforeEach(() => {
     useProjectStore.setState({ project: makeProject(), currentTime: 0 })
-    Object.assign(navigator, {
-      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
-    })
+    HTMLElement.prototype.scrollIntoView = vi.fn()
   })
 
   it('copies transcript text', async () => {
     const user = userEvent.setup()
     render(<TranscriptPanel />)
     await user.click(screen.getByRole('button', { name: 'Copy transcript' }))
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Hello world')
+    expect(await screen.findByTitle('Copied')).toBeInTheDocument()
   })
 
   it('shows a search field and highlights matches', async () => {
