@@ -14,7 +14,7 @@ import { ErrorBanner } from './components/ErrorBanner';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
-  const { project, setProject, isUploading, setIsUploading, currentTime, updateCutStatus, setSeekTo } = useProjectStore();
+  const { project, setProject, isUploading, setIsUploading, currentTime, updateCutStatus, undoLastCutDecision, setSeekTo } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
   const [showViralClips, setShowViralClips] = useState(false);
@@ -41,6 +41,11 @@ function App() {
       if (!project?.candidate_cuts.length || project.status !== 'ready') return;
       const cuts = project.candidate_cuts;
       const key = event.key.toLowerCase();
+      if (key === 'z' || key === 'u') {
+        event.preventDefault();
+        undoLastCutDecision();
+        return;
+      }
       if (key === 'x' || key === 'k') {
         const cut = cutAtPlayhead(cuts, currentTime);
         if (!cut) return;
@@ -64,7 +69,7 @@ function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [project, currentTime, updateCutStatus, setSeekTo]);
+  }, [project, currentTime, updateCutStatus, undoLastCutDecision, setSeekTo]);
 
   const handleAnalyzeStart = (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => {
     if (!project) return;
