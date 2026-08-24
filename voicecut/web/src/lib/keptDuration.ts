@@ -24,3 +24,21 @@ export function computeKeptDuration(project: DurationProject): {
     removedDur: cutDur,
   }
 }
+
+export function formatClock(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const sec = Math.floor(seconds % 60)
+  return `${m}:${sec.toString().padStart(2, '0')}`
+}
+
+export function formatKeptDurationSummary(dur: {
+  totalDur: number
+  keptDur: number
+  removedDur: number
+}): string {
+  const lines = [`Kept ${formatClock(dur.keptDur)} / ${formatClock(dur.totalDur)}`]
+  if (dur.removedDur > 0.5) {
+    lines.push(`Removed ${formatClock(dur.removedDur)}`)
+  }
+  return lines.join('\n')
+}

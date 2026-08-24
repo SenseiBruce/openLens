@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeKeptDuration } from '../keptDuration'
+import { computeKeptDuration, formatKeptDurationSummary } from '../keptDuration'
 
 describe('computeKeptDuration', () => {
   it('returns zeros without a project or duration', () => {
@@ -17,5 +17,13 @@ describe('computeKeptDuration', () => {
         user_decisions: [{ cut_id: 'c2', action: 'kept' }],
       }),
     ).toEqual({ totalDur: 10, keptDur: 7, removedDur: 3 })
+  })
+})
+
+describe('formatKeptDurationSummary', () => {
+  it('includes kept, total, and removed when cuts exist', () => {
+    expect(
+      formatKeptDurationSummary({ totalDur: 10, keptDur: 7, removedDur: 3 }),
+    ).toBe('Kept 0:07 / 0:10\nRemoved 0:03')
   })
 })
