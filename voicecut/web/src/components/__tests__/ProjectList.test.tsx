@@ -54,6 +54,32 @@ describe('ProjectList', () => {
     })
   })
 
+  it('filters projects by name search', async () => {
+    const user = userEvent.setup()
+    render(<ProjectList onSelect={vi.fn()} onUpload={vi.fn()} isUploading={false} />)
+    await screen.findByText('One')
+
+    await user.type(screen.getByLabelText('Search projects'), 'One')
+    expect(screen.getByText('One')).toBeInTheDocument()
+    expect(screen.queryByText('Two')).not.toBeInTheDocument()
+  })
+
+  it('filters projects by status and can clear filters', async () => {
+    const user = userEvent.setup()
+    render(<ProjectList onSelect={vi.fn()} onUpload={vi.fn()} isUploading={false} />)
+    await screen.findByText('One')
+
+    await user.selectOptions(screen.getByLabelText('Filter by status'), 'idle')
+    expect(screen.queryByText('One')).not.toBeInTheDocument()
+    expect(screen.getByText('Two')).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('Filter by status'), 'exporting')
+    expect(screen.getByText('No projects match your filters')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }))
+    expect(screen.getByText('One')).toBeInTheDocument()
+    expect(screen.getByText('Two')).toBeInTheDocument()
+  })
+
   it('handleMassDelete deletes selected projects', async () => {
     const user = userEvent.setup()
     vi.mocked(apiClient.getProjects)
