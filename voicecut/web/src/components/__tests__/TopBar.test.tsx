@@ -118,4 +118,26 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /copy project id/i }))
     expect(writeText).toHaveBeenCalledWith('Demo\nid: p1')
   })
+
+  it('copies the duration pill text', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    useProjectStore.setState({
+      project: makeProject({
+        candidate_cuts: [
+          { id: 'c1', start: 0, end: 3, reason: 'no_dialogue', status: 'cut', duration: 3 },
+        ],
+      }),
+    })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await user.click(screen.getByRole('button', { name: /copy kept duration/i }))
+    expect(writeText).toHaveBeenCalledWith('0:07 / 0:10 -0:03')
+  })
 })

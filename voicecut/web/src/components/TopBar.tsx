@@ -10,6 +10,15 @@ import { formatCutDecisionCounts } from '../lib/cutDecisionCounts';
 import { formatProjectIdentity } from '../lib/projectIdentity';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
+import { computeKeptDuration, formatDurationPill } from '../lib/keptDuration';
+import { AnalyzeModal } from './AnalyzeModal';
+import { ChaptersModal } from './ChaptersModal';
+
+function fmt(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
 
 export const TopBar: React.FC<{
   onAnalyzeStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
@@ -73,6 +82,13 @@ export const TopBar: React.FC<{
       window.setTimeout(() => setCopiedIdentity(false), 2000);
     } catch (err) {
       reportError('copy-project-id', err);
+  const handleCopyDuration = async () => {
+    try {
+      await navigator.clipboard.writeText(formatDurationPill(project));
+      setCopiedDuration(true);
+      window.setTimeout(() => setCopiedDuration(false), 2000);
+    } catch (err) {
+      reportError('copy-duration', err);
     }
   };
 
@@ -150,6 +166,12 @@ export const TopBar: React.FC<{
               }}
             >
               {copiedCuts ? 'Copied' : 'Copy cuts'}
+              onClick={handleCopyDuration}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"
+              title="Copy kept duration"
+              aria-label="Copy kept duration"
+            >
+              {copiedDuration ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
             </button>
           </div>
         </div>

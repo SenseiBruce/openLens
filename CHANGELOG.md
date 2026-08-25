@@ -10,6 +10,7 @@
 - Export dialog remembers the last output resolution in localStorage.
 - Viral clips dialog remembers the last target length (15/30/60s) in localStorage.
 - Copy project id (and name) from the TopBar name pill while a project has no duration yet.
+- Copy kept / total / removed duration from the TopBar pill.
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).
