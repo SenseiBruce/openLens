@@ -99,6 +99,7 @@ describe('TopBar', () => {
   })
 
   it('copies the skip-cuts setting without toggling it', async () => {
+  it('copies project status from the status button', async () => {
     const user = userEvent.setup()
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
@@ -113,6 +114,12 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /copy skip-cuts setting/i }))
     expect(writeText).toHaveBeenCalledWith('Skip cuts: on')
     expect(useProjectStore.getState().skipCuts).toBe(true)
+    useProjectStore.setState({ project: makeProject({ status: 'idle' }), skipCuts: true })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await user.click(screen.getByRole('button', { name: /copy project status/i }))
+    expect(writeText).toHaveBeenCalledWith('Project status: idle')
   })
 
   it('renders kept and removed duration for a ready project', async () => {
