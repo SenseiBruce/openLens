@@ -98,6 +98,23 @@ describe('TopBar', () => {
     expect(useProjectStore.getState().skipCuts).toBe(false)
   })
 
+  it('copies the skip-cuts setting without toggling it', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    useProjectStore.setState({ project: makeProject(), skipCuts: true })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await user.click(screen.getByRole('button', { name: /copy skip-cuts setting/i }))
+    expect(writeText).toHaveBeenCalledWith('Skip cuts: on')
+    expect(useProjectStore.getState().skipCuts).toBe(true)
+  })
+
   it('renders kept and removed duration for a ready project', async () => {
     vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
     useProjectStore.setState({
