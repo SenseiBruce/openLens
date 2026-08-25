@@ -98,5 +98,6 @@ describe('TopBar', () => {
     expect(screen.getByText('/ 0:10')).toBeInTheDocument()
     expect(screen.getByText('-0:03')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^copy$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy cuts/i })).toBeInTheDocument()
   })
 })

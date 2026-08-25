@@ -4,6 +4,8 @@ import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { computeKeptDuration, formatClock, formatKeptDurationSummary } from '../lib/keptDuration';
+import { computeKeptDuration } from '../lib/keptDuration';
+import { formatCutDecisionCounts } from '../lib/cutDecisionCounts';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 import { List } from 'lucide-react';
@@ -18,6 +20,7 @@ export const TopBar: React.FC<{
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
   const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
   const [copiedDuration, setCopiedDuration] = useState(false);
+  const [copiedCuts, setCopiedCuts] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -122,6 +125,18 @@ export const TopBar: React.FC<{
             >
               {copiedDuration ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
               {copiedDuration ? 'Copied' : 'Copy'}
+              className="text-[10px] font-medium text-zinc-400 hover:text-white"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(formatCutDecisionCounts(project))
+                  setCopiedCuts(true)
+                  window.setTimeout(() => setCopiedCuts(false), 2000)
+                } catch {
+                  setCopiedCuts(false)
+                }
+              }}
+            >
+              {copiedCuts ? 'Copied' : 'Copy cuts'}
             </button>
           </div>
         </div>

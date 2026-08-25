@@ -16,5 +16,6 @@
 - Copy kept / total / removed duration from the VoiceCut top bar.
 - VoiceCut remembers the Skip Cuts toggle in localStorage (`voicecut_skipCuts`).
 - Copy export output paths from the VoiceCut export complete dialog.
+- Copy VoiceCut cut/kept/pending counts from the top bar.
 - Pin `filelock==3.32.4` in `voicecut/requirements.lock`.
 - CI `docker-smoke` job curls `/health` after `docker compose up --build`.
