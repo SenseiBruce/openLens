@@ -15,6 +15,7 @@ import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
   const { project, setProject, isUploading, setIsUploading, currentTime, updateCutStatus, undoLastCutDecision, setSeekTo } = useProjectStore();
+  const { project, setProject, isUploading, setIsUploading } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
   const [showViralClips, setShowViralClips] = useState(false);

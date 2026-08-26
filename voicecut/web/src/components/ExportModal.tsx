@@ -26,6 +26,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [copiedFiles, setCopiedFiles] = useState(false);
+  const [selectedRes, setSelectedRes] = useState<string | null>(null); // null = lossless original
+  const [progressMsg, setProgressMsg] = useState('');
+  const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Fetch original resolution on mount
   useEffect(() => {
@@ -50,6 +54,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     setSelectedRes(value);
     saveExportResolution(value);
   };
+
+  // Valid options: only those <= original height
+  const validOptions = resolutionsAtOrBelow(originalHeight);
 
   const handleExport = () => {
     if (!project?.id) return;
@@ -101,6 +108,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                 className="accent-indigo-500"
                 checked={selectedRes === null}
                 onChange={() => chooseResolution(null)}
+                onChange={() => setSelectedRes(null)}
               />
               <span className="flex-1 text-sm">
                 Original ({originalHeight}p) — <span className="text-green-400 text-xs font-medium">Lossless copy</span>
@@ -120,6 +128,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                     className="accent-indigo-500"
                     checked={selectedRes === opt.value}
                     onChange={() => chooseResolution(opt.value)}
+                    onChange={() => setSelectedRes(opt.value)}
                   />
                   <span className="text-sm">{opt.label}</span>
                   {opt.height < originalHeight && (
