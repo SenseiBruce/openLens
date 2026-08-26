@@ -102,7 +102,10 @@ describe('ProjectList', () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
     const writeText = vi.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, { clipboard: { writeText } })
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
 
     render(<ProjectList onSelect={onSelect} onUpload={vi.fn()} isUploading={false} />)
     await screen.findByText('One')
