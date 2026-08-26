@@ -97,4 +97,18 @@ describe('ProjectList', () => {
     expect(apiClient.deleteProject).toHaveBeenCalledWith('p1')
     expect(apiClient.deleteProject).not.toHaveBeenCalledWith('p2')
   })
+
+  it('copies source duration without selecting the card', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+
+    render(<ProjectList onSelect={onSelect} onUpload={vi.fn()} isUploading={false} />)
+    await screen.findByText('One')
+
+    await user.click(screen.getByRole('button', { name: 'Copy source duration for One' }))
+    expect(writeText).toHaveBeenCalledWith('Source duration: 0:12')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
 })

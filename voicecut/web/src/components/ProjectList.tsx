@@ -4,6 +4,12 @@ import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { filterProjects } from '../lib/projectListFilters';
 import type { ProjectStatus, ProjectSummary } from '../types';
+import React, { useEffect, useState } from 'react';
+import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
+import { formatSourceDuration } from '../lib/sourceDuration';
+import type { ProjectSummary } from '../types';
 
 interface ProjectListProps {
   onSelect: (projectId: string) => void;
@@ -34,6 +40,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
     setSearchQuery('');
     setStatusFilter('all');
   };
+  const [copiedDurationId, setCopiedDurationId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -88,6 +95,17 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
       else next.add(id);
       return next;
     });
+  };
+
+  const copySourceDuration = async (e: React.MouseEvent, project: ProjectSummary) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(formatSourceDuration(project.video_duration));
+      setCopiedDurationId(project.id);
+      window.setTimeout(() => setCopiedDurationId(null), 2000);
+    } catch (err) {
+      reportError('copy-source-duration', err);
+    }
   };
 
   const handleCardClick = (id: string) => {
@@ -256,6 +274,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
                       {p.video_duration ? fmt(p.video_duration) : '--:--'}
+                      <button
+                        type="button"
+                        onClick={(e) => copySourceDuration(e, p)}
+                        className="p-1 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                        title="Copy source duration"
+                        aria-label={`Copy source duration for ${p.name}`}
+                      >
+                        {copiedDurationId === p.id ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </button>
                     </div>
                     <span>
                       {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
