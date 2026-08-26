@@ -1,6 +1,5 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { VideoPlayer } from '../VideoPlayer'
 import { useProjectStore } from '../../store/useProjectStore'
@@ -41,10 +40,11 @@ describe('VideoPlayer filename copy', () => {
       configurable: true,
       value: { writeText },
     })
-    const user = userEvent.setup()
     render(<VideoPlayer />)
     expect(screen.getByText('interview-take-2.mp4')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Copy video filename' }))
-    expect(writeText).toHaveBeenCalledWith('Filename: interview-take-2.mp4')
+    fireEvent.click(screen.getByRole('button', { name: 'Copy video filename' }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Filename: interview-take-2.mp4')
+    })
   })
 })
