@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { TopBar } from '../TopBar'
@@ -179,5 +179,22 @@ describe('TopBar', () => {
     )
     await user.click(screen.getByRole('button', { name: /copy kept duration/i }))
     expect(writeText).toHaveBeenCalledWith('0:07 / 0:10 -0:03')
+  })
+
+  it('copies the Whisper model name', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    useProjectStore.setState({ project: makeProject(), skipCuts: true })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Copy Whisper model' }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Whisper model: small')
+    })
   })
 })

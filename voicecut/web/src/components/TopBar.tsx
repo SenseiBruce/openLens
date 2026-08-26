@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check } from 'lucide-react';
 import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check, List } from 'lucide-react';
+import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
@@ -14,6 +15,7 @@ import { computeKeptDuration, formatDurationPill } from '../lib/keptDuration';
 import { formatBackendHealth } from '../lib/backendHealth';
 import { formatSkipCuts } from '../lib/skipCuts';
 import { formatProjectStatus } from '../lib/projectStatus';
+import { formatWhisperModel } from '../lib/whisperModel';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 
@@ -262,6 +264,21 @@ export const TopBar: React.FC<{
           >
             {copiedStatus ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             Status
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(
+                  formatWhisperModel(project.settings?.whisper_model),
+                );
+              } catch (err) {
+                reportError('copy-whisper-model', err);
+              }
+            }}
+            className="flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white"
+            title="Copy Whisper model"
+            aria-label="Copy Whisper model"
+          >
+            <Copy className="w-3 h-3" />
+            {project.settings?.whisper_model || 'model'}
           </button>
 
           <label className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-3 py-1.5 transition-colors">
