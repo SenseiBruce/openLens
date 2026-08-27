@@ -48,6 +48,7 @@ describe('resolutionsAtOrBelow', () => {
 
 describe('ExportModal', () => {
   beforeEach(() => {
+    localStorage.clear()
     useProjectStore.setState({ project: makeProject() })
     vi.mocked(apiClient.getVideoInfo).mockResolvedValue({ width: 1920, height: 1080 })
     vi.mocked(apiClient.exportProjectStream).mockImplementation((_id, _res, onEvent) => {

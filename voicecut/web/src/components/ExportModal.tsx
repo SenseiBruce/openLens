@@ -4,6 +4,11 @@ import { apiClient } from '../api/client';
 import { useProjectStore } from '../store/useProjectStore';
 import type { PipelineEvent } from '../types';
 import { resolutionsAtOrBelow } from '../lib/exportResolutions';
+import {
+  loadExportResolution,
+  saveExportResolution,
+  type StoredExportResolution,
+} from '../lib/exportResolutionStorage';
 
 interface ExportModalProps {
   onClose: () => void;
@@ -15,7 +20,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const { project } = useProjectStore();
   const [phase, setPhase] = useState<Phase>('picking');
   const [originalHeight, setOriginalHeight] = useState<number>(2160);
-  const [selectedRes, setSelectedRes] = useState<string | null>(null); // null = lossless original
+  const [selectedRes, setSelectedRes] = useState<string | null>(() => loadExportResolution());
   const [progressMsg, setProgressMsg] = useState('');
   const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -30,8 +35,19 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     });
   }, [project?.id]);
 
-  // Valid options: only those <= original height
   const validOptions = resolutionsAtOrBelow(originalHeight);
+
+  useEffect(() => {
+    const options = resolutionsAtOrBelow(originalHeight);
+    if (selectedRes && !options.some(option => option.value === selectedRes)) {
+      setSelectedRes(null);
+    }
+  }, [originalHeight, selectedRes]);
+
+  const chooseResolution = (value: StoredExportResolution) => {
+    setSelectedRes(value);
+    saveExportResolution(value);
+  };
 
   const handleExport = () => {
     if (!project?.id) return;
@@ -82,7 +98,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                 name="resolution"
                 className="accent-indigo-500"
                 checked={selectedRes === null}
-                onChange={() => setSelectedRes(null)}
+                onChange={() => chooseResolution(null)}
               />
               <span className="flex-1 text-sm">
                 Original ({originalHeight}p) — <span className="text-green-400 text-xs font-medium">Lossless copy</span>
@@ -101,7 +117,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                     name="resolution"
                     className="accent-indigo-500"
                     checked={selectedRes === opt.value}
-                    onChange={() => setSelectedRes(opt.value)}
+                    onChange={() => chooseResolution(opt.value)}
                   />
                   <span className="text-sm">{opt.label}</span>
                   {opt.height < originalHeight && (
