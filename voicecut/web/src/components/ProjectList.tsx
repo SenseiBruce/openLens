@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Scissors, Upload, Clock, Loader2, Trash2, Video } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
-import type { ProjectSummary } from '../types';
+import { filterProjects } from '../lib/projectListFilters';
+import type { ProjectStatus, ProjectSummary } from '../types';
 
 interface ProjectListProps {
   onSelect: (projectId: string) => void;
@@ -21,6 +22,18 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSelectMode, setIsSelectMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
+
+  const filteredProjects = useMemo(
+    () => filterProjects(projects, { query: searchQuery, status: statusFilter }),
+    [projects, searchQuery, statusFilter],
+  );
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+  };
 
   const fetchProjects = async () => {
     try {
@@ -113,15 +126,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
             {isSelectMode && (
               <button
                 onClick={() => {
-                  if (selectedIds.size === projects.length) {
+                  if (selectedIds.size === filteredProjects.length && filteredProjects.length > 0) {
                     setSelectedIds(new Set());
                   } else {
-                    setSelectedIds(new Set(projects.map(p => p.id)));
+                    setSelectedIds(new Set(filteredProjects.map(p => p.id)));
                   }
                 }}
                 className="text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 px-4 py-2.5 rounded-lg transition-colors"
               >
-                {selectedIds.size === projects.length ? 'Deselect All' : 'Select All'}
+                {selectedIds.size === filteredProjects.length && filteredProjects.length > 0 ? 'Deselect All' : 'Select All'}
               </button>
             )}
 
@@ -159,8 +172,44 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
             </label>
           </div>
         ) : (
+          <>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search projects…"
+                aria-label="Search projects"
+                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
+                aria-label="Filter by status"
+                className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+              >
+                <option value="all">All statuses</option>
+                <option value="idle">Idle</option>
+                <option value="analyzing">Analyzing</option>
+                <option value="ready">Ready</option>
+                <option value="exporting">Exporting</option>
+                <option value="error">Error</option>
+              </select>
+            </div>
+            {filteredProjects.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center border border-zinc-800 rounded-2xl bg-zinc-900/40">
+                <h3 className="text-lg font-medium text-white">No projects match your filters</h3>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-4 text-sm font-medium text-indigo-400 hover:text-indigo-300"
+                >
+                  Clear filters
+                </button>
+              </div>
+            ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((p) => {
+            {filteredProjects.map((p) => {
               const isSelected = selectedIds.has(p.id);
               return (
                 <div
@@ -227,6 +276,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
               );
             })}
           </div>
+            )}
+          </>
         )}
       </div>
     </div>
