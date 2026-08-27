@@ -11,6 +11,7 @@ import { formatProjectIdentity } from '../lib/projectIdentity';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 import { computeKeptDuration, formatDurationPill } from '../lib/keptDuration';
+import { formatBackendHealth } from '../lib/backendHealth';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 
@@ -32,6 +33,7 @@ export const TopBar: React.FC<{
   const [copiedDuration, setCopiedDuration] = useState(false);
   const [copiedCuts, setCopiedCuts] = useState(false);
   const [copiedIdentity, setCopiedIdentity] = useState(false);
+  const [copiedHealth, setCopiedHealth] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -89,6 +91,13 @@ export const TopBar: React.FC<{
       window.setTimeout(() => setCopiedDuration(false), 2000);
     } catch (err) {
       reportError('copy-duration', err);
+  const handleCopyHealth = async () => {
+    try {
+      await navigator.clipboard.writeText(formatBackendHealth(health));
+      setCopiedHealth(true);
+      window.setTimeout(() => setCopiedHealth(false), 2000);
+    } catch (err) {
+      reportError('copy-health', err);
     }
   };
 
@@ -262,9 +271,12 @@ export const TopBar: React.FC<{
       )}
 
       {/* Health Indicator */}
-      <div 
-        className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800"
+      <button
+        type="button"
+        onClick={handleCopyHealth}
+        className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-600"
         title={`Backend Status: ${health.toUpperCase()}`}
+        aria-label="Copy backend status"
       >
         <span className={`w-2 h-2 rounded-full ${
           health === 'live' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
@@ -272,7 +284,8 @@ export const TopBar: React.FC<{
           'bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]'
         }`} />
         <span className="text-[10px] font-medium text-zinc-400 capitalize">{health}</span>
-      </div>
+        {copiedHealth ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500" />}
+      </button>
 
       {showAnalyzeModal && (
         <AnalyzeModal

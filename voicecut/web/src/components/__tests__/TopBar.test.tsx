@@ -62,6 +62,22 @@ describe('TopBar', () => {
     expect(await screen.findByText('live')).toBeInTheDocument()
   })
 
+  it('copies backend health from the status chip', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await screen.findByText('live')
+    await user.click(screen.getByRole('button', { name: /copy backend status/i }))
+    expect(writeText).toHaveBeenCalledWith('Backend status: live')
+  })
+
   it('shows degraded when health is not healthy', async () => {
     vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'degraded' })
     render(
