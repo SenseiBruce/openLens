@@ -7,6 +7,8 @@
 # by the following command:
 #
 #    pip-compile --allow-unsafe --generate-hashes --output-file=voicecut/requirements.lock --strip-extras voicecut/requirements.txt
+# by the following command:
+#
 #    pip-compile --allow-unsafe --generate-hashes --output-file=/tmp/requirements.lock --strip-extras /agent/repos/openLens/voicecut/requirements.txt
 #
 aiohappyeyeballs==2.7.1 \
@@ -2258,6 +2260,7 @@ typing-extensions==4.16.0 \
     #   starlette
     #   soundfile
     #   sqlalchemy
+    #   starlette
     #   typing-inspection
 typing-inspection==0.4.4 \
     --hash=sha256:547274fa6b0a561ccf549cc9524b999a578e737d015d8709d021f9d0d13bea47 \
