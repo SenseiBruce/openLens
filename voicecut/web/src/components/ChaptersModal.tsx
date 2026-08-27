@@ -6,6 +6,8 @@ import { formatChapterTimestamps } from '../lib/chapterClipboard';
 import { X, Loader2, Sparkles, Settings2 } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
+import { formatChapterModel } from '../lib/chapterModel';
+import { reportError } from '../lib/errorReporter';
 
 export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { project, setProject } = useProjectStore();
@@ -109,7 +111,23 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 </div>
 
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1">Model Name (litellm format)</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs text-zinc-400">Model Name (litellm format)</label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(formatChapterModel(modelName));
+                        } catch (err) {
+                          reportError('copy-chapter-model', err);
+                        }
+                      }}
+                      className="text-xs text-indigo-400 hover:text-indigo-300"
+                      aria-label="Copy chapter model"
+                    >
+                      Copy
+                    </button>
+                  </div>
                   <input 
                     type="text"
                     value={modelName}
