@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { computeKeptDuration, formatKeptDurationSummary } from '../keptDuration'
-import { computeKeptDuration, formatDurationPill } from '../keptDuration'
-import { computeKeptDuration } from '../keptDuration'
+import {
+  computeKeptDuration,
+  formatDurationPill,
+  formatKeptDurationSummary,
+} from '../keptDuration'
 
 describe('computeKeptDuration', () => {
   it('returns zeros without a project or duration', () => {
@@ -27,6 +29,9 @@ describe('formatKeptDurationSummary', () => {
     expect(
       formatKeptDurationSummary({ totalDur: 10, keptDur: 7, removedDur: 3 }),
     ).toBe('Kept 0:07 / 0:10\nRemoved 0:03')
+  })
+})
+
 describe('formatDurationPill', () => {
   it('formats kept, total, and removed time', () => {
     expect(

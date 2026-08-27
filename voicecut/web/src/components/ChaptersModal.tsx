@@ -3,9 +3,6 @@ import { X, Loader2, Sparkles, Settings2, Copy, Check } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { formatChapterTimestamps } from '../lib/chapterClipboard';
-import { X, Loader2, Sparkles, Settings2 } from 'lucide-react';
-import { useProjectStore } from '../store/useProjectStore';
-import { apiClient } from '../api/client';
 import { formatChapterModel } from '../lib/chapterModel';
 import { reportError } from '../lib/errorReporter';
 
@@ -191,7 +188,6 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   {copied ? 'Copied!' : 'Copy timestamps'}
                 </button>
-              <div className="pt-4 border-t border-zinc-800 text-center">
                 <button
                   onClick={handleGenerate}
                   disabled={loading}

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Restore VoiceCut UI files that were concatenated during stacked PR merges.
 - Timeline keyboard shortcuts: `J`/`L` (or `[`/`]`) jump cuts, `X` cuts, `K` keeps, `Z`/`U` undo last keep/cut
 - Transcript toolbar: search, copy plain text, and export SRT
 - Project list search and status filter on the home screen

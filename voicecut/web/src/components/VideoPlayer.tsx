@@ -3,8 +3,6 @@ import { Check, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { formatVideoFilename } from '../lib/videoFilename';
 import { reportError } from '../lib/errorReporter';
-import React, { useRef, useEffect } from 'react';
-import { useProjectStore } from '../store/useProjectStore';
 
 export const VideoPlayer: React.FC = () => {
   const { project, setCurrentTime, seekTo, clearSeekTo, skipCuts } = useProjectStore();

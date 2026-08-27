@@ -41,10 +41,6 @@ export function formatKeptDurationSummary(dur: {
     lines.push(`Removed ${formatClock(dur.removedDur)}`)
   }
   return lines.join('\n')
-  const safe = Math.max(0, Math.floor(seconds))
-  const m = Math.floor(safe / 60)
-  const sec = safe % 60
-  return `${m}:${sec.toString().padStart(2, '0')}`
 }
 
 export function formatDurationPill(project: DurationProject): string {
