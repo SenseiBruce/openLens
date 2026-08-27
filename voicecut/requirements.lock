@@ -9,6 +9,8 @@
 #    pip-compile --allow-unsafe --generate-hashes --output-file=voicecut/requirements.lock --strip-extras voicecut/requirements.txt
 # by the following command:
 #
+# by the following command:
+#
 #    pip-compile --allow-unsafe --generate-hashes --output-file=/tmp/requirements.lock --strip-extras /agent/repos/openLens/voicecut/requirements.txt
 #
 aiohappyeyeballs==2.7.1 \
