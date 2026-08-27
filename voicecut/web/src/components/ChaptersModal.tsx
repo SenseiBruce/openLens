@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Loader2, Sparkles, Settings2 } from 'lucide-react';
+import { X, Loader2, Sparkles, Settings2, Copy, Check } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
+import { formatChapterTimestamps } from '../lib/chapterClipboard';
 
 export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { project, setProject } = useProjectStore();
@@ -13,6 +14,7 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   const [provider, setProvider] = useState<'google' | 'openrouter' | 'custom'>('google');
   const [modelName, setModelName] = useState('gemini/gemini-2.5-flash');
   const [apiKey, setApiKey] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Handle provider preset changes
   const handleProviderChange = (newProvider: 'google' | 'openrouter' | 'custom') => {
@@ -33,6 +35,17 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       setError(err.message || 'Failed to generate chapters');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyTimestamps = async () => {
+    if (!project?.chapters?.length) return;
+    try {
+      await navigator.clipboard.writeText(formatChapterTimestamps(project.chapters));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
     }
   };
 
@@ -148,7 +161,15 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 </div>
               ))}
               
-              <div className="pt-4 border-t border-zinc-800 text-center">
+              <div className="pt-4 border-t border-zinc-800 text-center flex items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleCopyTimestamps}
+                  className="inline-flex items-center gap-2 text-zinc-300 hover:text-white text-xs font-medium transition-colors"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  {copied ? 'Copied!' : 'Copy timestamps'}
+                </button>
                 <button
                   onClick={handleGenerate}
                   disabled={loading}
