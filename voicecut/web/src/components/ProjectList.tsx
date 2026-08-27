@@ -9,6 +9,11 @@ import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lu
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { formatSourceDuration } from '../lib/sourceDuration';
+import React, { useEffect, useState } from 'react';
+import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
+import { formatProjectName } from '../lib/projectName';
 import type { ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -41,6 +46,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
     setStatusFilter('all');
   };
   const [copiedDurationId, setCopiedDurationId] = useState<string | null>(null);
+  const [copiedNameId, setCopiedNameId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -105,6 +111,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
       window.setTimeout(() => setCopiedDurationId(null), 2000);
     } catch (err) {
       reportError('copy-source-duration', err);
+  const copyProjectName = async (e: React.MouseEvent, project: ProjectSummary) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(formatProjectName(project.name));
+      setCopiedNameId(project.id);
+      window.setTimeout(() => setCopiedNameId(null), 2000);
+    } catch (err) {
+      reportError('copy-project-name', err);
     }
   };
 
@@ -256,6 +270,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                         <h3 className="text-sm font-semibold text-white truncate" title={p.name}>
                           {p.name}
                         </h3>
+                        <button
+                          type="button"
+                          onClick={(e) => copyProjectName(e, p)}
+                          className="mt-1 p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                          title="Copy project name"
+                          aria-label={`Copy project name for ${p.name}`}
+                        >
+                          {copiedNameId === p.id ? (
+                            <Check className="w-3 h-3 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-500">
                           <span className={
                             p.status === 'ready' ? 'text-green-400' :
