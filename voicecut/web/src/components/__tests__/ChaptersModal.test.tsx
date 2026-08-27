@@ -2,7 +2,6 @@ import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ChaptersModal } from '../ChaptersModal'
-import { apiClient } from '../../api/client'
 import { useProjectStore } from '../../store/useProjectStore'
 import type { Project } from '../../types'
 
