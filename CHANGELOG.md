@@ -13,6 +13,7 @@
 - Copy kept / total / removed duration from the TopBar pill.
 - Copy backend health (live/degraded/offline) from the TopBar chip.
 - Copy Skip Cuts on/off from the TopBar without toggling the setting.
+- Copy the current project status (idle/analyzing/ready/…) from the TopBar.
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).
