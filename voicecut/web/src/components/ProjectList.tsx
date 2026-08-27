@@ -1,29 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Scissors, Upload, Clock, Loader2, Trash2, Video } from 'lucide-react';
+import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { filterProjects } from '../lib/projectListFilters';
-import type { ProjectStatus, ProjectSummary } from '../types';
-import React, { useEffect, useState } from 'react';
-import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
-import { apiClient } from '../api/client';
-import { reportError } from '../lib/errorReporter';
-import { formatSourceDuration } from '../lib/sourceDuration';
-import React, { useEffect, useState } from 'react';
-import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
-import { apiClient } from '../api/client';
-import { reportError } from '../lib/errorReporter';
-import { formatProjectName } from '../lib/projectName';
-import React, { useEffect, useState } from 'react';
-import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
-import { apiClient } from '../api/client';
-import { reportError } from '../lib/errorReporter';
 import { formatProjectDate } from '../lib/projectDate';
-import React, { useEffect, useState } from 'react';
-import { Scissors, Upload, Clock, Loader2, Trash2, Video } from 'lucide-react';
-import { apiClient } from '../api/client';
-import { reportError } from '../lib/errorReporter';
-import type { ProjectSummary } from '../types';
+import { formatProjectName } from '../lib/projectName';
+import { formatSourceDuration } from '../lib/sourceDuration';
+import type { ProjectStatus, ProjectSummary } from '../types';
 
 interface ProjectListProps {
   onSelect: (projectId: string) => void;
@@ -54,9 +37,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
     setSearchQuery('');
     setStatusFilter('all');
   };
-  const [copiedDurationId, setCopiedDurationId] = useState<string | null>(null);
-  const [copiedNameId, setCopiedNameId] = useState<string | null>(null);
-  const [copiedDateId, setCopiedDateId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -113,33 +93,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
     });
   };
 
-  const copySourceDuration = async (e: React.MouseEvent, project: ProjectSummary) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(formatSourceDuration(project.video_duration));
-      setCopiedDurationId(project.id);
-      window.setTimeout(() => setCopiedDurationId(null), 2000);
-    } catch (err) {
-      reportError('copy-source-duration', err);
-  const copyProjectName = async (e: React.MouseEvent, project: ProjectSummary) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(formatProjectName(project.name));
-      setCopiedNameId(project.id);
-      window.setTimeout(() => setCopiedNameId(null), 2000);
-    } catch (err) {
-      reportError('copy-project-name', err);
-  const copyProjectDate = async (e: React.MouseEvent, project: ProjectSummary) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(formatProjectDate(project.created_at));
-      setCopiedDateId(project.id);
-      window.setTimeout(() => setCopiedDateId(null), 2000);
-    } catch (err) {
-      reportError('copy-project-date', err);
-    }
-  };
-
   const handleCardClick = (id: string) => {
     if (isSelectMode) {
       toggleSelect(id);
@@ -180,16 +133,11 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                     setSelectedIds(new Set());
                   } else {
                     setSelectedIds(new Set(filteredProjects.map(p => p.id)));
-                  if (selectedIds.size === projects.length) {
-                    setSelectedIds(new Set());
-                  } else {
-                    setSelectedIds(new Set(projects.map(p => p.id)));
                   }
                 }}
                 className="text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 px-4 py-2.5 rounded-lg transition-colors"
               >
                 {selectedIds.size === filteredProjects.length && filteredProjects.length > 0 ? 'Deselect All' : 'Select All'}
-                {selectedIds.size === projects.length ? 'Deselect All' : 'Select All'}
               </button>
             )}
 
@@ -265,8 +213,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
             ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProjects.map((p) => {
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((p) => {
               const isSelected = selectedIds.has(p.id);
               return (
                 <div
@@ -297,16 +243,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                         </h3>
                         <button
                           type="button"
-                          onClick={(e) => copyProjectName(e, p)}
-                          className="mt-1 p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
-                          title="Copy project name"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void navigator.clipboard.writeText(formatProjectName(p.name)).catch(() => undefined);
+                          }}
+                          className="text-[10px] text-indigo-400 hover:text-indigo-300"
                           aria-label={`Copy project name for ${p.name}`}
                         >
-                          {copiedNameId === p.id ? (
-                            <Check className="w-3 h-3 text-emerald-400" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
+                          <Copy className="w-3 h-3" />
                         </button>
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-500">
                           <span className={
@@ -328,36 +272,29 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                       {p.video_duration ? fmt(p.video_duration) : '--:--'}
                       <button
                         type="button"
-                        onClick={(e) => copySourceDuration(e, p)}
-                        className="p-1 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
-                        title="Copy source duration"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void navigator.clipboard.writeText(formatSourceDuration(p.video_duration)).catch(() => undefined);
+                        }}
+                        className="text-[10px] text-indigo-400 hover:text-indigo-300"
                         aria-label={`Copy source duration for ${p.name}`}
                       >
-                        {copiedDurationId === p.id ? (
-                          <Check className="w-3 h-3 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
+                        <Copy className="w-3 h-3" />
                       </button>
                     </div>
                     <span className="flex items-center gap-1">
                       {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
                       <button
                         type="button"
-                        onClick={(e) => copyProjectDate(e, p)}
-                        className="p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
-                        title="Copy project date"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void navigator.clipboard.writeText(formatProjectDate(p.created_at)).catch(() => undefined);
+                        }}
+                        className="text-[10px] text-indigo-400 hover:text-indigo-300"
                         aria-label={`Copy project date for ${p.name}`}
                       >
-                        {copiedDateId === p.id ? (
-                          <Check className="w-3 h-3 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
+                        <Copy className="w-3 h-3" />
                       </button>
-                    </div>
-                    <span>
-                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
                     </span>
                   </div>
 

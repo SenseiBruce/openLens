@@ -36,7 +36,6 @@ describe('AnalyzeModal', () => {
   })
 
   it('copies the spoken language', async () => {
-  it('copies the custom prompt', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -46,6 +45,16 @@ describe('AnalyzeModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /copy spoken language/i }))
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('Spoken language: Hinglish')
+    })
+  })
+
+  it('copies the custom prompt', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /copy custom prompt/i }))
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('Custom prompt: names: Kinshuk')

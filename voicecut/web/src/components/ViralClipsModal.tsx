@@ -9,7 +9,6 @@ export function ViralClipsModal({ onClose }: { onClose: () => void }) {
   const { project } = useProjectStore();
   const [apiKey, setApiKey] = useState('');
   const [targetLength, setTargetLength] = useState<ViralClipLength>(() => loadViralClipLength());
-  const [targetLength, setTargetLength] = useState(30);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [clips, setClips] = useState<any[]>([]);
@@ -63,7 +62,6 @@ export function ViralClipsModal({ onClose }: { onClose: () => void }) {
                       setTargetLength(next)
                       saveViralClipLength(next)
                     }}
-                    onChange={(e) => setTargetLength(Number(e.target.value))}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                   >
                     <option value={15}>15 seconds (Short/Punchy)</option>

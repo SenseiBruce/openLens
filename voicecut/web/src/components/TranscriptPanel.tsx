@@ -10,10 +10,6 @@ import {
   wordMatchesQuery,
 } from '../lib/transcriptUtils';
 import { reportError } from '../lib/errorReporter';
-import React, { useRef, useEffect } from 'react';
-import { useProjectStore } from '../store/useProjectStore';
-import clsx from 'clsx';
-import { Search, Copy, Download, AlignLeft } from 'lucide-react';
 
 export const TranscriptPanel: React.FC = () => {
   const { project, currentTime, setSeekTo, updateCutStatus } = useProjectStore();
@@ -36,8 +32,6 @@ export const TranscriptPanel: React.FC = () => {
     );
   }
 
-  // Interleave words and cuts sorted by start time
-  const elements: ({ type: 'word'; data: any } | { type: 'cut'; data: any })[] = [];
   const textItems = project.words.length > 0
     ? project.words
     : project.transcript_segments.map(seg => ({ word: seg.text, start: seg.start, end: seg.end }));
@@ -107,13 +101,6 @@ export const TranscriptPanel: React.FC = () => {
             onClick={handleExportSrt}
             className="text-zinc-600 hover:text-zinc-300 transition-colors"
           >
-          <button title="Search" className="text-zinc-600 hover:text-zinc-300 transition-colors">
-            <Search className="w-3.5 h-3.5" />
-          </button>
-          <button title="Copy" className="text-zinc-600 hover:text-zinc-300 transition-colors">
-            <Copy className="w-3.5 h-3.5" />
-          </button>
-          <button title="Export SRT" className="text-zinc-600 hover:text-zinc-300 transition-colors">
             <Download className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -155,17 +142,6 @@ export const TranscriptPanel: React.FC = () => {
                     !isMatch && isActive && 'bg-indigo-500/25 text-white font-medium',
                     !isMatch && !isActive && isPast && 'text-zinc-300 hover:bg-zinc-800',
                     !isMatch && !isActive && !isPast && 'text-zinc-600 hover:bg-zinc-800'
-              return (
-                <span
-                  key={`w-${idx}`}
-                  ref={isActive ? (activeRef as any) : undefined}
-                  className={clsx(
-                    'cursor-pointer rounded px-0.5 transition-all duration-150',
-                    isActive
-                      ? 'bg-indigo-500/25 text-white font-medium'
-                      : isPast
-                        ? 'text-zinc-300 hover:bg-zinc-800'
-                        : 'text-zinc-600 hover:bg-zinc-800'
                   )}
                   onClick={() => setSeekTo(item.start)}
                 >

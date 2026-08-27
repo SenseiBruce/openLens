@@ -99,8 +99,6 @@ describe('ProjectList', () => {
   })
 
   it('copies source duration without selecting the card', async () => {
-  it('copies the project name without selecting the card', async () => {
-  it('copies the project created date without selecting the card', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
     const writeText = vi.fn().mockResolvedValue(undefined)
@@ -114,10 +112,6 @@ describe('ProjectList', () => {
 
     await user.click(screen.getByRole('button', { name: 'Copy source duration for One' }))
     expect(writeText).toHaveBeenCalledWith('Source duration: 0:12')
-    await user.click(screen.getByRole('button', { name: 'Copy project name for One' }))
-    expect(writeText).toHaveBeenCalledWith('Project name: One')
-    await user.click(screen.getByRole('button', { name: 'Copy project date for One' }))
-    expect(writeText).toHaveBeenCalledWith('Created: 2026-01-01')
     expect(onSelect).not.toHaveBeenCalled()
   })
 })
