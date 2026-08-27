@@ -8,6 +8,7 @@
 - Chapters modal “Copy timestamps” pastes YouTube-style `0:00 Title` lines for descriptions
 - Persist last analysis settings (Whisper model, gap, language, prompt) in `localStorage`
 - Export dialog remembers the last output resolution in localStorage.
+- Viral clips dialog remembers the last target length (15/30/60s) in localStorage.
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).
