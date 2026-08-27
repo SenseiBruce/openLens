@@ -10,6 +10,8 @@ import {
   type StoredExportResolution,
 } from '../lib/exportResolutionStorage';
 import { formatExportFiles } from '../lib/exportFilesClipboard';
+import { formatOriginalResolution } from '../lib/originalResolution';
+import { reportError } from '../lib/errorReporter';
 
 interface ExportModalProps {
   onClose: () => void;
@@ -91,8 +93,25 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
         {phase === 'picking' && (
           <>
             <h2 className="text-xl font-bold mb-1">Export Video</h2>
-            <p className="text-sm text-zinc-400 mb-6">
-              Original resolution: <span className="text-white font-medium">{originalHeight}p</span>
+            <p className="text-sm text-zinc-400 mb-6 flex items-center gap-2">
+              <span>
+                Original resolution: <span className="text-white font-medium">{originalHeight}p</span>
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatOriginalResolution(originalHeight));
+                  } catch (err) {
+                    reportError('copy-original-resolution', err);
+                  }
+                }}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                aria-label="Copy original resolution"
+                title="Copy original resolution"
+              >
+                Copy
+              </button>
             </p>
 
             <label className="block text-sm font-medium text-zinc-300 mb-2">

@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ExportModal } from '../ExportModal'
@@ -79,5 +79,19 @@ describe('ExportModal', () => {
     })
     expect(await screen.findByText('Export Complete')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /copy paths/i })).toBeInTheDocument()
+  })
+
+  it('copies original resolution to the clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    render(<ExportModal onClose={vi.fn()} />)
+    await screen.findByText('1080p Full HD')
+    fireEvent.click(screen.getByRole('button', { name: /copy original resolution/i }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Original resolution: 1080p')
+    })
   })
 })
