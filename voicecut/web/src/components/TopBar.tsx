@@ -1,18 +1,12 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles } from 'lucide-react';
+import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
-import { computeKeptDuration } from '../lib/keptDuration';
+import { computeKeptDuration, formatClock, formatKeptDurationSummary } from '../lib/keptDuration';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 import { List } from 'lucide-react';
-
-function fmt(s: number): string {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${m}:${sec.toString().padStart(2, '0')}`;
-}
 
 export const TopBar: React.FC<{
   onAnalyzeStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
@@ -23,6 +17,7 @@ export const TopBar: React.FC<{
   const [showChaptersModal, setShowChaptersModal] = React.useState(false);
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
   const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
+  const [copiedDuration, setCopiedDuration] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -99,16 +94,35 @@ export const TopBar: React.FC<{
 
             {/* Times */}
             <span className="text-xs font-mono text-white tabular-nums">
-              {fmt(keptDur)}
+              {formatClock(keptDur)}
             </span>
             <span className="text-[10px] text-zinc-500 tabular-nums">
-              / {fmt(totalDur)}
+              / {formatClock(totalDur)}
             </span>
             {removedDur > 0.5 && (
               <span className="text-[10px] font-medium text-red-400 tabular-nums">
-                -{fmt(removedDur)}
+                -{formatClock(removedDur)}
               </span>
             )}
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    formatKeptDurationSummary({ totalDur, keptDur, removedDur }),
+                  );
+                  setCopiedDuration(true);
+                  window.setTimeout(() => setCopiedDuration(false), 2000);
+                } catch {
+                  setCopiedDuration(false);
+                }
+              }}
+              className="inline-flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white"
+              title="Copy kept duration"
+            >
+              {copiedDuration ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              {copiedDuration ? 'Copied' : 'Copy'}
+            </button>
           </div>
         </div>
       ) : (
