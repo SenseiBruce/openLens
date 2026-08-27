@@ -16,6 +16,7 @@ vi.mock('../../api/client', () => ({
     deleteProject: vi.fn(),
     analyzeProjectStream: vi.fn(),
     saveDecisions: vi.fn().mockResolvedValue(undefined),
+    updateCutDecision: vi.fn().mockResolvedValue(undefined),
   },
 }))
 

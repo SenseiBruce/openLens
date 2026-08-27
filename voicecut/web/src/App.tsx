@@ -9,11 +9,12 @@ import { ViralClipsModal } from './components/ViralClipsModal';
 import { useProjectStore } from './store/useProjectStore';
 import { apiClient } from './api/client';
 import { reportError } from './lib/errorReporter';
+import { cutAtPlayhead, isTypingTarget, nextCut, previousCut } from './lib/cutHotkeys';
 import { ErrorBanner } from './components/ErrorBanner';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 function App() {
-  const { project, setProject, isUploading, setIsUploading } = useProjectStore();
+  const { project, setProject, isUploading, setIsUploading, currentTime, updateCutStatus, undoLastCutDecision, setSeekTo } = useProjectStore();
   const [progressMsg, setProgressMsg] = useState('');
   const [showExport, setShowExport] = useState(false);
   const [showViralClips, setShowViralClips] = useState(false);
@@ -33,6 +34,42 @@ function App() {
         .catch(err => reportError('load_project', err));
     }
   }, [setProject]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) return;
+      if (!project?.candidate_cuts.length || project.status !== 'ready') return;
+      const cuts = project.candidate_cuts;
+      const key = event.key.toLowerCase();
+      if (key === 'z' || key === 'u') {
+        event.preventDefault();
+        undoLastCutDecision();
+        return;
+      }
+      if (key === 'x' || key === 'k') {
+        const cut = cutAtPlayhead(cuts, currentTime);
+        if (!cut) return;
+        event.preventDefault();
+        updateCutStatus(cut.id, key === 'x' ? 'cut' : 'kept');
+        return;
+      }
+      if (key === 'j' || event.key === '[') {
+        const cut = previousCut(cuts, currentTime);
+        if (!cut) return;
+        event.preventDefault();
+        setSeekTo(cut.start);
+        return;
+      }
+      if (key === 'l' || event.key === ']') {
+        const cut = nextCut(cuts, currentTime);
+        if (!cut) return;
+        event.preventDefault();
+        setSeekTo(cut.start);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [project, currentTime, updateCutStatus, undoLastCutDecision, setSeekTo]);
 
   const handleAnalyzeStart = (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => {
     if (!project) return;

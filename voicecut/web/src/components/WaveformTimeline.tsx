@@ -111,6 +111,7 @@ export const WaveformTimeline: React.FC = () => {
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-indigo-500/40 inline-block"/>Speech</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red-500/50 inline-block"/>Cut</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500/40 inline-block"/>Kept</span>
+          <span className="font-mono">J/L jump · X cut · K keep</span>
         </div>
       </div>
       {/* Timeline ticks */}
