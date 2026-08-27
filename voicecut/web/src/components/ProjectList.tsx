@@ -14,6 +14,11 @@ import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lu
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { formatProjectName } from '../lib/projectName';
+import React, { useEffect, useState } from 'react';
+import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lucide-react';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
+import { formatProjectDate } from '../lib/projectDate';
 import type { ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -47,6 +52,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
   };
   const [copiedDurationId, setCopiedDurationId] = useState<string | null>(null);
   const [copiedNameId, setCopiedNameId] = useState<string | null>(null);
+  const [copiedDateId, setCopiedDateId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -119,6 +125,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
       window.setTimeout(() => setCopiedNameId(null), 2000);
     } catch (err) {
       reportError('copy-project-name', err);
+  const copyProjectDate = async (e: React.MouseEvent, project: ProjectSummary) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(formatProjectDate(project.created_at));
+      setCopiedDateId(project.id);
+      window.setTimeout(() => setCopiedDateId(null), 2000);
+    } catch (err) {
+      reportError('copy-project-date', err);
     }
   };
 
@@ -315,8 +329,21 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                         )}
                       </button>
                     </div>
-                    <span>
+                    <span className="flex items-center gap-1">
                       {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
+                      <button
+                        type="button"
+                        onClick={(e) => copyProjectDate(e, p)}
+                        className="p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                        title="Copy project date"
+                        aria-label={`Copy project date for ${p.name}`}
+                      >
+                        {copiedDateId === p.id ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </button>
                     </span>
                   </div>
 
