@@ -18,6 +18,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
       export_formats: ['mp4'],
       min_speech_confidence: 0.5,
       language: 'hinglish',
+      initial_prompt: 'names: Kinshuk',
     },
     speech_segments: [],
     transcript_segments: [],
@@ -35,6 +36,7 @@ describe('AnalyzeModal', () => {
   })
 
   it('copies the spoken language', async () => {
+  it('copies the custom prompt', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -44,6 +46,9 @@ describe('AnalyzeModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /copy spoken language/i }))
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('Spoken language: Hinglish')
+    fireEvent.click(screen.getByRole('button', { name: /copy custom prompt/i }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Custom prompt: names: Kinshuk')
     })
   })
 })

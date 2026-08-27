@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, X, Info } from 'lucide-react';
+import { Settings, X, Info, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettingsStorage';
 import { Settings, X, Info, Copy } from 'lucide-react';
@@ -8,6 +8,7 @@ import { formatMinGap } from '../lib/minGap';
 import { Settings, X, Info, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
+import { formatInitialPrompt } from '../lib/initialPrompt';
 import { reportError } from '../lib/errorReporter';
 
 export const AnalyzeModal: React.FC<{
@@ -109,7 +110,24 @@ export const AnalyzeModal: React.FC<{
 
           {/* Custom Prompt */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-zinc-300">Custom Prompt (Optional)</label>
+            <label className="text-sm font-medium text-zinc-300 flex justify-between items-center gap-2">
+              Custom Prompt (Optional)
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatInitialPrompt(initialPrompt));
+                  } catch (err) {
+                    reportError('copy-initial-prompt', err);
+                  }
+                }}
+                className="p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                title="Copy custom prompt"
+                aria-label="Copy custom prompt"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+            </label>
             <textarea
               value={initialPrompt}
               onChange={(e) => setInitialPrompt(e.target.value)}

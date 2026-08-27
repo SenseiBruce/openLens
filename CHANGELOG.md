@@ -21,6 +21,7 @@
 - Editor top bar can copy the project Whisper model.
 - Analysis settings can copy the minimum silence gap.
 - Analysis Settings can copy the selected spoken language.
+- Analysis Settings can copy the optional custom transcription prompt.
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).
