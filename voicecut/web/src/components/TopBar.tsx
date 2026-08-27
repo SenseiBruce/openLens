@@ -18,6 +18,14 @@ import { formatProjectStatus } from '../lib/projectStatus';
 import { formatWhisperModel } from '../lib/whisperModel';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
+import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles } from 'lucide-react';
+import { useProjectStore } from '../store/useProjectStore';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
+import { computeKeptDuration } from '../lib/keptDuration';
+import { AnalyzeModal } from './AnalyzeModal';
+import { ChaptersModal } from './ChaptersModal';
+import { List } from 'lucide-react';
 
 function fmt(s: number): string {
   const m = Math.floor(s / 60);
@@ -202,6 +210,16 @@ export const TopBar: React.FC<{
             >
               {copiedDuration ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
             </button>
+              {fmt(keptDur)}
+            </span>
+            <span className="text-[10px] text-zinc-500 tabular-nums">
+              / {fmt(totalDur)}
+            </span>
+            {removedDur > 0.5 && (
+              <span className="text-[10px] font-medium text-red-400 tabular-nums">
+                -{fmt(removedDur)}
+              </span>
+            )}
           </div>
         </div>
       ) : (
@@ -281,6 +299,8 @@ export const TopBar: React.FC<{
             {project.settings?.whisper_model || 'model'}
           </button>
 
+          </label>
+
           <label className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md px-3 py-1.5 transition-colors">
             <Upload className="w-3.5 h-3.5" />
             Import Video
@@ -336,6 +356,9 @@ export const TopBar: React.FC<{
         className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-600"
         title={`Backend Status: ${health.toUpperCase()}`}
         aria-label="Copy backend status"
+      <div 
+        className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800"
+        title={`Backend Status: ${health.toUpperCase()}`}
       >
         <span className={`w-2 h-2 rounded-full ${
           health === 'live' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
@@ -345,6 +368,7 @@ export const TopBar: React.FC<{
         <span className="text-[10px] font-medium text-zinc-400 capitalize">{health}</span>
         {copiedHealth ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500" />}
       </button>
+      </div>
 
       {showAnalyzeModal && (
         <AnalyzeModal

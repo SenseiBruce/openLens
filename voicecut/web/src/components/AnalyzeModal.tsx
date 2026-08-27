@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Settings, X, Info } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettingsStorage';
+import { Settings, X, Info, Copy } from 'lucide-react';
+import { useProjectStore } from '../store/useProjectStore';
+import { formatMinGap } from '../lib/minGap';
+import { reportError } from '../lib/errorReporter';
 
 export const AnalyzeModal: React.FC<{
   onClose: () => void;
@@ -13,6 +17,10 @@ export const AnalyzeModal: React.FC<{
   const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || stored?.min_gap_duration || 1.0);
   const [language, setLanguage] = useState<string>(project?.settings?.language || stored?.language || 'hinglish');
   const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || stored?.initial_prompt || '');
+  const [model, setModel] = useState<string>(project?.settings?.whisper_model || 'small');
+  const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || 1.0);
+  const [language, setLanguage] = useState<string>(project?.settings?.language || 'hinglish');
+  const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || '');
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -100,6 +108,26 @@ export const AnalyzeModal: React.FC<{
             <label className="text-sm font-medium text-zinc-300 flex justify-between">
               Minimum Silence Gap
               <span className="text-indigo-400 tabular-nums">{minGap.toFixed(1)}s</span>
+            <label className="text-sm font-medium text-zinc-300 flex justify-between items-center gap-2">
+              Minimum Silence Gap
+              <span className="flex items-center gap-2">
+                <span className="text-indigo-400 tabular-nums">{minGap.toFixed(1)}s</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(formatMinGap(minGap));
+                    } catch (err) {
+                      reportError('copy-min-gap', err);
+                    }
+                  }}
+                  className="p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                  title="Copy minimum silence gap"
+                  aria-label="Copy minimum silence gap"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
+              </span>
             </label>
             <input
               type="range"
@@ -142,6 +170,12 @@ export const AnalyzeModal: React.FC<{
               saveAnalyzeSettings(settings);
               onStart(settings);
             }}
+            onClick={() => onStart({ 
+              whisper_model: model, 
+              min_gap_duration: minGap, 
+              ...(language ? { language } : {}),
+              ...(initialPrompt ? { initial_prompt: initialPrompt } : {})
+            })}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"
           >
             Start Analysis

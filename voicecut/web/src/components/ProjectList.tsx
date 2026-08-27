@@ -19,6 +19,10 @@ import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy, Check } from 'lu
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { formatProjectDate } from '../lib/projectDate';
+import React, { useEffect, useState } from 'react';
+import { Scissors, Upload, Clock, Loader2, Trash2, Video } from 'lucide-react';
+import { apiClient } from '../api/client';
+import { reportError } from '../lib/errorReporter';
 import type { ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -176,11 +180,16 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                     setSelectedIds(new Set());
                   } else {
                     setSelectedIds(new Set(filteredProjects.map(p => p.id)));
+                  if (selectedIds.size === projects.length) {
+                    setSelectedIds(new Set());
+                  } else {
+                    setSelectedIds(new Set(projects.map(p => p.id)));
                   }
                 }}
                 className="text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 px-4 py-2.5 rounded-lg transition-colors"
               >
                 {selectedIds.size === filteredProjects.length && filteredProjects.length > 0 ? 'Deselect All' : 'Select All'}
+                {selectedIds.size === projects.length ? 'Deselect All' : 'Select All'}
               </button>
             )}
 
@@ -256,6 +265,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
             ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProjects.map((p) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map((p) => {
               const isSelected = selectedIds.has(p.id);
               return (
                 <div
@@ -344,6 +355,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                           <Copy className="w-3 h-3" />
                         )}
                       </button>
+                    </div>
+                    <span>
+                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date'}
                     </span>
                   </div>
 

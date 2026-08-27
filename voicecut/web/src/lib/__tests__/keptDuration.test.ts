@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { computeKeptDuration, formatKeptDurationSummary } from '../keptDuration'
 import { computeKeptDuration, formatDurationPill } from '../keptDuration'
+import { computeKeptDuration } from '../keptDuration'
 
 describe('computeKeptDuration', () => {
   it('returns zeros without a project or duration', () => {
