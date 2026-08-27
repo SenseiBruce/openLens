@@ -5,6 +5,9 @@ import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettings
 import { Settings, X, Info, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { formatMinGap } from '../lib/minGap';
+import { Settings, X, Info, Copy } from 'lucide-react';
+import { useProjectStore } from '../store/useProjectStore';
+import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
 import { reportError } from '../lib/errorReporter';
 
 export const AnalyzeModal: React.FC<{
@@ -68,6 +71,24 @@ export const AnalyzeModal: React.FC<{
           {/* Language Selection */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-zinc-300">Spoken Language</label>
+            <label className="text-sm font-medium text-zinc-300 flex justify-between items-center gap-2">
+              Spoken Language
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatAnalyzeLanguage(language));
+                  } catch (err) {
+                    reportError('copy-analyze-language', err);
+                  }
+                }}
+                className="p-0.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                title="Copy spoken language"
+                aria-label="Copy spoken language"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+            </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
