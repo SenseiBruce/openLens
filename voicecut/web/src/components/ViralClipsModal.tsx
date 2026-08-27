@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { X, Loader2, Download, Sparkles } from 'lucide-react';
+import { X, Loader2, Download, Sparkles, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { loadViralClipLength, saveViralClipLength, type ViralClipLength } from '../lib/viralClipLengthStorage';
+import { formatViralClipLength } from '../lib/viralClipLength';
 
 export function ViralClipsModal({ onClose }: { onClose: () => void }) {
   const { project } = useProjectStore();
@@ -54,7 +55,24 @@ export function ViralClipsModal({ onClose }: { onClose: () => void }) {
             <>
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Target Length</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Target Length</label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(formatViralClipLength(targetLength));
+                        } catch {
+                          /* clipboard may be unavailable in tests */
+                        }
+                      }}
+                      className="text-xs text-indigo-400 hover:text-indigo-300"
+                      title="Copy target length"
+                      aria-label="Copy target length"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
                   <select 
                     value={targetLength}
                     onChange={(e) => {

@@ -10,6 +10,7 @@
 - Persist last analysis settings (Whisper model, gap, language, prompt) in `localStorage`
 - Export dialog remembers the last output resolution in localStorage.
 - Viral clips dialog remembers the last target length (15/30/60s) in localStorage.
+- Viral clips dialog can copy the selected target length.
 - Copy project id (and name) from the TopBar name pill while a project has no duration yet.
 - Copy kept / total / removed duration from the TopBar pill.
 - Copy backend health (live/degraded/offline) from the TopBar chip.
