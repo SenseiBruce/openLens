@@ -6,6 +6,7 @@
 - Transcript toolbar: search, copy plain text, and export SRT
 - Project list search and status filter on the home screen
 - Chapters modal “Copy timestamps” pastes YouTube-style `0:00 Title` lines for descriptions
+- Persist last analysis settings (Whisper model, gap, language, prompt) in `localStorage`
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).

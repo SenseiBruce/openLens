@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Settings, X, Info } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
+import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettingsStorage';
 
 export const AnalyzeModal: React.FC<{
   onClose: () => void;
   onStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
 }> = ({ onClose, onStart }) => {
   const { project } = useProjectStore();
-  const [model, setModel] = useState<string>(project?.settings?.whisper_model || 'small');
-  const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || 1.0);
-  const [language, setLanguage] = useState<string>(project?.settings?.language || 'hinglish');
-  const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || '');
+  const stored = loadAnalyzeSettings();
+  const [model, setModel] = useState<string>(project?.settings?.whisper_model || stored?.whisper_model || 'small');
+  const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || stored?.min_gap_duration || 1.0);
+  const [language, setLanguage] = useState<string>(project?.settings?.language || stored?.language || 'hinglish');
+  const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || stored?.initial_prompt || '');
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -130,12 +132,16 @@ export const AnalyzeModal: React.FC<{
             Cancel
           </button>
           <button
-            onClick={() => onStart({ 
-              whisper_model: model, 
-              min_gap_duration: minGap, 
-              ...(language ? { language } : {}),
-              ...(initialPrompt ? { initial_prompt: initialPrompt } : {})
-            })}
+            onClick={() => {
+              const settings = {
+                whisper_model: model,
+                min_gap_duration: minGap,
+                ...(language ? { language } : {}),
+                ...(initialPrompt ? { initial_prompt: initialPrompt } : {}),
+              };
+              saveAnalyzeSettings(settings);
+              onStart(settings);
+            }}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"
           >
             Start Analysis
