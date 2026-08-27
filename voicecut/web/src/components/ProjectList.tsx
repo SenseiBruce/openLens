@@ -248,7 +248,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                             void navigator.clipboard.writeText(formatProjectName(p.name)).catch(() => undefined);
                           }}
                           className="text-[10px] text-indigo-400 hover:text-indigo-300"
-                          aria-label="Copy project name"
+                          aria-label={`Copy project name for ${p.name}`}
                         >
                           <Copy className="w-3 h-3" />
                         </button>
@@ -277,7 +277,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                           void navigator.clipboard.writeText(formatSourceDuration(p.video_duration)).catch(() => undefined);
                         }}
                         className="text-[10px] text-indigo-400 hover:text-indigo-300"
-                        aria-label="Copy source duration"
+                        aria-label={`Copy source duration for ${p.name}`}
                       >
                         <Copy className="w-3 h-3" />
                       </button>
@@ -291,7 +291,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                           void navigator.clipboard.writeText(formatProjectDate(p.created_at)).catch(() => undefined);
                         }}
                         className="text-[10px] text-indigo-400 hover:text-indigo-300"
-                        aria-label="Copy project date"
+                        aria-label={`Copy project date for ${p.name}`}
                       >
                         <Copy className="w-3 h-3" />
                       </button>
