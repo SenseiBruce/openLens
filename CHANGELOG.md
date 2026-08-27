@@ -23,6 +23,7 @@
 - Analysis Settings can copy the selected spoken language.
 - Analysis Settings can copy the optional custom transcription prompt.
 - Export modal can copy the original video resolution.
+- Chapters modal can copy the LiteLLM model name.
 - Runnable pytest and Vitest suites with coverage floors, Docker Compose, and GitHub Actions CI.
 - Structured frontend error reporting (`reportError`) instead of `window.alert`.
 - HuggingFace offline flags documented in `.env.example` (`HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_DATASETS_OFFLINE`).
