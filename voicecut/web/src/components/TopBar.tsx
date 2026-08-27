@@ -1,14 +1,15 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check } from 'lucide-react';
+import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check, List } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { computeKeptDuration, formatClock, formatKeptDurationSummary } from '../lib/keptDuration';
 import { computeKeptDuration } from '../lib/keptDuration';
 import { formatCutDecisionCounts } from '../lib/cutDecisionCounts';
+import { formatProjectIdentity } from '../lib/projectIdentity';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
-import { List } from 'lucide-react';
 
 export const TopBar: React.FC<{
   onAnalyzeStart: (settings: { whisper_model: string; min_gap_duration: number; language?: string; initial_prompt?: string }) => void;
@@ -21,6 +22,7 @@ export const TopBar: React.FC<{
   const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
   const [copiedDuration, setCopiedDuration] = useState(false);
   const [copiedCuts, setCopiedCuts] = useState(false);
+  const [copiedIdentity, setCopiedIdentity] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -60,6 +62,17 @@ export const TopBar: React.FC<{
       reportError('upload', err);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleCopyIdentity = async () => {
+    if (!project) return;
+    try {
+      await navigator.clipboard.writeText(formatProjectIdentity({ id: project.id, name: project.name }));
+      setCopiedIdentity(true);
+      window.setTimeout(() => setCopiedIdentity(false), 2000);
+    } catch (err) {
+      reportError('copy-project-id', err);
     }
   };
 
@@ -147,6 +160,15 @@ export const TopBar: React.FC<{
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-full px-3 py-1 text-xs text-zinc-400">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
               <span className="max-w-48 truncate">{project.name}</span>
+              <button
+                type="button"
+                onClick={handleCopyIdentity}
+                className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"
+                title="Copy project id"
+                aria-label="Copy project id"
+              >
+                {copiedIdentity ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              </button>
             </div>
           </div>
         ) : <div className="flex-1" />
