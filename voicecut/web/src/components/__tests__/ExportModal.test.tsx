@@ -81,6 +81,14 @@ describe('ExportModal', () => {
     expect(screen.getByRole('button', { name: /copy paths/i })).toBeInTheDocument()
   })
 
+  it('persists output format checkboxes', async () => {
+    const user = userEvent.setup()
+    render(<ExportModal onClose={vi.fn()} />)
+    await screen.findByText('1080p Full HD')
+    await user.click(screen.getByRole('checkbox', { name: 'SRT' }))
+    expect(JSON.parse(localStorage.getItem('voicecut_exportFormat') || '[]')).toEqual(['mp4', 'srt'])
+  })
+
   it('copies original resolution to the clipboard', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
