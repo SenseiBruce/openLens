@@ -36,6 +36,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 
 describe('ChaptersModal', () => {
   beforeEach(() => {
+    localStorage.clear()
     useProjectStore.setState({ project: makeProject() })
   })
 
@@ -50,6 +51,17 @@ describe('ChaptersModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /copy chapter model/i }))
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('Chapter model: gemini/gemini-2.5-flash')
+    })
+  })
+
+  it('persists the chapter model name', async () => {
+    render(<ChaptersModal onClose={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('LLM Settings'))
+    fireEvent.change(screen.getByPlaceholderText('e.g. gemini/gemini-2.5-flash'), {
+      target: { value: 'openrouter/auto' },
+    })
+    await waitFor(() => {
+      expect(localStorage.getItem('voicecut_chapterModel')).toBe('openrouter/auto')
     })
   })
 })
