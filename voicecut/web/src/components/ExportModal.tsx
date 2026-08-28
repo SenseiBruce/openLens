@@ -9,6 +9,12 @@ import {
   saveExportResolution,
   type StoredExportResolution,
 } from '../lib/exportResolutionStorage';
+import {
+  EXPORT_FORMAT_OPTIONS,
+  loadExportFormats,
+  saveExportFormats,
+  type StoredExportFormat,
+} from '../lib/exportFormatStorage';
 import { formatExportFiles } from '../lib/exportFilesClipboard';
 import { formatOriginalResolution } from '../lib/originalResolution';
 import { reportError } from '../lib/errorReporter';
@@ -28,6 +34,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const [exportFiles, setExportFiles] = useState<Record<string, string> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [copiedFiles, setCopiedFiles] = useState(false);
+  const [exportFormats, setExportFormats] = useState<StoredExportFormat[]>(() => loadExportFormats());
 
   // Fetch original resolution on mount
   useEffect(() => {
@@ -146,6 +153,39 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                   )}
                 </label>
               ))}
+            </div>
+
+            <label className="block text-sm font-medium text-zinc-300 mt-6 mb-2">
+              Output formats
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {EXPORT_FORMAT_OPTIONS.map((fmt) => {
+                const checked = exportFormats.includes(fmt);
+                return (
+                  <label
+                    key={fmt}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 hover:border-indigo-500 cursor-pointer text-sm"
+                    style={{
+                      backgroundColor: checked ? 'rgba(99,102,241,0.1)' : undefined,
+                      borderColor: checked ? 'rgb(99,102,241)' : undefined,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-indigo-500"
+                      checked={checked}
+                      onChange={() => {
+                        const next = checked
+                          ? exportFormats.filter((item) => item !== fmt)
+                          : [...exportFormats, fmt];
+                        setExportFormats(next);
+                        saveExportFormats(next);
+                      }}
+                    />
+                    {fmt.toUpperCase()}
+                  </label>
+                );
+              })}
             </div>
 
             <button
