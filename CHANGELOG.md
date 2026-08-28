@@ -16,6 +16,7 @@
 - Copy backend health (live/degraded/offline) from the TopBar chip.
 - Copy Skip Cuts on/off from the TopBar without toggling the setting.
 - Copy the current project status (idle/analyzing/ready/…) from the TopBar.
+- Home project cards can copy status without opening the project.
 - Project cards can copy source `video_duration` without opening the project.
 - Project cards can copy the project name without opening the project.
 - Project cards can copy the created date without opening the project.

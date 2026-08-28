@@ -6,6 +6,7 @@ import { filterProjects } from '../lib/projectListFilters';
 import { formatProjectDate } from '../lib/projectDate';
 import { formatProjectName } from '../lib/projectName';
 import { formatSourceDuration } from '../lib/sourceDuration';
+import { formatProjectStatus } from '../lib/projectStatus';
 import type { ProjectStatus, ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -261,6 +262,17 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                           }>
                             • {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void navigator.clipboard.writeText(formatProjectStatus(p.status)).catch(() => undefined);
+                            }}
+                            className="text-[10px] text-indigo-400 hover:text-indigo-300"
+                            aria-label={`Copy project status for ${p.name}`}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
                         </div>
                       </div>
                     </div>
