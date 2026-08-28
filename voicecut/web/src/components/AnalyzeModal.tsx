@@ -4,6 +4,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettingsStorage';
 import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
 import { loadAnalyzeLanguage, saveAnalyzeLanguage } from '../lib/analyzeLanguageStorage';
+import { loadWhisperModel, saveWhisperModel } from '../lib/whisperModelStorage';
 import { formatInitialPrompt } from '../lib/initialPrompt';
 import { formatMinGap } from '../lib/minGap';
 
@@ -14,7 +15,10 @@ export const AnalyzeModal: React.FC<{
   const { project } = useProjectStore();
   const stored = loadAnalyzeSettings();
   const storedLanguage = loadAnalyzeLanguage();
-  const [model, setModel] = useState<string>(project?.settings?.whisper_model || stored?.whisper_model || 'small');
+  const storedModel = loadWhisperModel();
+  const [model, setModel] = useState<string>(
+    storedModel || project?.settings?.whisper_model || stored?.whisper_model || 'small',
+  );
   const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || stored?.min_gap_duration || 1.0);
   const [language, setLanguage] = useState<string>(
     storedLanguage ?? project?.settings?.language ?? stored?.language ?? 'hinglish',
@@ -24,6 +28,10 @@ export const AnalyzeModal: React.FC<{
   useEffect(() => {
     saveAnalyzeLanguage(language);
   }, [language]);
+
+  useEffect(() => {
+    saveWhisperModel(model);
+  }, [model]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -47,8 +55,9 @@ export const AnalyzeModal: React.FC<{
         <div className="p-6 flex flex-col gap-6">
           {/* Whisper Model */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-zinc-300">Transcription Accuracy (Whisper Model)</label>
+            <label htmlFor="analyze-whisper-model" className="text-sm font-medium text-zinc-300">Transcription Accuracy (Whisper Model)</label>
             <select
+              id="analyze-whisper-model"
               value={model}
               onChange={(e) => setModel(e.target.value)}
               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -204,6 +213,7 @@ export const AnalyzeModal: React.FC<{
               };
               saveAnalyzeSettings(settings);
               saveAnalyzeLanguage(language);
+              saveWhisperModel(model);
               onStart(settings);
             }}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"

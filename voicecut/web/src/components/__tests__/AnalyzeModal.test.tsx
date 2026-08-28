@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnalyzeModal } from '../AnalyzeModal'
 import { ANALYZE_LANGUAGE_KEY } from '../../lib/analyzeLanguageStorage'
+import { WHISPER_MODEL_KEY } from '../../lib/whisperModelStorage'
 import { useProjectStore } from '../../store/useProjectStore'
 import type { Project } from '../../types'
 
@@ -69,5 +70,15 @@ describe('AnalyzeModal', () => {
     render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
     await user.selectOptions(screen.getByRole('combobox', { name: /spoken language/i }), 'en')
     expect(localStorage.getItem(ANALYZE_LANGUAGE_KEY)).toBe('en')
+  })
+
+  it('persists Whisper model separately', async () => {
+    const user = userEvent.setup()
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /transcription accuracy/i }),
+      'medium',
+    )
+    expect(localStorage.getItem(WHISPER_MODEL_KEY)).toBe('medium')
   })
 })
