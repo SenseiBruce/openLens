@@ -20,6 +20,7 @@ const projects: ProjectSummary[] = [
 
 describe('ProjectList', () => {
   beforeEach(() => {
+    localStorage.clear()
     vi.mocked(apiClient.getProjects).mockReset()
     vi.mocked(apiClient.deleteProject).mockReset()
     vi.mocked(apiClient.getProjects).mockResolvedValue(projects)
@@ -96,6 +97,18 @@ describe('ProjectList', () => {
     expect(window.confirm).toHaveBeenCalled()
     expect(apiClient.deleteProject).toHaveBeenCalledWith('p1')
     expect(apiClient.deleteProject).not.toHaveBeenCalledWith('p2')
+  })
+
+  it('restores search and status filters from localStorage', async () => {
+    localStorage.setItem(
+      'voicecut_projectListFilters',
+      JSON.stringify({ query: 'Two', status: 'idle' }),
+    )
+    render(<ProjectList onSelect={vi.fn()} onUpload={vi.fn()} isUploading={false} />)
+    await screen.findByText('Two')
+    expect(screen.queryByText('One')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Search projects')).toHaveValue('Two')
+    expect(screen.getByLabelText('Filter by status')).toHaveValue('idle')
   })
 
   it('copies source duration without selecting the card', async () => {

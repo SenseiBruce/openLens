@@ -3,6 +3,7 @@ import { Scissors, Upload, Clock, Loader2, Trash2, Video, Copy } from 'lucide-re
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
 import { filterProjects } from '../lib/projectListFilters';
+import { loadProjectListFilters, saveProjectListFilters } from '../lib/projectListFilterStorage';
 import { formatProjectDate } from '../lib/projectDate';
 import { formatProjectName } from '../lib/projectName';
 import { formatSourceDuration } from '../lib/sourceDuration';
@@ -26,13 +27,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSelectMode, setIsSelectMode] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState(() => loadProjectListFilters().query);
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>(
+    () => loadProjectListFilters().status,
+  );
 
   const filteredProjects = useMemo(
     () => filterProjects(projects, { query: searchQuery, status: statusFilter }),
     [projects, searchQuery, statusFilter],
   );
+
+  useEffect(() => {
+    saveProjectListFilters({ query: searchQuery, status: statusFilter });
+  }, [searchQuery, statusFilter]);
 
   const clearFilters = () => {
     setSearchQuery('');

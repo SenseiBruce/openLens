@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Home project search and status filter persist in localStorage (`voicecut_projectListFilters`).
 - Restore VoiceCut UI files that were concatenated during stacked PR merges.
 - Timeline keyboard shortcuts: `J`/`L` (or `[`/`]`) jump cuts, `X` cuts, `K` keeps, `Z`/`U` undo last keep/cut
 - Transcript toolbar: search, copy plain text, and export SRT
