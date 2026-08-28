@@ -40,6 +40,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 
 describe('TranscriptPanel toolbar', () => {
   beforeEach(() => {
+    localStorage.clear()
     useProjectStore.setState({ project: makeProject(), currentTime: 0 })
     HTMLElement.prototype.scrollIntoView = vi.fn()
   })
@@ -58,5 +59,11 @@ describe('TranscriptPanel toolbar', () => {
     await user.type(screen.getByLabelText('Find in transcript'), 'hello')
     const hit = screen.getByText('Hello')
     expect(hit.className).toContain('bg-amber-400/30')
+  })
+
+  it('restores a persisted transcript search query', () => {
+    localStorage.setItem('voicecut_transcriptSearchQuery', 'hello')
+    render(<TranscriptPanel />)
+    expect(screen.getByLabelText('Find in transcript')).toHaveValue('hello')
   })
 })
