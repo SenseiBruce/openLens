@@ -10,13 +10,21 @@ import {
   wordMatchesQuery,
 } from '../lib/transcriptUtils';
 import { reportError } from '../lib/errorReporter';
+import {
+  loadTranscriptSearchQuery,
+  saveTranscriptSearchQuery,
+} from '../lib/transcriptSearchStorage';
 
 export const TranscriptPanel: React.FC = () => {
   const { project, currentTime, setSeekTo, updateCutStatus } = useProjectStore();
   const activeRef = useRef<HTMLSpanElement>(null);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(() => loadTranscriptSearchQuery().length > 0);
+  const [searchQuery, setSearchQuery] = useState(() => loadTranscriptSearchQuery());
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+
+  useEffect(() => {
+    saveTranscriptSearchQuery(searchQuery);
+  }, [searchQuery]);
 
   // Auto-scroll active word into view
   useEffect(() => {
