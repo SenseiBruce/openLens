@@ -3,7 +3,7 @@ import { Upload, Play, Scissors, Download, Loader2, Clock, Sparkles, Copy, Check
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { reportError } from '../lib/errorReporter';
-import { computeKeptDuration, formatClock, formatDurationPill } from '../lib/keptDuration';
+import { computeKeptDuration, formatClock, formatDurationPill, formatKeptDurationSummary } from '../lib/keptDuration';
 import { formatCutDecisionCounts } from '../lib/cutDecisionCounts';
 import { formatProjectIdentity } from '../lib/projectIdentity';
 import { formatBackendHealth } from '../lib/backendHealth';
@@ -22,6 +22,7 @@ export const TopBar: React.FC<{
   const { project, setProject, setIsUploading, skipCuts, setSkipCuts } = useProjectStore();
   const [health, setHealth] = useState<'live' | 'degraded' | 'offline'>('live');
   const [copiedDuration, setCopiedDuration] = useState(false);
+  const [copiedDurationSummary, setCopiedDurationSummary] = useState(false);
   const [copiedCuts, setCopiedCuts] = useState(false);
   const [copiedIdentity, setCopiedIdentity] = useState(false);
 
@@ -138,6 +139,26 @@ export const TopBar: React.FC<{
             >
               {copiedDuration ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
               {copiedDuration ? 'Copied' : 'Copy'}
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    formatKeptDurationSummary({ totalDur, keptDur, removedDur }),
+                  );
+                  setCopiedDurationSummary(true);
+                  window.setTimeout(() => setCopiedDurationSummary(false), 2000);
+                } catch {
+                  setCopiedDurationSummary(false);
+                }
+              }}
+              className="inline-flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white"
+              title="Copy kept duration summary"
+              aria-label="Copy kept duration summary"
+            >
+              {copiedDurationSummary ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              {copiedDurationSummary ? 'Copied' : 'Copy summary'}
             </button>
             <button
               type="button"

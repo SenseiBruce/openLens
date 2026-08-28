@@ -130,7 +130,8 @@ describe('TopBar', () => {
     expect(await screen.findByText('0:07')).toBeInTheDocument()
     expect(screen.getByText('/ 0:10')).toBeInTheDocument()
     expect(screen.getByText('-0:03')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /copy kept duration/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy kept duration$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy kept duration summary/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /copy cuts/i })).toBeInTheDocument()
   })
 
@@ -170,8 +171,30 @@ describe('TopBar', () => {
     render(
       <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
     )
-    await user.click(screen.getByRole('button', { name: /copy kept duration/i }))
+    await user.click(screen.getByRole('button', { name: /copy kept duration$/i }))
     expect(writeText).toHaveBeenCalledWith('0:07 / 0:10 -0:03')
+  })
+
+  it('copies the kept duration summary', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    useProjectStore.setState({
+      project: makeProject({
+        candidate_cuts: [
+          { id: 'c1', start: 0, end: 3, reason: 'no_dialogue', status: 'cut', duration: 3 },
+        ],
+      }),
+    })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await user.click(screen.getByRole('button', { name: /copy kept duration summary/i }))
+    expect(writeText).toHaveBeenCalledWith('Kept 0:07 / 0:10\nRemoved 0:03')
   })
 
   it('copies the Whisper model name', async () => {
