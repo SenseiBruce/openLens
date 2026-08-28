@@ -1,7 +1,9 @@
 import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnalyzeModal } from '../AnalyzeModal'
+import { ANALYZE_LANGUAGE_KEY } from '../../lib/analyzeLanguageStorage'
 import { useProjectStore } from '../../store/useProjectStore'
 import type { Project } from '../../types'
 
@@ -32,6 +34,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 
 describe('AnalyzeModal', () => {
   beforeEach(() => {
+    localStorage.clear()
     useProjectStore.setState({ project: makeProject() })
   })
 
@@ -59,5 +62,12 @@ describe('AnalyzeModal', () => {
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('Custom prompt: names: Kinshuk')
     })
+  })
+
+  it('persists spoken language separately', async () => {
+    const user = userEvent.setup()
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
+    await user.selectOptions(screen.getByRole('combobox', { name: /spoken language/i }), 'en')
+    expect(localStorage.getItem(ANALYZE_LANGUAGE_KEY)).toBe('en')
   })
 })

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Settings, X, Info, Copy } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettingsStorage';
 import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
+import { loadAnalyzeLanguage, saveAnalyzeLanguage } from '../lib/analyzeLanguageStorage';
 import { formatInitialPrompt } from '../lib/initialPrompt';
 import { formatMinGap } from '../lib/minGap';
 
@@ -12,10 +13,17 @@ export const AnalyzeModal: React.FC<{
 }> = ({ onClose, onStart }) => {
   const { project } = useProjectStore();
   const stored = loadAnalyzeSettings();
+  const storedLanguage = loadAnalyzeLanguage();
   const [model, setModel] = useState<string>(project?.settings?.whisper_model || stored?.whisper_model || 'small');
   const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || stored?.min_gap_duration || 1.0);
-  const [language, setLanguage] = useState<string>(project?.settings?.language || stored?.language || 'hinglish');
+  const [language, setLanguage] = useState<string>(
+    storedLanguage ?? project?.settings?.language ?? stored?.language ?? 'hinglish',
+  );
   const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || stored?.initial_prompt || '');
+
+  useEffect(() => {
+    saveAnalyzeLanguage(language);
+  }, [language]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -63,7 +71,7 @@ export const AnalyzeModal: React.FC<{
           {/* Language Selection */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-zinc-300">Spoken Language</label>
+              <label htmlFor="analyze-language" className="text-sm font-medium text-zinc-300">Spoken Language</label>
               <button
                 type="button"
                 onClick={async () => {
@@ -81,6 +89,7 @@ export const AnalyzeModal: React.FC<{
               </button>
             </div>
             <select
+              id="analyze-language"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -194,6 +203,7 @@ export const AnalyzeModal: React.FC<{
                 ...(initialPrompt ? { initial_prompt: initialPrompt } : {}),
               };
               saveAnalyzeSettings(settings);
+              saveAnalyzeLanguage(language);
               onStart(settings);
             }}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"
