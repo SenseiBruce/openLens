@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Loader2, Sparkles, Settings2, Copy, Check } from 'lucide-react';
 import { useProjectStore } from '../store/useProjectStore';
 import { apiClient } from '../api/client';
 import { formatChapterTimestamps } from '../lib/chapterClipboard';
 import { formatChapterModel } from '../lib/chapterModel';
+import { loadChapterModel, saveChapterModel } from '../lib/chapterModelStorage';
 import { reportError } from '../lib/errorReporter';
 
 export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -14,9 +15,13 @@ export const ChaptersModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   // Settings state
   const [showSettings, setShowSettings] = useState(false);
   const [provider, setProvider] = useState<'google' | 'openrouter' | 'custom'>('google');
-  const [modelName, setModelName] = useState('gemini/gemini-2.5-flash');
+  const [modelName, setModelName] = useState(loadChapterModel);
   const [apiKey, setApiKey] = useState('');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    saveChapterModel(modelName);
+  }, [modelName]);
 
   // Handle provider preset changes
   const handleProviderChange = (newProvider: 'google' | 'openrouter' | 'custom') => {
