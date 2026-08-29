@@ -19,6 +19,7 @@ import { formatExportFiles } from '../lib/exportFilesClipboard';
 import { formatOriginalResolution } from '../lib/originalResolution';
 import { formatExportResolution } from '../lib/exportResolutionCopy';
 import { formatExportFormats } from '../lib/exportFormatCopy';
+import { formatExportProgress } from '../lib/exportProgressCopy';
 import { reportError } from '../lib/errorReporter';
 
 interface ExportModalProps {
@@ -240,6 +241,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
             <h2 className="text-xl font-bold">Exporting Video</h2>
             <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
             <p className="text-sm text-zinc-400 text-center">{progressMsg}</p>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(formatExportProgress(progressMsg));
+                } catch (err) {
+                  reportError('copy-export-progress', err);
+                }
+              }}
+              className="text-xs text-indigo-400 hover:text-indigo-300"
+              aria-label="Copy export progress"
+              title="Copy export progress"
+            >
+              Copy progress
+            </button>
           </div>
         )}
 
