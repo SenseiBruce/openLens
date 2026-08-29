@@ -130,4 +130,25 @@ describe('ExportModal', () => {
       expect(writeText).toHaveBeenCalledWith('Export resolution: original')
     })
   })
+
+  it('copies export progress to the clipboard', async () => {
+    const user = userEvent.setup()
+    vi.mocked(apiClient.exportProjectStream).mockImplementation((_id, _res, onEvent) => {
+      onEvent({ step: 'progress', message: 'Encoding mp4' } as never)
+      return { close: vi.fn() } as unknown as EventSource
+    })
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    render(<ExportModal onClose={vi.fn()} />)
+    await screen.findByText('1080p Full HD')
+    await user.click(screen.getByRole('button', { name: 'Export' }))
+    expect(await screen.findByRole('button', { name: /copy export progress/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /copy export progress/i }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Export progress: Encoding mp4')
+    })
+  })
 })
