@@ -18,6 +18,7 @@ import {
 import { formatExportFiles } from '../lib/exportFilesClipboard';
 import { formatOriginalResolution } from '../lib/originalResolution';
 import { formatExportResolution } from '../lib/exportResolutionCopy';
+import { formatExportFormats } from '../lib/exportFormatCopy';
 import { reportError } from '../lib/errorReporter';
 
 interface ExportModalProps {
@@ -173,9 +174,26 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
               ))}
             </div>
 
-            <label className="block text-sm font-medium text-zinc-300 mt-6 mb-2">
+            <div className="flex items-center justify-between mt-6 mb-2">
+            <label className="block text-sm font-medium text-zinc-300">
               Output formats
             </label>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatExportFormats(exportFormats));
+                  } catch (err) {
+                    reportError('copy-export-formats', err);
+                  }
+                }}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                aria-label="Copy export formats"
+                title="Copy export formats"
+              >
+                Copy
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
               {EXPORT_FORMAT_OPTIONS.map((fmt) => {
                 const checked = exportFormats.includes(fmt);
