@@ -133,6 +133,29 @@ describe('TopBar', () => {
     expect(screen.getByRole('button', { name: /copy kept duration$/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /copy kept duration summary/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /copy cuts/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy kept percent/i })).toBeInTheDocument()
+  })
+
+  it('copies the kept percent from the duration bar', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    vi.mocked(apiClient.getDetailedHealth).mockResolvedValue({ status: 'healthy' })
+    useProjectStore.setState({
+      project: makeProject({
+        candidate_cuts: [
+          { id: 'c1', start: 0, end: 3, reason: 'no_dialogue', status: 'cut', duration: 3 },
+        ],
+      }),
+    })
+    render(
+      <TopBar onAnalyzeStart={vi.fn()} onExportStart={vi.fn()} onViralClipsStart={vi.fn()} />,
+    )
+    await user.click(screen.getByRole('button', { name: /copy kept percent/i }))
+    expect(writeText).toHaveBeenCalledWith('Kept percent: 70%')
   })
 
   it('copies project id from the name pill when duration is hidden', async () => {

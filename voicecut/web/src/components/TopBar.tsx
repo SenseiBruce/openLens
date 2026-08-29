@@ -10,6 +10,7 @@ import { formatBackendHealth } from '../lib/backendHealth';
 import { formatSkipCuts } from '../lib/skipCuts';
 import { formatWhisperModel } from '../lib/whisperModel';
 import { formatProjectName } from '../lib/projectName';
+import { formatKeptPercent } from '../lib/keptPercent';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 
@@ -27,6 +28,7 @@ export const TopBar: React.FC<{
   const [copiedCuts, setCopiedCuts] = useState(false);
   const [copiedIdentity, setCopiedIdentity] = useState(false);
   const [copiedProjectName, setCopiedProjectName] = useState(false);
+  const [copiedKeptPercent, setCopiedKeptPercent] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -109,6 +111,23 @@ export const TopBar: React.FC<{
             <Clock className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
 
             {/* Bar */}
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(formatKeptPercent(keptDur, totalDur));
+                  setCopiedKeptPercent(true);
+                  window.setTimeout(() => setCopiedKeptPercent(false), 2000);
+                } catch {
+                  setCopiedKeptPercent(false);
+                }
+              }}
+              className="text-[10px] font-medium text-zinc-400 hover:text-white"
+              title="Copy kept percent"
+              aria-label="Copy kept percent"
+            >
+              {copiedKeptPercent ? 'Copied %' : `${pct.toFixed(0)}%`}
+            </button>
             <div className="w-32 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
