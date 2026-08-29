@@ -6,6 +6,7 @@ import { AnalyzeModal } from '../AnalyzeModal'
 import { ANALYZE_LANGUAGE_KEY } from '../../lib/analyzeLanguageStorage'
 import { WHISPER_MODEL_KEY } from '../../lib/whisperModelStorage'
 import { MIN_GAP_KEY } from '../../lib/minGapStorage'
+import { INITIAL_PROMPT_KEY } from '../../lib/initialPromptStorage'
 import { useProjectStore } from '../../store/useProjectStore'
 import type { Project } from '../../types'
 
@@ -102,5 +103,13 @@ describe('AnalyzeModal', () => {
       target: { value: '1.7' },
     })
     expect(localStorage.getItem(MIN_GAP_KEY)).toBe('1.7')
+  })
+
+  it('persists custom prompt separately', async () => {
+    const user = userEvent.setup()
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
+    await user.clear(screen.getByPlaceholderText(/this is a vlog/i))
+    await user.type(screen.getByPlaceholderText(/this is a vlog/i), 'acronyms: NLP')
+    expect(localStorage.getItem(INITIAL_PROMPT_KEY)).toBe('acronyms: NLP')
   })
 })
