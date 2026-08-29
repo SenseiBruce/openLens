@@ -102,4 +102,18 @@ describe('ExportModal', () => {
       expect(writeText).toHaveBeenCalledWith('Original resolution: 1080p')
     })
   })
+
+  it('copies selected export resolution to the clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    render(<ExportModal onClose={vi.fn()} />)
+    await screen.findByText('1080p Full HD')
+    fireEvent.click(screen.getByRole('button', { name: /copy export resolution/i }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Export resolution: original')
+    })
+  })
 })
