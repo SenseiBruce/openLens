@@ -6,6 +6,7 @@ import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
 import { loadAnalyzeLanguage, saveAnalyzeLanguage } from '../lib/analyzeLanguageStorage';
 import { loadWhisperModel, saveWhisperModel } from '../lib/whisperModelStorage';
 import { loadMinGap, saveMinGap } from '../lib/minGapStorage';
+import { loadInitialPrompt, saveInitialPrompt } from '../lib/initialPromptStorage';
 import { formatInitialPrompt } from '../lib/initialPrompt';
 import { formatMinGap } from '../lib/minGap';
 import { formatWhisperModel } from '../lib/whisperModel';
@@ -19,6 +20,7 @@ export const AnalyzeModal: React.FC<{
   const storedLanguage = loadAnalyzeLanguage();
   const storedModel = loadWhisperModel();
   const storedMinGap = loadMinGap();
+  const storedPrompt = loadInitialPrompt();
   const [model, setModel] = useState<string>(
     storedModel || project?.settings?.whisper_model || stored?.whisper_model || 'small',
   );
@@ -28,7 +30,9 @@ export const AnalyzeModal: React.FC<{
   const [language, setLanguage] = useState<string>(
     storedLanguage ?? project?.settings?.language ?? stored?.language ?? 'hinglish',
   );
-  const [initialPrompt, setInitialPrompt] = useState<string>(project?.settings?.initial_prompt || stored?.initial_prompt || '');
+  const [initialPrompt, setInitialPrompt] = useState<string>(
+    storedPrompt ?? (project?.settings?.initial_prompt || stored?.initial_prompt || ''),
+  );
 
   useEffect(() => {
     saveAnalyzeLanguage(language);
@@ -41,6 +45,10 @@ export const AnalyzeModal: React.FC<{
   useEffect(() => {
     saveMinGap(minGap);
   }, [minGap]);
+
+  useEffect(() => {
+    saveInitialPrompt(initialPrompt);
+  }, [initialPrompt]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -242,6 +250,7 @@ export const AnalyzeModal: React.FC<{
               saveAnalyzeLanguage(language);
               saveWhisperModel(model);
               saveMinGap(minGap);
+              saveInitialPrompt(initialPrompt);
               onStart(settings);
             }}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"
