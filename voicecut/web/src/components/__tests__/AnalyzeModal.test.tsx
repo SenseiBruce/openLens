@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnalyzeModal } from '../AnalyzeModal'
 import { ANALYZE_LANGUAGE_KEY } from '../../lib/analyzeLanguageStorage'
 import { WHISPER_MODEL_KEY } from '../../lib/whisperModelStorage'
+import { MIN_GAP_KEY } from '../../lib/minGapStorage'
 import { useProjectStore } from '../../store/useProjectStore'
 import type { Project } from '../../types'
 
@@ -93,5 +94,13 @@ describe('AnalyzeModal', () => {
       'medium',
     )
     expect(localStorage.getItem(WHISPER_MODEL_KEY)).toBe('medium')
+  })
+
+  it('persists minimum silence gap separately', () => {
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
+    fireEvent.change(screen.getByRole('slider', { name: /minimum silence gap/i }), {
+      target: { value: '1.7' },
+    })
+    expect(localStorage.getItem(MIN_GAP_KEY)).toBe('1.7')
   })
 })

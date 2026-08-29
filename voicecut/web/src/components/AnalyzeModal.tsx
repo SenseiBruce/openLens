@@ -5,6 +5,7 @@ import { loadAnalyzeSettings, saveAnalyzeSettings } from '../lib/analyzeSettings
 import { formatAnalyzeLanguage } from '../lib/analyzeLanguage';
 import { loadAnalyzeLanguage, saveAnalyzeLanguage } from '../lib/analyzeLanguageStorage';
 import { loadWhisperModel, saveWhisperModel } from '../lib/whisperModelStorage';
+import { loadMinGap, saveMinGap } from '../lib/minGapStorage';
 import { formatInitialPrompt } from '../lib/initialPrompt';
 import { formatMinGap } from '../lib/minGap';
 import { formatWhisperModel } from '../lib/whisperModel';
@@ -17,10 +18,13 @@ export const AnalyzeModal: React.FC<{
   const stored = loadAnalyzeSettings();
   const storedLanguage = loadAnalyzeLanguage();
   const storedModel = loadWhisperModel();
+  const storedMinGap = loadMinGap();
   const [model, setModel] = useState<string>(
     storedModel || project?.settings?.whisper_model || stored?.whisper_model || 'small',
   );
-  const [minGap, setMinGap] = useState<number>(project?.settings?.min_gap_duration || stored?.min_gap_duration || 1.0);
+  const [minGap, setMinGap] = useState<number>(
+    storedMinGap ?? project?.settings?.min_gap_duration ?? stored?.min_gap_duration ?? 1.0,
+  );
   const [language, setLanguage] = useState<string>(
     storedLanguage ?? project?.settings?.language ?? stored?.language ?? 'hinglish',
   );
@@ -33,6 +37,10 @@ export const AnalyzeModal: React.FC<{
   useEffect(() => {
     saveWhisperModel(model);
   }, [model]);
+
+  useEffect(() => {
+    saveMinGap(minGap);
+  }, [minGap]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -198,6 +206,7 @@ export const AnalyzeModal: React.FC<{
               step="0.1"
               value={minGap}
               onChange={(e) => setMinGap(parseFloat(e.target.value))}
+              aria-label="Minimum silence gap"
               className="w-full accent-indigo-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-zinc-500">
@@ -232,6 +241,7 @@ export const AnalyzeModal: React.FC<{
               saveAnalyzeSettings(settings);
               saveAnalyzeLanguage(language);
               saveWhisperModel(model);
+              saveMinGap(minGap);
               onStart(settings);
             }}
             className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20"
