@@ -9,6 +9,7 @@ import { formatProjectIdentity } from '../lib/projectIdentity';
 import { formatBackendHealth } from '../lib/backendHealth';
 import { formatSkipCuts } from '../lib/skipCuts';
 import { formatWhisperModel } from '../lib/whisperModel';
+import { formatProjectName } from '../lib/projectName';
 import { AnalyzeModal } from './AnalyzeModal';
 import { ChaptersModal } from './ChaptersModal';
 
@@ -25,6 +26,7 @@ export const TopBar: React.FC<{
   const [copiedDurationSummary, setCopiedDurationSummary] = useState(false);
   const [copiedCuts, setCopiedCuts] = useState(false);
   const [copiedIdentity, setCopiedIdentity] = useState(false);
+  const [copiedProjectName, setCopiedProjectName] = useState(false);
 
   // Poll backend health
   useEffect(() => {
@@ -75,6 +77,17 @@ export const TopBar: React.FC<{
       window.setTimeout(() => setCopiedIdentity(false), 2000);
     } catch (err) {
       reportError('copy-project-id', err);
+    }
+  };
+
+  const handleCopyProjectName = async () => {
+    if (!project) return;
+    try {
+      await navigator.clipboard.writeText(formatProjectName(project.name));
+      setCopiedProjectName(true);
+      window.setTimeout(() => setCopiedProjectName(false), 2000);
+    } catch (err) {
+      reportError('copy-project-name', err);
     }
   };
 
@@ -176,6 +189,17 @@ export const TopBar: React.FC<{
             >
               {copiedCuts ? 'Copied' : 'Copy cuts'}
             </button>
+            <button
+              type="button"
+              className="text-[10px] font-medium text-zinc-400 hover:text-white"
+              aria-label="Copy project name"
+              title="Copy project name"
+              onClick={() => {
+                void handleCopyProjectName();
+              }}
+            >
+              {copiedProjectName ? 'Copied name' : 'Copy name'}
+            </button>
           </div>
         </div>
       ) : (
@@ -185,6 +209,15 @@ export const TopBar: React.FC<{
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-full px-3 py-1 text-xs text-zinc-400">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
               <span className="max-w-48 truncate">{project.name}</span>
+              <button
+                type="button"
+                onClick={handleCopyProjectName}
+                className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"
+                title="Copy project name"
+                aria-label="Copy project name"
+              >
+                {copiedProjectName ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              </button>
               <button
                 type="button"
                 onClick={handleCopyIdentity}
