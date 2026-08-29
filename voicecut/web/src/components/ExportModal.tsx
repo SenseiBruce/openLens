@@ -17,6 +17,7 @@ import {
 } from '../lib/exportFormatStorage';
 import { formatExportFiles } from '../lib/exportFilesClipboard';
 import { formatOriginalResolution } from '../lib/originalResolution';
+import { formatExportResolution } from '../lib/exportResolutionCopy';
 import { reportError } from '../lib/errorReporter';
 
 interface ExportModalProps {
@@ -114,9 +115,26 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
               </button>
             </p>
 
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
+            <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-zinc-300">
               Output Resolution
             </label>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatExportResolution(selectedRes));
+                  } catch (err) {
+                    reportError('copy-export-resolution', err);
+                  }
+                }}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                aria-label="Copy export resolution"
+                title="Copy export resolution"
+              >
+                Copy
+              </button>
+            </div>
 
             {/* Lossless original option */}
             <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-700 hover:border-indigo-500 cursor-pointer mb-2 transition-colors"
