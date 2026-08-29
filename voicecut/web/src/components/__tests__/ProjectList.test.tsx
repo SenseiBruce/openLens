@@ -144,4 +144,19 @@ describe('ProjectList', () => {
     expect(writeText).toHaveBeenCalledWith('Project status: ready')
     expect(onSelect).not.toHaveBeenCalled()
   })
+
+  it('copies the visible project status filter', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+
+    render(<ProjectList onSelect={vi.fn()} onUpload={vi.fn()} isUploading={false} />)
+    await screen.findByText('One')
+    await user.selectOptions(screen.getByLabelText('Filter by status'), 'idle')
+    await user.click(screen.getByRole('button', { name: 'Copy project status filter' }))
+    expect(writeText).toHaveBeenCalledWith('Project status filter: idle')
+  })
 })

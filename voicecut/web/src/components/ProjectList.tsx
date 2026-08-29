@@ -7,7 +7,8 @@ import { loadProjectListFilters, saveProjectListFilters } from '../lib/projectLi
 import { formatProjectDate } from '../lib/projectDate';
 import { formatProjectName } from '../lib/projectName';
 import { formatSourceDuration } from '../lib/sourceDuration';
-import { formatProjectStatus } from '../lib/projectStatus';
+import { formatProjectStatus } from '../lib/projectStatus'
+import { formatProjectListStatusFilter } from '../lib/projectListStatusFilter';
 import type { ProjectStatus, ProjectSummary } from '../types';
 
 interface ProjectListProps {
@@ -193,6 +194,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                 aria-label="Search projects"
                 className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500"
               />
+              <div className="flex items-center gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
@@ -206,6 +208,20 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onSelect, onUpload, is
                 <option value="exporting">Exporting</option>
                 <option value="error">Error</option>
               </select>
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(formatProjectListStatusFilter(statusFilter))
+                    .catch(() => undefined)
+                }}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                aria-label="Copy project status filter"
+                title="Copy project status filter"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+              </div>
             </div>
             {filteredProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center border border-zinc-800 rounded-2xl bg-zinc-900/40">
