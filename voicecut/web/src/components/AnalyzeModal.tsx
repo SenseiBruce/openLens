@@ -7,6 +7,7 @@ import { loadAnalyzeLanguage, saveAnalyzeLanguage } from '../lib/analyzeLanguage
 import { loadWhisperModel, saveWhisperModel } from '../lib/whisperModelStorage';
 import { formatInitialPrompt } from '../lib/initialPrompt';
 import { formatMinGap } from '../lib/minGap';
+import { formatWhisperModel } from '../lib/whisperModel';
 
 export const AnalyzeModal: React.FC<{
   onClose: () => void;
@@ -55,7 +56,24 @@ export const AnalyzeModal: React.FC<{
         <div className="p-6 flex flex-col gap-6">
           {/* Whisper Model */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="analyze-whisper-model" className="text-sm font-medium text-zinc-300">Transcription Accuracy (Whisper Model)</label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="analyze-whisper-model" className="text-sm font-medium text-zinc-300">Transcription Accuracy (Whisper Model)</label>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(formatWhisperModel(model));
+                  } catch {
+                    /* clipboard may be unavailable in tests */
+                  }
+                }}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                title="Copy Whisper model"
+                aria-label="Copy Whisper model"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+            </div>
             <select
               id="analyze-whisper-model"
               value={model}

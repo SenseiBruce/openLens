@@ -39,6 +39,19 @@ describe('AnalyzeModal', () => {
     useProjectStore.setState({ project: makeProject() })
   })
 
+  it('copies the Whisper model', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    render(<AnalyzeModal onClose={vi.fn()} onStart={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /copy whisper model/i }))
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Whisper model: small')
+    })
+  })
+
   it('copies the spoken language', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
